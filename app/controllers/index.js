@@ -21,17 +21,30 @@ textField.addEventListener('change', function(e){
 		var number = phoneSearchValue;
 		
 		// Set JSON URL. 		
-		var url = "http://up637415.co.uk/node.json?field_premium_number=" + number;
+		var url = "http://up637415.co.uk/node.json?field_premium_number=0870 070 0191";
 		var json;
 		
 		var xhr = Ti.Network.createHTTPClient({
+			
 			onload: function() {
+			Ti.API.log("JSON:::  " + this.responseText);  
 			// parse the retrieved data, turning it into a JavaScript object
-			json = JSON.parse(this.responseText);
-			Ti.API.info(json);
-			// ...
+			var json = JSON.parse(this.responseText);
+			var json_free_phone_numbers = json['list']['0']['field_free_phone'];
+			
+			// var free_phone_fields = JSON.stringify(json['list']['0']['field_free_phone']);
+			
+			json_free_phone_numbers.forEach(function(entry) {
+			    Ti.API.log("Telephone Field:::   " + entry);
+			});
+			
+			
 			}
 		});
+		
+		xhr.open("GET", url); 
+		
+		xhr.send();
 		
 		// Initiate call.
 		
@@ -41,6 +54,7 @@ textField.addEventListener('change', function(e){
 		        data : call
 		        });
 		// Ti.Android.currentActivity.startActivity(intent);
+	
 	}
         
 });
