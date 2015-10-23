@@ -1,6 +1,6 @@
 <Alloy>
 	<Window class="container">
-		<Label id="label" onClick="doClick">Hello, World</Label>
+		<Label id="serachTitle" >Search for an alternative telephone number:</Label>
 		<!-- <TextField id="phonesearch" borderStyle="Ti.UI.INPUT_BORDERSTYLE_ROUNDED" 
 			color="#336699" top="10" left="10" width="98%" height="60"/> -->
 	</Window>
