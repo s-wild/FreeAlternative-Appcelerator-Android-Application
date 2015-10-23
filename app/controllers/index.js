@@ -1,3 +1,14 @@
+// TESTING
+			
+var scrollView = Ti.UI.createScrollView({
+    contentWidth:'auto',
+    contentHeight:'auto',
+    width:350,
+    height:240,
+    top:125,
+    backgroundColor:'red'     
+});
+$.index.add(scrollView);
 
 var textField = Ti.UI.createTextField({
   borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED,
@@ -7,10 +18,6 @@ var textField = Ti.UI.createTextField({
   softKeyboardOnFocus : Titanium.UI.Android.SOFT_KEYBOARD_SHOW_ON_FOCUS,
 });
 $.index.add(textField);
-
-function doClick(e) {
-    alert(textField.value.length);
-}
 
 textField.addEventListener('change', function(e){
 	
@@ -36,20 +43,22 @@ textField.addEventListener('change', function(e){
 			var json_free_phone_numbers = json['list']['0']['field_free_phone'];  
 			
 			Ti.API.log("Field_FREE_PHONE:::  " + json_free_phone_numbers);  
-			
+
             // Iterate over each result. Generate button to call. 			
 			json_free_phone_numbers.forEach(function(entry) {
 				
-			    Ti.API.log("Telephone Field:::   " + entry);
+				// var button_spacing = toString(top_buttons_spacing+= 10);
+				
+			    // Ti.API.log("Top Spacing:::   " + increment);
 			    var callButton = Titanium.UI.createButton({
-			        top : "130dp",
-			        width : "96%",
+			        top : "0",
+			        width : "94%",
 			        height : "60dp",
 			        title : entry,
 			        font: {fontSize: '30'},
 			    });
 			    callButton.addEventListener('click', callNowButton);
-			    $.index.add(callButton);
+			    scrollView.add(callButton);
 			});
 			
 			}
@@ -64,7 +73,7 @@ textField.addEventListener('change', function(e){
 	}
         
 });
-
+ 
 function callNowButton(e) {
 	// This function will be called by multiple handlers
 	// The event object is accessible within this function
