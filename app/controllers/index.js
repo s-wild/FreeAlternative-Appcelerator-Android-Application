@@ -48,15 +48,9 @@ textField.addEventListener('change', function(e){
 			        title : entry,
 			        font: {fontSize: '30'},
 			    });
+			    callButton.addEventListener('click', callNowButton);
 			    $.index.add(callButton);
-			    var call = 'tel: ' + entry;
-				var intent = Ti.Android.createIntent({
-				        action : Ti.Android.ACTION_CALL,
-				        data : call
-				        });
-				// Ti.Android.currentActivity.startActivity(intent);
 			});
-			
 			
 			}
 		});
@@ -70,6 +64,19 @@ textField.addEventListener('change', function(e){
 	}
         
 });
+
+function callNowButton(e) {
+	// This function will be called by multiple handlers
+	// The event object is accessible within this function
+	Ti.API.info('The '+e.type+' event happened' + this.title);
+	var call = 'tel: ' + this.title;
+	var intent = Ti.Android.createIntent({
+	        action : Ti.Android.ACTION_CALL,
+	        data : call
+	        });
+	Ti.Android.currentActivity.startActivity(intent);
+	
+}
 
 
 $.index.open();
