@@ -9,7 +9,13 @@ $.index.add(textField);
 
 // Hide no result label on load.
 noResults = $.noResults;
-noResults.hide();
+noResults.hide(); 
+
+// Activity indication loader.
+var activity=Ti.UI.createActivityIndicator({
+    message:'Loading..'
+});
+$.index.add(activity);
 
 textField.addEventListener('change', function(e){
 	
@@ -42,6 +48,7 @@ textField.addEventListener('change', function(e){
 		var xhr = Ti.Network.createHTTPClient({
 			// function called when the response data is available
 			onload: function() {
+
 				Ti.API.log("JSON:::  " + this.responseText);  
 				jsonText = this.responseText;
 				
@@ -76,8 +83,8 @@ textField.addEventListener('change', function(e){
 				}
 				else {
 					noResults.show(); 
-				}
 					
+				}
 			},
 			 // function called when an error occurs, including a timeout
 		     onerror : function() {
@@ -89,8 +96,6 @@ textField.addEventListener('change', function(e){
         // Open URL.		
 		xhr.open("GET", url); 
 		xhr.send();
-		
-		
 	
 	}
 	else {
@@ -113,5 +118,7 @@ function callNowButton(id, call_button_number) {
 	Ti.Android.currentActivity.startActivity(intent);
 	
 }
+
+
 
 $.index.open();
