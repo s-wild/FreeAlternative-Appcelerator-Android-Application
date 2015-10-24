@@ -6,11 +6,10 @@
 	width: Ti.UI.SIZE,
 	height: Ti.UI.SIZE,
 	color: "#000",
-	top: "6%"
+	top: 20,
+	left: 15
 }
 
-"#label": {
-	font: {
-		fontSize: 8
-	}
+"#noResults": {
+	top: 150
 }
