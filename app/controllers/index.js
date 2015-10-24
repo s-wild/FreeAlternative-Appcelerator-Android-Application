@@ -1,5 +1,3 @@
-// TESTING
-			
 var scrollView = Ti.UI.createScrollView({
     contentWidth:'auto',
     contentHeight:'auto',
@@ -63,22 +61,6 @@ textField.addEventListener('change', function(e){
 				    call_buttons.addEventListener('click', callNowButton); 
 				    
 				}	
-				// json_free_phone_numbers.forEach(function(entry) {
-				// i++;
-// 					
-					// // var button_spacing = toString(top_buttons_spacing+= 10);
-				    // // Ti.API.log("Top Spacing:::   " + i); 
-// 				    
-				    // callButton[i] = Titanium.UI.createButton({
-				        // top : "0",
-				        // width : "94%",
-				        // height : "60dp",
-				        // title : entry,
-				        // font: {fontSize: '30'},
-				    // });
-				    // callButton.addEventListener('click', callNowButton);
-				    // scrollView.add(callButton);
-				// });
 			}
 		});
 		
@@ -92,13 +74,11 @@ textField.addEventListener('change', function(e){
         
 });
  
+// Call now button.
 function callNowButton(id, call_button_number) {
-	// This function will be called by multiple handlers
-	// The event object is accessible within this function
-	Ti.API.info('Call function index: '+ this.id);  
-	// Ti.API.info('Call function index: '+ json_free_phone_numbers); 
-	
-	
+
+	Ti.API.info('Call function id: '+ this.id);  
+
 	var call = 'tel: ' + this.id;
 	// Ti.API.info('Call'+ call);
 	var intent = Ti.Android.createIntent({
@@ -108,6 +88,5 @@ function callNowButton(id, call_button_number) {
 	Ti.Android.currentActivity.startActivity(intent);
 	
 }
-
 
 $.index.open();
