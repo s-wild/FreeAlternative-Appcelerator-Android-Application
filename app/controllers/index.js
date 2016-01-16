@@ -2,14 +2,14 @@ var textField = Ti.UI.createTextField({
   borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED,
   color: '#336699',
   top: 50, left: 10,
-  width: 360, height: 60,keyboardType: Titanium.UI.KEYBOARD_PHONE_PAD,
+  width: 360, height: 60,keyboardType: Titanium.UI.KEYBOARD_DEFAULT,
   softKeyboardOnFocus : Titanium.UI.Android.SOFT_KEYBOARD_SHOW_ON_FOCUS,
 });
 $.index.add(textField);
 
-// Hide no result label on load.
-noResults = $.noResults;
-noResults.hide(); 
+// Hide no result label on load.    
+noResults = $.noResults;  
+noResults.hide();   
 
 // Activity indication loader.
 var activity=Ti.UI.createActivityIndicator({
@@ -23,12 +23,18 @@ textField.addEventListener('change', function(e){
 	var phoneSearchValue = textField.value;
 	Ti.API.log(phoneSearchValue.length);
 	
+	// Check if premium number.
+	if(phoneSearchValue.indexOf('0870') >= 0){
+	  // Found world
+	  Ti.API.log("0870");
+	}
+	
     // 	Check if value is a phone number. 
-	if (phoneSearchValue.length == 11) {
+	if (phoneSearchValue.length >= 11) {
 		var scrollView = Ti.UI.createScrollView({
 		    contentWidth:'auto',
 		    contentHeight:'auto',
-		    left: 0, 
+		    left: 0,   
 		    right: 0,
 		    height:240,
 		    top:125,
