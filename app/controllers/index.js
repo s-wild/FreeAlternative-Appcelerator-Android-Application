@@ -1,10 +1,15 @@
 // Get displays on load, hide if necessary. 
 noResults = $.noResults;
 noResults.hide();
-resultsView = $.resultsView;
-resultsView.hide();
+yesResults = $.yesResults;
+yesResults.hide();
 searchInputBox = $.searchInputBox;
 
+var scrollView = Ti.UI.createScrollView({
+  top:130,
+  layout: 'vertical'
+});
+$.index.add(scrollView);
 // Global Variables
 call_buttons = [];
 
@@ -15,7 +20,7 @@ var activity = Ti.UI.createActivityIndicator({
 $.index.add(activity);
 
 searchInputBox.addEventListener('change', function(e) {
-
+	
   // Get searchInput.
   var searchInput = searchInputBox.value;
 
@@ -25,8 +30,11 @@ searchInputBox.addEventListener('change', function(e) {
   }
 
   // Hide results view if no values.
-  if (searchInput.length == 0) {
+  if (searchInput.length <= 2) {
     resultsView.hide();
+    noResults.hide();
+	yesResults.hide();
+    resultsView.data = [];
   }
 
   // Check user has entered a character, if so, respond with results or no results. 
@@ -76,6 +84,7 @@ function IsNumeric(searchInput) {
 // Get JSON for name search
 function getUrlContents(url) {
   Ti.API.log("Url=" + url);
+  resultsView = [];
 
   // Get contents from URL.
   var xhr = Ti.Network.createHTTPClient({
@@ -87,9 +96,35 @@ function getUrlContents(url) {
 
       // parse the retrieved data, turning it into a JavaScript object
       var json = JSON.parse(this.responseText);
-      jsonList = JSON.stringify(json['list']);
-      Ti.API.log("JSON Length:" + jsonList.length);
+      resultNodes = json.nodes;
+      resultsLength = JSON.stringify(json.nodes.length);
+      Ti.API.log("JSON Result Title:" + resultsLength);
       
+      if(resultsLength >= 1) {
+		 Ti.API.log("Results: True");
+		 noResults.hide();
+		 yesResults.show();
+      } 
+      if(resultsLength == 0) {
+      	Ti.API.log("Results: False");
+      	yesResults.hide();
+      	noResults.show();
+      }
+      
+      var index;
+	  topprop = 0.1; // this is space between two labels one below the other
+	  for (index = 0; index < resultsLength; ++index) {
+	  	
+	  	resultNodeTitle = JSON.stringify(resultNodes[index].node.title);
+	  	Ti.API.log("Result JSON array" + JSON.stringify(resultNodes[index].node.title));
+	  	
+	      //resultsView.add(call_buttons);
+          // call_buttons.addEventListener('click', callNowButton);
+          var row = createRow(index, resultNodeTitle);
+          scrollView.add(row);
+          //resultsView.show();
+     }
+  
       
       /*if (jsonList.length > 2) {
 
@@ -132,6 +167,25 @@ function getUrlContents(url) {
   // Open URL.		
   xhr.open("GET", url);
   xhr.send();
+}
+
+function createRow(index, resultNodeTitle) {
+  topprop = 0.1; // this is space between two labels one below the other
+  var row = Ti.UI.createView({
+    height: 80,
+    top: 1, 
+    left: 0
+  }); 
+  var call_buttons = Titanium.UI.createButton({
+    title: resultNodeTitle,
+    keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
+    top: 1, 
+    left: '3%',
+    width: '94%', 
+    height: '94%'
+  });
+  row.add(call_buttons);
+  return row;
 }
 
 $.index.open();
