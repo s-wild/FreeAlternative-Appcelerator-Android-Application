@@ -1,15 +1,11 @@
-var textField = Ti.UI.createTextField({
-  borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED,
-  color: '#336699',
-  top: 50, left: 10,
-  width: 360, height: 60,keyboardType: Titanium.UI.KEYBOARD_DEFAULT,
-  softKeyboardOnFocus : Titanium.UI.Android.SOFT_KEYBOARD_SHOW_ON_FOCUS,
-});
-$.index.add(textField);
-
-// Hide no result label on load.    
+// Get displays on load, hide if necessary. 
 noResults = $.noResults;  
 noResults.hide();   
+resultsView = $.resultsView;
+resultsView.hide();
+
+// Global Variables
+call_buttons = [];
 
 // Activity indication loader.
 var activity=Ti.UI.createActivityIndicator({
@@ -23,34 +19,50 @@ textField.addEventListener('change', function(e){
 	var phoneSearchValue = textField.value;
 	Ti.API.log(phoneSearchValue.length);
 	
-	// Check if premium number.
-	if(phoneSearchValue.indexOf('0870') >= 0){
-	  // Found world
-	  Ti.API.log("0870");
+	// Show results view on first keyup.
+	if (phoneSearchValue.length == 1) {
+		resultsView.show();
 	}
+	
+	// Hide results view if no values.
+	if (phoneSearchValue.length == 0) {
+		resultsView.hide();
+	}
+	
+	// Check user has entered a character, if so, respond with results or no results. 
+	if (phoneSearchValue.length > 1) {
+		Ti.API.log("User has entered something, respond to them!"); 
+		
+		
+		$.index.add(scrollView);
+		
+		// Check if only numbers, if so assume it is a telephone number, else assume user is searching company name.
+		var checkStringNumber = IsNumeric(phoneSearchValue);
+		if (checkStringNumber == true) {
+			Ti.API.log("You have entered a number."); 
+		}
+		else {
+			Ti.API.log("You have entered a name."); 
+			// Adjust URL to match name search. 			
+			var url = "http://up637415.co.uk/views/phone-numbers?title="
+		}
+	}
+	else {
+		// Nothing entered, delete everything!
+		Ti.API.log("Nothing has been entered, remove everything!");
+	}
+	
 	
     // 	Check if value is a phone number. 
 	if (phoneSearchValue.length >= 11) {
-		var scrollView = Ti.UI.createScrollView({
-		    contentWidth:'auto',
-		    contentHeight:'auto',
-		    left: 0,   
-		    right: 0,
-		    height:240,
-		    top:125,
-		    backgroundColor:'transparent',
-		    layout: 'vertical'
-		});
-		call_buttons = [];
-		$.index.add(scrollView);
- 
+		
 		var number = phoneSearchValue;
 		
 		// Set JSON URL. 		 
-		var url = "http://up637415.co.uk/node.json?field_premium_number=" + number;
+		var url = "http://up637415.co.uk/views/phone-numbers" + number;
 		var json;
 		
-        // Get contents from URL. 		
+        // Get contents from URL.
 		var xhr = Ti.Network.createHTTPClient({
 			// function called when the response data is available
 			onload: function() {
@@ -125,6 +137,14 @@ function callNowButton(id, call_button_number) {
 	
 }
 
+// Function to check if numeric number is in String.
+function IsNumeric(phoneSearchValue) {
+    return (phoneSearchValue - 0) == phoneSearchValue && (''+phoneSearchValue).trim().length > 0;
+}
 
+// Get JSON for name search
+function getCompanyNames(phoneSearchValue) {
+	
+}
 
 $.index.open();
