@@ -5,53 +5,66 @@ yesResults = $.yesResults;
 yesResults.hide();
 searchInputBox = $.searchInputBox;
 
-var scrollView = Ti.UI.createScrollView({
+var resultsView = Ti.UI.createScrollView({
   top:130,
   layout: 'vertical'
 });
-$.index.add(scrollView);
+
+$.index.add(resultsView);
+
 // Global Variables
 call_buttons = [];
 
 // Activity indication loader.
-var activity = Ti.UI.createActivityIndicator({
-  message: 'Loading..'
-});
-$.index.add(activity);
+// var activity = Ti.UI.createActivityIndicator({
+  // message: 'Loading..'
+// });
+// $.index.add(activity);
 
+var len=searchInputBox.value.length;
 searchInputBox.addEventListener('change', function(e) {
-	
+	resultsView.removeAllChildren();
+
   // Get searchInput.
   var searchInput = searchInputBox.value;
-
-  // Show results view on first keyup.
-  if (searchInput.length == 1) {
-    resultsView.show();
-  }
-
-  // Hide results view if no values.
-  if (searchInput.length <= 2) {
+  
+  
+  // delete results if no input.
+  if (searchInput.length == 0) {
     resultsView.hide();
     noResults.hide();
 	yesResults.hide();
     resultsView.data = [];
   }
 
+  // Show results view on first keyup.
+  if (searchInput.length == 1) {
+    resultsView.show();
+  }
+
+
   // Check user has entered a character, if so, respond with results or no results. 
   if (searchInput.length > 1) {
     Ti.API.log("User has entered something, respond to them!");
 	var url="";
 
-    // Check if only numbers, if so assume it is a telephone number, else assume user is searching company name.
+    // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
     var checkStringNumber = IsNumeric(searchInput);
     if (checkStringNumber == true) {
       Ti.API.log("You have entered a number.");
+      // Check if premium number.
+      var checkTelephonePremium = numberTelephoneCheckPremium(searchInput);
+      if (checkTelephonePremium == true) {
+      	Ti.API.log("it's a premium number.");
+      	 url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?field_premium_number_value=" + searchInput;
+      	getUrlContents(url);
+      } 
     } else {
       Ti.API.log("You have entered a name.");
       // Adjust URL to match name search. 			
-      var url = "http://up637415.co.uk/views/phone-numbers?title=" + searchInput;
+      var url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?title=" + searchInput; 
+      getUrlContents(url);
     }
-    getUrlContents(url);
   } else {
     // Nothing entered, delete everything!
     Ti.API.log("Nothing has been entered, remove everything!");
@@ -81,10 +94,16 @@ function IsNumeric(searchInput) {
   return (searchInput - 0) == searchInput && ('' + searchInput).trim().length > 0;
 }
 
+// Function to check if numeric number is in String.
+function numberTelephoneCheckPremium(searchInput) {
+	if(searchInput.indexOf('0845') >= 0 || searchInput.indexOf('0870') >= 0 || searchInput.indexOf('0844') >= 0){
+	  return true;
+	}
+}
+
 // Get JSON for name search
 function getUrlContents(url) {
   Ti.API.log("Url=" + url);
-  resultsView = [];
 
   // Get contents from URL.
   var xhr = Ti.Network.createHTTPClient({
@@ -116,12 +135,13 @@ function getUrlContents(url) {
 	  for (index = 0; index < resultsLength; ++index) {
 	  	
 	  	resultNodeTitle = JSON.stringify(resultNodes[index].node.title);
+	  	var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
 	  	Ti.API.log("Result JSON array" + JSON.stringify(resultNodes[index].node.title));
 	  	
 	      //resultsView.add(call_buttons);
           // call_buttons.addEventListener('click', callNowButton);
-          var row = createRow(index, resultNodeTitle);
-          scrollView.add(row);
+          var row = createRow(index, resultNodeTitleNoQuotes);
+          resultsView.add(row);
           //resultsView.show();
      }
   
@@ -169,7 +189,7 @@ function getUrlContents(url) {
   xhr.send();
 }
 
-function createRow(index, resultNodeTitle) {
+function createRow(index, resultNodeTitleNoQuotes) {
   topprop = 0.1; // this is space between two labels one below the other
   var row = Ti.UI.createView({
     height: 80,
@@ -177,7 +197,7 @@ function createRow(index, resultNodeTitle) {
     left: 0
   }); 
   var call_buttons = Titanium.UI.createButton({
-    title: resultNodeTitle,
+    title: resultNodeTitleNoQuotes,
     keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
     top: 1, 
     left: '3%',
@@ -210,7 +230,7 @@ $.index.open();
 		var number = searchInput;
 		
 		// Set JSON URL. 		 
-		var url = "http://up637415.co.uk/views/phone-numbers" + number;
+		var url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers" + number;
 		var json;
 		
         // Get contents from URL.
