@@ -4,5 +4,6 @@
 		<TextField id="searchInputBox" borderStyle="Ti.UI.INPUT_BORDERSTYLE_ROUNDED" color="#336699" top="35" left="10" width="250" height="60" />
 		<Label id="noResults" top="100">Sorry, no results.</Label>
 		<Label id="yesResults" top="100">Results:</Label>
+		<Label id="fullResult" top="100">Full Result:</Label>
 	</Window>
 </Alloy>
