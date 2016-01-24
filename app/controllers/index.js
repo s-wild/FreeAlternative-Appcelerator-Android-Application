@@ -33,7 +33,8 @@ call_buttons = [];
 var len=searchInputBox.value.length;
 
 searchInputBox.addEventListener('change', function(e) {
-	resultsView.removeAllChildren();
+	// Define type of search
+	type = 1; // type 1 is searching for a company by number or name.
 	// Delay function will prevent bombardment of requests to the server.
 	delay(function(){
 		Ti.API.log("Time elapsed!");
@@ -60,25 +61,25 @@ searchInputBox.addEventListener('change', function(e) {
 				if (checkTelephonePremium == true) {
 					Ti.API.log("it's a premium number.");
 					url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?field_premium_number_value=" + searchInput;
-					getUrlContents(url);;
+					getUrlContents(url, type);
 				} 
 			} 
 			else {
 				Ti.API.log("You have entered a name.");
 				// Adjust URL to match name search. 			
 				var url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?title=" + searchInput; 
-				getUrlContents(url);;
+				getUrlContents(url, type);
 			}
 		} 
 		else {
 			// Nothing entered, delete everything!
 			Ti.API.log("Nothing has been entered, remove everything!");
 		}
-	}, 500 ); // This number is the delay for when the user types.
+	}, 300 ); // This number is the delay for when the user types.
 });
 
 // Call now button.
-function callNowButton(id, call_button_number) {
+function callButton(id, call_button_number) {
 	Ti.API.info('Call function id: ' + this.id);
 	var call = 'tel: ' + this.id;
 	// Ti.API.info('Call'+ call);
@@ -102,7 +103,8 @@ function numberTelephoneCheckPremium(searchInput) {
 }
 
 // Get JSON for name search
-function getUrlContents(url) {
+function getUrlContents(url, type) {
+	Ti.API.info("url="+url);
 	// Get contents from URL.
 	var xhr = Ti.Network.createHTTPClient({
 		ondatastream: function(e) {
@@ -110,10 +112,12 @@ function getUrlContents(url) {
 		},
 		// function called when the response data is available
 		onload: function(e) {
+			resultsView.removeAllChildren();
 			jsonText = this.responseText;
 			// parse the retrieved data, turning it into a JavaScript object
 			var json = JSON.parse(this.responseText);
-			resultNodes = json.nodes;
+			resultNodes = json.nodes; 
+			Ti.API.info(JSON.stringify(resultNodes));
 			resultsLength = JSON.stringify(json.nodes.length);
 			if(resultsLength >= 1) {
 				Ti.API.log("Results: True");
@@ -127,15 +131,17 @@ function getUrlContents(url) {
 			}
 			var index;
 			topprop = 0.1; // this is space between two labels one below the other
-			for (index = 0; index < resultsLength; ++index) {
-				resultNodeTitle = JSON.stringify(resultNodes[index].node.title);
-				var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
-				//resultsView.add(call_buttons);
-				// call_buttons.addEventListener('click', callNowButton);
-				var row = createRow(index, resultNodeTitleNoQuotes);
-				resultsView.add(row);
-				//resultsView.show();
+			if (type == 1) { 
+				for (index = 0; index < resultsLength; ++index) {
+					resultNodeTitle = JSON.stringify(resultNodes[index].node.title);
+					resultNodeID = JSON.stringify(resultNodes[index].node.Nid);
+					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
+					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID);
+					resultsView.add(row);
+					resultsView.show(); 
+				}
 			}
+			
 	    },
 	    onerror: function() {
 	    	// function called when an error occurs, including a timeout
@@ -148,7 +154,7 @@ function getUrlContents(url) {
 	xhr.send();
 }
 
-function createRow(index, resultNodeTitleNoQuotes) {
+function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID) {
   topprop = 0.1; // this is space between two labels one below the other
   var row = Ti.UI.createView({
     height: 80,
@@ -156,6 +162,7 @@ function createRow(index, resultNodeTitleNoQuotes) {
     left: 0
   }); 
   var call_buttons = Titanium.UI.createButton({
+  	id: resultNodeID,
     title: resultNodeTitleNoQuotes,
     keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
     top: 1, 
@@ -164,16 +171,19 @@ function createRow(index, resultNodeTitleNoQuotes) {
     height: '94%'
   });
   row.add(call_buttons);
-  call_buttons.addEventListener('click', callNowButton); 
+  call_buttons.addEventListener('click', retriveResult);  
   return row;
 }
 
 $.index.open();
 
-function callNowButton() {
-	Ti.API.log("Call now button clicked.");
-	var win2=Alloy.createController('result').getView(); 
-	win2.open();
+function retriveResult() {
+	type = 2; // type 2 is searching for full individual result based on nid.
+	var node_id = this.id;
+	var NodeIDNoQuotes = node_id.slice(1, -1);
+	var url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?nid=" + NodeIDNoQuotes;
+	getUrlContents(url, type);
+	
 }
 /*
     // 	Check if value is a phone number. 
@@ -218,7 +228,7 @@ function callNowButton() {
 					    });
 		
 					    scrollView.add(call_buttons);
-					    call_buttons.addEventListener('click', callNowButton); 
+					    call_buttons.addEventListener('click', retriveResult); 
 					    
 					}
 				}

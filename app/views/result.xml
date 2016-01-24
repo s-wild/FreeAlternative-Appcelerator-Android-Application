@@ -1,5 +1,0 @@
-<Alloy>
-	<Window class="container">
-		<Label id="serachTitle" >Search for an alternative telephone number:</Label>
-	</Window>
-</Alloy>
