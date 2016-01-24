@@ -4,6 +4,8 @@ noResults.hide();
 yesResults = $.yesResults;
 yesResults.hide();
 searchInputBox = $.searchInputBox;
+fullResult = $.fullResult;
+fullResult.hide(); 
 
 var resultsView = Ti.UI.createScrollView({
 	top:130,
@@ -215,12 +217,32 @@ function retriveResult() {
 
 function createFullResultView(fullResult) {
 	typeOfAction = "call_buttons";
+	resultsObject = JSON.stringify(fullResult[0].node);
+	Ti.API.log("Full Result:" + JSON.stringify(resultsObject) + resultsObject.length);
+	/*var fieldSplit = resultsObject.split(',');
+	//var fieldSplitNoQuotes = fieldSplit.slice(1, -1)
+	
+	for (index = 0; index < fieldSplit.length; ++index) {
+		 
+		numberItem = fieldSplit[index].slice(1, -1);
+		Ti.API.log("Number Item: " + JSON.stringify(numberItem));
+		if(index == 1) {
+			
+		} 
+		 
+		// resultNodeTitle = numberItem;
+		// var row = createRowTitle(index, resultNodeTitle, resultNodeTitle, typeOfAction);
+		// resultsView.add(row);
+		// resultsView.show(); 
+	}*/
+	
+	
 	freeNumbers = JSON.stringify(fullResult[0].node.freePhone);
 	standardNumbers = JSON.stringify(fullResult[0].node.standardNumber);
 	premiumNumbers = JSON.stringify(fullResult[0].node.premiumNumber);
 
-	var numberseNoQuotes = freeNumbers.slice(1, -1) + "," +standardNumbers.slice(1, -1) + "," + premiumNumbers.slice(1, -1);
-	var numbersSplit = numberseNoQuotes.split(',');
+	var numberseNoQuotes = freeNumbers.slice(1, -1) + "|" +standardNumbers.slice(1, -1) + "|" + premiumNumbers.slice(1, -1);
+	var numbersSplit = numberseNoQuotes.split('|');
 	Ti.API.log("Full Result:" + numbersSplit + numbersSplit.length);
 	for (index = 0; index < numbersSplit.length; ++index) {
 		numberItem = numbersSplit[index];
@@ -230,7 +252,6 @@ function createFullResultView(fullResult) {
 		resultsView.add(row);
 		resultsView.show(); 
 	} 
-	// Loop through freephone
 }
 
 $.index.open();
