@@ -89,11 +89,18 @@ function callButton(id, call_button_number) {
 	Ti.API.info('Call function id: ' + this.id);
 	var call = 'tel: ' + this.id;
 	// Ti.API.info('Call'+ call);
+	Ti.API.info('Call function id: ' + this.id);
+	var call = 'tel: ' + this.id;
+	Ti.API.info('Call'+ call);
+	var telephoneNumberValue = this.id;
+	numberFeedback(telephoneNumberValue);
 	var intent = Ti.Android.createIntent({
 		action: Ti.Android.ACTION_CALL,
 		data: call
 	});
 	Ti.Android.currentActivity.startActivity(intent); 
+
+	
 } 
 
 // Function to check if numeric number is in String.
@@ -175,30 +182,31 @@ function getUrlContents(url, type) {
 }
 
 function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction) {
-  topprop = 0.1; // this is space between two labels one below the other
-  var row = Ti.UI.createView({
-    height: 80,
-    top: 1, 
-    left: 0
-  }); 
-  var call_buttons = Titanium.UI.createButton({
-  	id: resultNodeID,
-    title: resultNodeTitleNoQuotes,
-    keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
-    top: 1, 
-    left: '3%',
-    width: '94%', 
-    height: '94%'
-  });
-  row.add(call_buttons);
-  if(typeOfAction == "company_links") {
-  	call_buttons.addEventListener('click', retriveResult); 
-  }
-  if(typeOfAction == "call_buttons") {
-  	call_buttons.addEventListener('click', callButton); 
-  }
-   
-  return row;
+	topprop = 0.1; // this is space between two labels one below the other
+	var row = Ti.UI.createView({
+	    height: 80,
+	    top: 1, 
+	    left: 0
+    }); 
+	var call_buttons = Titanium.UI.createButton({
+	  	id: resultNodeID,
+	    title: resultNodeTitleNoQuotes,
+	    keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
+	    top: 1, 
+	    left: '3%',
+		width: '94%', 
+		height: '94%'
+	 });
+	
+	  row.add(call_buttons);
+	  if(typeOfAction == "company_links") {
+		call_buttons.addEventListener('click', retriveResult); 
+	  }
+	  if(typeOfAction == "call_buttons") {
+		call_buttons.addEventListener('click', callButton); 
+	  }
+	   
+	  return row;
 }
 
 function retriveResult() {
@@ -265,7 +273,27 @@ function createFullResultView(fullResult) {
 		var row = createRowTitle(index, resultNodeTitle, resultNodeTitle, typeOfAction);
 		resultsView.add(row);
 		resultsView.show(); 
-	} */
+	} */ 
+}
+function numberFeedback(telephoneNumberValue){
+	delay(function(){
+	Ti.API.log("Feedback"); 
+	var dialog = Ti.UI.createAlertDialog({
+	    cancel: 1,
+	    buttonNames: ['Yes', 'No'],
+	    message: 'Would you like to leave feedback for \n' + telephoneNumberValue + ' to help future users?',
+	    title: 'Feedback For Telephone Number'
+	  });
+	  dialog.addEventListener('click', function(e){
+	    if (e.index === e.source.cancel){
+	      Ti.API.info('The cancel button was clicked');
+	    }
+	    Ti.API.info('e.cancel: ' + e.cancel);
+	    Ti.API.info('e.source.cancel: ' + e.source.cancel);
+	    Ti.API.info('e.index: ' + e.index);
+	  });
+	  dialog.show();
+	}, 300 ); // This number is the delay so popup box appears after call.
 }
 
 $.index.open();
