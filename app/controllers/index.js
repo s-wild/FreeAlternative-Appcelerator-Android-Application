@@ -217,26 +217,40 @@ function retriveResult() {
 
 function createFullResultView(fullResult) {
 	typeOfAction = "call_buttons";
-	resultsObject = JSON.stringify(fullResult[0].node);
-	Ti.API.log("Full Result:" + JSON.stringify(resultsObject) + resultsObject.length);
-	/*var fieldSplit = resultsObject.split(',');
+	resultsObject = fullResult[0].node;
+	//Ti.API.log("Full Result:" + JSON.stringify(resultsObject) + Object.keys(resultsObject).length);
+	
 	//var fieldSplitNoQuotes = fieldSplit.slice(1, -1)
 	
-	for (index = 0; index < fieldSplit.length; ++index) {
-		 
-		numberItem = fieldSplit[index].slice(1, -1);
-		Ti.API.log("Number Item: " + JSON.stringify(numberItem));
+	
+	for (index = 0; index < Object.keys(resultsObject).length; ++index) {
+		
+
 		if(index == 1) {
+			freePhoneWithLabel = resultsObject.freePhone;
+			freePhoneNumbers = resultsObject.freePhone.substring(freePhoneWithLabel.indexOf(":") + 1);
+			var freeNumberItems = freePhoneNumbers.split('|');
 			
+			Ti.API.log("Index Number Item: " + freeNumberItems);
+			for (index = 0; index < freeNumberItems.length; ++index) {
+				numberItem = freeNumberItems[index];
+				// Ti.API.log("Number Item: " + freeNumberItem); 
+				resultNodeTitle = numberItem;
+				var row = createRowTitle(index, resultNodeTitle, resultNodeTitle, typeOfAction);
+				resultsView.add(row);
+				resultsView.show(); 
+			} 
+			//freePhoneNumbersNoLabel = numberItem.substring(str.indexOf(":") + 1);
+			//Ti.API.log("Freephones: " + JSON.stringify(numberItemNoLabel));
 		} 
 		 
 		// resultNodeTitle = numberItem;
 		// var row = createRowTitle(index, resultNodeTitle, resultNodeTitle, typeOfAction);
 		// resultsView.add(row);
 		// resultsView.show(); 
-	}*/
+	}
 	
-	
+	/*
 	freeNumbers = JSON.stringify(fullResult[0].node.freePhone);
 	standardNumbers = JSON.stringify(fullResult[0].node.standardNumber);
 	premiumNumbers = JSON.stringify(fullResult[0].node.premiumNumber);
@@ -251,7 +265,7 @@ function createFullResultView(fullResult) {
 		var row = createRowTitle(index, resultNodeTitle, resultNodeTitle, typeOfAction);
 		resultsView.add(row);
 		resultsView.show(); 
-	} 
+	} */
 }
 
 $.index.open();
