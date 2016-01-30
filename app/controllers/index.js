@@ -26,21 +26,11 @@ var delay = (function(){
 // Global Variables
 call_buttons = [];
 
-// Activity indication loader.
-// var activity = Ti.UI.createActivityIndicator({
-  // message: 'Loading..'
-// });
-// $.index.add(activity);
-
-var len=searchInputBox.value.length;
-
 searchInputBox.addEventListener('change', function(e) {
 	// Strange bug, I have to declare fullResult in here or it results in an error.
 	fullResult = $.fullResult;
 	fullResult.hide();
 	
-	// Define type of search
-	type = "search_by_name_number"; // type 1 is searching for a company by number or name.
 	// Delay function will prevent bombardment of requests to the server.
 	delay(function(){
 		Ti.API.log("Time elapsed!");
@@ -58,22 +48,24 @@ searchInputBox.addEventListener('change', function(e) {
 		}
 		// Check user has entered a character, if so, respond with results or no results. 
 		if (searchInput.length > 1) {
-			Ti.API.log("User has entered something, respond to them!");
 			var url="";
 			var checkStringNumber = IsNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
 			if (checkStringNumber == true) {
 				Ti.API.log("You have entered a number.");
-				var checkTelephonePremium = numberTelephoneCheckPremium(searchInput); // Check if premium number.
-				if (checkTelephonePremium == true) {
-					Ti.API.log("it's a premium number.");
-					url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?field_premium_number_value=" + searchInput;
-					getUrlContents(url, type);
-				} 
+				// var checkTelephonePremium = numberTelephoneCheckPremium(searchInput); // Check if premium number.
+				// if (checkTelephonePremium == true) {
+					// Ti.API.log("it's a premium number.");
+					// url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?field_premium_number_value=" + searchInput;
+					// getUrlContents(url, type);
+				// } 
 			} 
 			else {
 				Ti.API.log("You have entered a name.");
 				// Adjust URL to match name search. 			
-				var url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?title=" + searchInput; 
+				var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/companies?name=" + searchInput;
+				// Define type of search
+				type = "search_by_name_number";
+				Ti.API.log("URL", url);
 				getUrlContents(url, type);
 			}
 		} 
@@ -88,9 +80,6 @@ searchInputBox.addEventListener('change', function(e) {
 function callButton(id, call_button_number) {
 	Ti.API.info('Call function id: ' + this.id);
 	var call = 'tel: ' + this.id;
-	// Ti.API.info('Call'+ call);
-	Ti.API.info('Call function id: ' + this.id);
-	var call = 'tel: ' + this.id;
 	Ti.API.info('Call'+ call);
 	var telephoneNumberValue = this.id;
 	numberFeedback(telephoneNumberValue);
@@ -99,25 +88,17 @@ function callButton(id, call_button_number) {
 		data: call
 	});
 	Ti.Android.currentActivity.startActivity(intent); 
-
-	
 } 
 
 // Function to check if numeric number is in String.
 function IsNumeric(searchInput) {
 	return (searchInput - 0) == searchInput && ('' + searchInput).trim().length > 0;
 }
-
-// Function to check if numeric number is in String.
-function numberTelephoneCheckPremium(searchInput) {
-	if(searchInput.indexOf('0845') >= 0 || searchInput.indexOf('0870') >= 0 || searchInput.indexOf('0844') >= 0){
-		return true;
-	}
-}
-
 // Get JSON for name search
-function getUrlContents(url, type) {
+function getUrlContents(url, type, companyID, companyName) {
 	Ti.API.info("url="+url);
+	Ti.API.info("company GETURL="+companyID);
+	Ti.API.info("company name GETURL="+companyName);
 	// Get contents from URL.
 	var xhr = Ti.Network.createHTTPClient({
 		ondatastream: function(e) {
@@ -127,19 +108,18 @@ function getUrlContents(url, type) {
 		onload: function(e) {
 			resultsView.removeAllChildren();
 			jsonText = this.responseText;
+			Ti.API.log("jsonText",jsonText);
 			// parse the retrieved data, turning it into a JavaScript object
 			var json = JSON.parse(this.responseText);
-			resultNodes = json.nodes; 
-			Ti.API.info(JSON.stringify(resultNodes));
-			resultsLength = JSON.stringify(json.nodes.length);
 			var index;
 			topprop = 0.1; // this is space between two labels one below the other
-			if (type == "search_by_name_number") { 
-				typeOfAction = "company_links";
+			if (type == "search_by_name_number") {
+				resultNodes = json.companies; 
+				resultsLength = JSON.stringify(resultNodes.length);
 				if(resultsLength >= 1) {
-				Ti.API.log("Results for company search: True");
-				noResults.hide();
-				yesResults.show();
+					Ti.API.log("Results for company search: True");
+					noResults.hide();
+					yesResults.show();
 				} 
 				if(resultsLength == 0) {
 					Ti.API.log("Results for company search: False");
@@ -147,18 +127,50 @@ function getUrlContents(url, type) {
 					noResults.show();
 				}
 				for (index = 0; index < resultsLength; ++index) {
-					resultNodeTitle = JSON.stringify(resultNodes[index].node.title);
-					resultNodeID = JSON.stringify(resultNodes[index].node.Nid);
+					resultNodeTitle = JSON.stringify(resultNodes[index].name);
+					resultNodeID = JSON.stringify(resultNodes[index].term_id);
 					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
-					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction);
+					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "companyRequest");
 					resultsView.add(row);
 					resultsView.show(); 
 				}
 			}
+			if (type == "variations") {
+				resultNodes = json.variations; 
+				Ti.API.log("Variations JSON", JSON.stringify(resultNodes));
+				resultsLength = JSON.stringify(resultNodes.length);
+				for (index = 0; index < resultsLength; ++index) {
+					resultNodeTitle = JSON.stringify(resultNodes[index].name);
+					var companyIDNoQuotes = companyID.slice(1, -1);
+					resultNodeID = companyIDNoQuotes + "," + resultNodes[index].term_id;
+					var resultNodeTitleNoQuotes = companyName + " " + resultNodeTitle.slice(1, -1);
+					Ti.API.log("BOLLOCKS!!!!!");
+					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "variationNumbersRequest");
+					resultsView.add(row);
+					resultsView.show(); 
+				}
+			}
+			if (type == "companyNumbers") {
+				Ti.API.log("CONNECT NUMBERS landed.");
+				resultNodes = json.telephone_numbers; 
+				resultsLength = JSON.stringify(resultNodes.length);
+				Ti.API.log("Numbers JSON", JSON.stringify(resultNodes));
+				for (index = 0; index < resultsLength; ++index) {
+					resultNodeTitle = JSON.stringify(resultNodes[index].title);
+					resultNodeID = resultNodes[index].title;
+					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
+					Ti.API.log("BOLLOCKS!!!!!");
+					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest");
+					resultsView.add(row);
+					resultsView.show(); 
+				}
+				//createFullResultView(fullResult);
+			}
 			if (type == "search_by_id") {
+				Ti.API.log("search_by_id");
 				fullResult = resultNodes;
 				createFullResultView(fullResult);
-				/*
+				
 				for (index = 0; index < resultsLength; ++index) {
 					
 					resultNodeTitle = JSON.stringify(resultNodes[index].node.title);
@@ -166,7 +178,6 @@ function getUrlContents(url, type) {
 					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
 					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID);
 				}
-				*/
 			}
 			
 	    },
@@ -182,6 +193,7 @@ function getUrlContents(url, type) {
 }
 
 function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction) {
+	Ti.API.log("Type of action:", typeOfAction);
 	topprop = 0.1; // this is space between two labels one below the other
 	var row = Ti.UI.createView({
 	    height: 80,
@@ -198,83 +210,57 @@ function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfActi
 		height: '94%'
 	 });
 	
-	  row.add(call_buttons);
-	  if(typeOfAction == "company_links") {
-		call_buttons.addEventListener('click', retriveResult); 
+	  
+	  if(typeOfAction == "companyRequest") {
+	  	Ti.API.log("Company Requested");
+		call_buttons.addEventListener('click', retriveVariations); 
 	  }
-	  if(typeOfAction == "call_buttons") {
+	  if(typeOfAction == "variationNumbersRequest") {
+	  	Ti.API.log("ids on button", call_buttons.id);
+		call_buttons.addEventListener('click', retriveNumbers); 
+	  }
+	  if(typeOfAction == "numbersRequest") {
+	  	Ti.API.log("ids on button", call_buttons.id);
 		call_buttons.addEventListener('click', callButton); 
 	  }
+	  row.add(call_buttons);
+	  // if(typeOfAction == "call_buttons") {
+		// call_buttons.addEventListener('click', callButton); 
+	  // }
 	   
 	  return row;
 }
 
-function retriveResult() {
+function retriveVariations() {
 	fullResult = $.fullResult;
 	yesResults.hide();
-	type = "search_by_id";
+	type = "variations";
 	var node_id = this.id;
-	var fullResultTitle = this.title+":";
+	var companyID = node_id;
+	Ti.API.log("retriveVariations() Node id " + node_id);
+	var fullResultTitle = this.title+":"; 
+	var companyName = this.title;
 	var NodeIDNoQuotes = node_id.slice(1, -1);
 	fullResult.setText(fullResultTitle);
 	fullResult.show();
-	var url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?nid=" + NodeIDNoQuotes;
+	var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/company-variations/" + NodeIDNoQuotes;
+	getUrlContents(url, type, companyID, companyName);
+}
+
+function retriveNumbers() {
+	var node_id = this.id;
+	var idSplitted = node_id.split(',');
+	var companyIDLocal = idSplitted[0];
+	var variationIDLocal = idSplitted[1];
+	Ti.API.log("retriveNumbers() variation id ", idSplitted[0]);
+	var fullResultTitle = this.title+":"; 
+	fullResult.setText(fullResultTitle);
+	fullResult.show();
+	var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
+	type = "companyNumbers";
 	getUrlContents(url, type);
-	
 }
 
-function createFullResultView(fullResult) {
-	typeOfAction = "call_buttons";
-	resultsObject = fullResult[0].node;
-	//Ti.API.log("Full Result:" + JSON.stringify(resultsObject) + Object.keys(resultsObject).length);
-	
-	//var fieldSplitNoQuotes = fieldSplit.slice(1, -1)
-	
-	
-	for (index = 0; index < Object.keys(resultsObject).length; ++index) {
-		
-
-		if(index == 1) {
-			freePhoneWithLabel = resultsObject.freePhone;
-			freePhoneNumbers = resultsObject.freePhone.substring(freePhoneWithLabel.indexOf(":") + 1);
-			var freeNumberItems = freePhoneNumbers.split('|');
-			
-			Ti.API.log("Index Number Item: " + freeNumberItems);
-			for (index = 0; index < freeNumberItems.length; ++index) {
-				numberItem = freeNumberItems[index];
-				// Ti.API.log("Number Item: " + freeNumberItem); 
-				resultNodeTitle = numberItem;
-				var row = createRowTitle(index, resultNodeTitle, resultNodeTitle, typeOfAction);
-				resultsView.add(row);
-				resultsView.show(); 
-			} 
-			//freePhoneNumbersNoLabel = numberItem.substring(str.indexOf(":") + 1);
-			//Ti.API.log("Freephones: " + JSON.stringify(numberItemNoLabel));
-		} 
-		 
-		// resultNodeTitle = numberItem;
-		// var row = createRowTitle(index, resultNodeTitle, resultNodeTitle, typeOfAction);
-		// resultsView.add(row);
-		// resultsView.show(); 
-	}
-	
-	/*
-	freeNumbers = JSON.stringify(fullResult[0].node.freePhone);
-	standardNumbers = JSON.stringify(fullResult[0].node.standardNumber);
-	premiumNumbers = JSON.stringify(fullResult[0].node.premiumNumber);
-
-	var numberseNoQuotes = freeNumbers.slice(1, -1) + "|" +standardNumbers.slice(1, -1) + "|" + premiumNumbers.slice(1, -1);
-	var numbersSplit = numberseNoQuotes.split('|');
-	Ti.API.log("Full Result:" + numbersSplit + numbersSplit.length);
-	for (index = 0; index < numbersSplit.length; ++index) {
-		numberItem = numbersSplit[index];
-		// Ti.API.log("Number Item: " + freeNumberItem); 
-		resultNodeTitle = numberItem;
-		var row = createRowTitle(index, resultNodeTitle, resultNodeTitle, typeOfAction);
-		resultsView.add(row);
-		resultsView.show(); 
-	} */ 
-}
 function numberFeedback(telephoneNumberValue){
 	delay(function(){
 	Ti.API.log("Feedback"); 
@@ -293,7 +279,8 @@ function numberFeedback(telephoneNumberValue){
 	    Ti.API.info('e.index: ' + e.index);
 	  });
 	  dialog.show();
-	}, 300 ); // This number is the delay so popup box appears after call.
+	}, 500 ); // This number is the delay so popup box appears after call.
 }
+
 
 $.index.open();
