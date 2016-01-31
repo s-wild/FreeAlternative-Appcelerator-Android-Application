@@ -7,6 +7,10 @@ yesResults.hide();
 searchInputBox = $.searchInputBox;
 fullResult = $.fullResult;
 fullResult.hide(); 
+numberFeedbackDialog = $.rateNumber;
+
+// Initialise rating widget.
+$.starwidget.init(); 
 
 var resultsView = Ti.UI.createScrollView({
 	top:130,
@@ -184,6 +188,7 @@ function getUrlContents(url, type, companyID, companyName) {
 	    onerror: function() {
 	    	// function called when an error occurs, including a timeout
 	    	Ti.API.log("Connection Error :/");
+	    	serverConnectionError();
 	    },
     	timeout: 5000 // in milliseconds
 	});
@@ -280,10 +285,16 @@ function retriveNumbers() {
 	getUrlContents(url, type);
 }
 
+// Generates the feedback box after user dials a number.
 function numberFeedback(telephoneNumberValue){
 	delay(function(){
 	Ti.API.log("Feedback"); 
-	var dialog = Ti.UI.createAlertDialog({
+	numberFeedbackDialog.setMessage("Thanks for using this service, please rate " + telephoneNumberValue + " to help other users.");
+	
+	// rateNumber
+	numberFeedbackDialog.show();
+	
+	/*var dialog = Ti.UI.createAlertDialog({
 	    cancel: 1,
 	    buttonNames: ['Yes', 'No'],
 	    message: 'Would you like to leave feedback for \n' + telephoneNumberValue + ' to help future users?',
@@ -297,9 +308,27 @@ function numberFeedback(telephoneNumberValue){
 	    Ti.API.info('e.source.cancel: ' + e.source.cancel);
 	    Ti.API.info('e.index: ' + e.index);
 	  });
-	  dialog.show();
-	}, 500 ); // This number is the delay so popup box appears after call.
+	  */
+	}, 800 ); // This number is the delay so popup box appears after call.
 }
-
+// Generates a message if the application fails to connect to the server. 
+function serverConnectionError(){
+	var serverConnectionError = Ti.UI.createAlertDialog({
+	    cancel: 1,
+	    // buttonNames: ['Yes', 'No'],
+	    message: 'The application is having some problems connecting to the server.' + 
+	    ' Could be the server but make sure your device has access to the internet.',
+	    title: 'Server Connection Error'
+	  });
+	  serverConnectionError.addEventListener('click', function(e){
+	    if (e.index === e.source.cancel){
+	      Ti.API.info('The cancel button was clicked');
+	    }
+	    Ti.API.info('e.cancel: ' + e.cancel);
+	    Ti.API.info('e.source.cancel: ' + e.source.cancel);
+	    Ti.API.info('e.index: ' + e.index);
+	  });
+	  serverConnectionError.show();
+}
 
 $.index.open();

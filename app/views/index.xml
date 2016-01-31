@@ -5,5 +5,13 @@
 		<Label id="noResults" top="100">Sorry, no results.</Label>
 		<Label id="yesResults" top="100">Results:</Label>
 		<Label id="fullResult" top="100">Full Result:</Label>
+		<AlertDialog id="rateNumber" title="Rate your call"
+            message="<b>Rate the number</b>" cancel="1">
+				<Widget id="starwidget" src="starrating" max='5' initialRating='0' />
+            <!-- The ButtonNames tag sets the buttonNames property. -->
+            <ButtonNames>
+                <ButtonName>Submit</ButtonName>
+            </ButtonNames>
+        </AlertDialog> 
 	</Window>
 </Alloy>
