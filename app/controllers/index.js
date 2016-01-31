@@ -1,3 +1,4 @@
+
 // Get displays on load, hide if necessary. 
 noResults = $.noResults;
 noResults.hide();
@@ -10,7 +11,7 @@ fullResult.hide();
 var resultsView = Ti.UI.createScrollView({
 	top:130,
 	layout: 'vertical'
-});
+}); 
 
 $.index.add(resultsView);
 
@@ -144,7 +145,6 @@ function getUrlContents(url, type, companyID, companyName) {
 					var companyIDNoQuotes = companyID.slice(1, -1);
 					resultNodeID = companyIDNoQuotes + "," + resultNodes[index].term_id;
 					var resultNodeTitleNoQuotes = companyName + " " + resultNodeTitle.slice(1, -1);
-					Ti.API.log("BOLLOCKS!!!!!");
 					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "variationNumbersRequest");
 					resultsView.add(row);
 					resultsView.show(); 
@@ -158,9 +158,9 @@ function getUrlContents(url, type, companyID, companyName) {
 				for (index = 0; index < resultsLength; ++index) {
 					resultNodeTitle = JSON.stringify(resultNodes[index].title);
 					resultNodeID = resultNodes[index].title;
+					resultNodeRating = resultNodes[index].rating;
 					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
-					Ti.API.log("BOLLOCKS!!!!!");
-					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest");
+					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest", resultNodeRating);
 					resultsView.add(row);
 					resultsView.show(); 
 				}
@@ -192,7 +192,7 @@ function getUrlContents(url, type, companyID, companyName) {
 	xhr.send();
 }
 
-function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction) {
+function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings) {
 	Ti.API.log("Type of action:", typeOfAction);
 	topprop = 0.1; // this is space between two labels one below the other
 	var row = Ti.UI.createView({
@@ -200,15 +200,34 @@ function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfActi
 	    top: 1, 
 	    left: 0
     }); 
-	var call_buttons = Titanium.UI.createButton({
-	  	id: resultNodeID,
-	    title: resultNodeTitleNoQuotes,
-	    keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
-	    top: 1, 
-	    left: '3%',
-		width: '94%', 
-		height: '94%'
-	 });
+    if (ratings!=undefined) {
+    	var call_buttons = Titanium.UI.createButton({
+		  	id: resultNodeID,
+		    title: "Rating: " + ratings + ", Tel: " + resultNodeTitleNoQuotes,
+		    //keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
+		    font: { fontSize:23 },
+		    top: 1, 
+		    left: '3%',
+			width: '94%', 
+			height: '94%'
+			//backgroundColor : "#80FF0000" 
+	 	});
+	 	var starImage = Ti.UI.createImageView({image:'../star.png', top: 60, height: 300, width: 300});
+	 	//call_buttons.add(starImage);
+    }
+    else {
+    	var call_buttons = Titanium.UI.createButton({
+		  	id: resultNodeID,
+		    title: resultNodeTitleNoQuotes,
+		    keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
+		    top: 1, 
+		    font: { fontSize:23 },
+		    left: '3%',
+			width: '94%', 
+			height: '94%'
+	 	});
+    }
+	
 	
 	  
 	  if(typeOfAction == "companyRequest") {
