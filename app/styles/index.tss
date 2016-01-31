@@ -15,5 +15,6 @@
 	top: 150
 }
 "#starwidget": {
-	left: "50dp"
+	left: "10dp",
+	top: "10dp"
 }

@@ -331,4 +331,71 @@ function serverConnectionError(){
 	  serverConnectionError.show();
 }
 
+var win = Titanium.UI.createWindow({  
+  layout:'vertical',
+  backgroundColor:'#fff',
+});
+
+var testData = [ 
+  {title: 'Apples'}, {title: 'Bananas'},
+  {title: 'Carrots'}, {title: 'Potatoes'} ];
+
+var table = Ti.UI.createTableView({
+  top:40,
+  height:Ti.UI.SIZE,
+  editable:true,
+  data: testData
+});
+
+table.addEventListener("dragend", function(){
+  log("Reset table with testData on dragend");
+  table.setData(testData);
+});
+
+table.addEventListener("delete", function(e){
+  var row_index = e.index; 
+  var row_bkup = e.row;
+
+  log("Swipe delete invoked, show the confirm dialog... \n\n" + 
+      "But the " + testData[row_index].title + " are already gone (ouch!)");
+
+  var dialog = Ti.UI.createAlertDialog({
+      cancel: 1,
+      buttonNames: ['Confirm', 'Cancel'],
+      message: 'Confirm delete?',
+      title: 'Delete'
+   });
+   
+  dialog.addEventListener('click', function(e){
+    if (e.index === e.source.cancel){
+      log("Delete cancelled. Keeping " + testData[row_index].title +
+          "\n\nTable Data after cancel: " + JSON.stringify( table.sections[0].getRows() ) + 
+          "\n\nTest data: " + JSON.stringify( testData ) +
+          "\n\nForce pushing the vanished row I choose to keep back into table data");
+      var restored = table.sections[0].getRows();
+      restored.splice(row_index, 0, row_bkup);
+      table.setData(restored);
+
+    } else if (e.index === 0) {
+      log( testData.splice(row_index, 1) + " Deleted!" + "\n\nTable data: " + 
+           JSON.stringify( table.sections[0].getRows() ) + 
+           "\n\nTest data: " + JSON.stringify( testData ));
+    }
+  });
+  dialog.show();
+});
+
+var logView = Ti.UI.createLabel({
+  top:20,
+  text: "Actions log"
+});
+
+
+function log(text){
+  logView.setText(text);
+}
+
+win.add(table);
+win.add(logView);
+
 $.index.open();
