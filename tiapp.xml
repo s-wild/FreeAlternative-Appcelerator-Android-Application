@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ti:app xmlns:ti="http://ti.appcelerator.org">
     <id>uk.co.freealternative.altphone</id>
-    <name>altphone</name>
+    <name>FreeAlternative</name>
     <version>1.0</version>
     <publisher>simonwild</publisher>
     <url>http://www.freealternative.co.uk</url>
-    <description>undefined</description>
+    <description>Find phone telephone numbers using FreeAlternative.</description>
     <copyright>2015 by simonwild</copyright>
     <icon>appicon.png</icon>
     <fullscreen>false</fullscreen>
