@@ -13,7 +13,7 @@ numberFeedbackDialog = $.rateNumber;
 $.starwidget.init(); 
 
 var resultsView = Ti.UI.createScrollView({
-	top:130,
+	top:140,
 	layout: 'vertical'
 }); 
 
@@ -30,6 +30,8 @@ var delay = (function(){
 
 // Global Variables
 call_buttons = [];
+
+var first = true;
 
 searchInputBox.addEventListener('change', function(e) {
 	// Strange bug, I have to declare fullResult in here or it results in an error.
@@ -56,20 +58,24 @@ searchInputBox.addEventListener('change', function(e) {
 			var url="";
 			var checkStringNumber = IsNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
 			if (checkStringNumber == true) {
+				// Adjust positions for number display.
+				resultsView.setTop(165);
+				yesResults.setTop(120);
 				Ti.API.log("You have entered a number.");
-				// var checkTelephonePremium = numberTelephoneCheckPremium(searchInput); // Check if premium number.
-				// if (checkTelephonePremium == true) {
-					// Ti.API.log("it's a premium number.");
-					// url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?field_premium_number_value=" + searchInput;
-					// getUrlContents(url, type);
-				// } 
+				Ti.API.log("it's a premium number.");
+				type = "search_by_number";
+				url = "http://10.0.3.2/fa.dev/httpdocs/json/views/phone-number-search?title=" + searchInput;
+				getUrlContents(url, type);
 			} 
 			else {
 				Ti.API.log("You have entered a name.");
+				// Adjust positions for company display.
+				resultsView.setTop(150);
+				yesResults.setTop(120);
 				// Adjust URL to match name search. 			
 				var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/companies?name=" + searchInput;
 				// Define type of search
-				type = "search_by_name_number";
+				type = "search_by_name";
 				Ti.API.log("URL", url);
 				getUrlContents(url, type);
 			}
@@ -78,7 +84,7 @@ searchInputBox.addEventListener('change', function(e) {
 			// Nothing entered, delete everything!
 			Ti.API.log("Nothing has been entered, remove everything!");
 		}
-	}, 300 ); // This number is the delay for when the user types.
+	}, 800 ); // This number is the delay for when the user types.
 });
 
 // Call now button.
@@ -118,7 +124,7 @@ function getUrlContents(url, type, companyID, companyName) {
 			var json = JSON.parse(this.responseText);
 			var index;
 			topprop = 0.1; // this is space between two labels one below the other
-			if (type == "search_by_name_number") {
+			if (type == "search_by_name") {
 				resultNodes = json.companies; 
 				resultsLength = JSON.stringify(resultNodes.length);
 				if(resultsLength >= 1) {
@@ -149,6 +155,34 @@ function getUrlContents(url, type, companyID, companyName) {
 					var companyIDNoQuotes = companyID.slice(1, -1);
 					resultNodeID = companyIDNoQuotes + "," + resultNodes[index].term_id;
 					var resultNodeTitleNoQuotes = companyName + " " + resultNodeTitle.slice(1, -1);
+					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "variationNumbersRequest");
+					resultsView.add(row);
+					resultsView.show(); 
+				}
+			}
+			if (type == "search_by_number") {
+				Ti.API.log("Search by numbers initiated");
+				resultNodes = json.companies;
+				Ti.API.log("JSON result", JSON.stringify(resultNodes));
+				resultsLength = JSON.stringify(resultNodes.length);
+				if(resultsLength >= 1) {
+					Ti.API.log("Results for company search: True");
+					noResults.hide();
+					yesResults.show();
+				} 
+				if(resultsLength == 0) {
+					Ti.API.log("Results for company search: False");
+					yesResults.hide();
+					noResults.show();
+				}
+				for (index = 0; index < resultsLength; ++index) {
+					resultNodeTitle = JSON.stringify(resultNodes[index].title);
+					resultNodeVariationID = resultNodes[index].variation_id;
+					resultNodeCompanyID = resultNodes[index].company_id;
+					resultNodeCompanyName = resultNodes[index].name;
+					resultNodeVariationName = resultNodes[index].variation;
+					resultNodeID = resultNodeCompanyID + "," + resultNodeVariationID;
+					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1) + "\n" + resultNodeCompanyName + " " + resultNodeVariationName;
 					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "variationNumbersRequest");
 					resultsView.add(row);
 					resultsView.show(); 
@@ -206,19 +240,24 @@ function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfActi
 	    left: 0
     }); 
     if (ratings!=undefined) {
+    	if (ratings == "0/5") {
+    		ratings = "NA";
+    	}
+    	else {
+    		ratings = ratings.slice(0, -2) + "   ";
+    	}
     	var call_buttons = Titanium.UI.createButton({
 		  	id: resultNodeID,
-		    title: "Rating: " + ratings + ", Tel: " + resultNodeTitleNoQuotes,
-		    //keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
-		    font: { fontSize:23 },
+		    title: ratings + "     " + resultNodeTitleNoQuotes,
+		    font: { fontSize:30 },
+		    textAlign: "left",
 		    top: 1, 
 		    left: '3%',
 			width: '94%', 
-			height: '94%'
-			//backgroundColor : "#80FF0000" 
+			height: '94%',
+			image : 'star.png' 
 	 	});
-	 	var starImage = Ti.UI.createImageView({image:'../star.png', top: 60, height: 300, width: 300});
-	 	//call_buttons.add(starImage);
+	 	Ti.API.log("Call button image", callButtonImage);
     }
     else {
     	var call_buttons = Titanium.UI.createButton({
@@ -272,6 +311,7 @@ function retriveVariations() {
 }
 
 function retriveNumbers() {
+	yesResults.hide();
 	var node_id = this.id;
 	var idSplitted = node_id.split(',');
 	var companyIDLocal = idSplitted[0];
@@ -288,27 +328,12 @@ function retriveNumbers() {
 // Generates the feedback box after user dials a number.
 function numberFeedback(telephoneNumberValue){
 	delay(function(){
-	Ti.API.log("Feedback"); 
-	numberFeedbackDialog.setMessage("Thanks for using this service, please rate " + telephoneNumberValue + " to help other users.");
+		Ti.API.log("Feedback"); 
+		numberFeedbackDialog.setMessage("Thanks for using this service, please rate " + telephoneNumberValue + " to help other users.");
+		
+		// rateNumber
+		numberFeedbackDialog.show();
 	
-	// rateNumber
-	numberFeedbackDialog.show();
-	
-	/*var dialog = Ti.UI.createAlertDialog({
-	    cancel: 1,
-	    buttonNames: ['Yes', 'No'],
-	    message: 'Would you like to leave feedback for \n' + telephoneNumberValue + ' to help future users?',
-	    title: 'Feedback For Telephone Number'
-	  });
-	  dialog.addEventListener('click', function(e){
-	    if (e.index === e.source.cancel){
-	      Ti.API.info('The cancel button was clicked');
-	    }
-	    Ti.API.info('e.cancel: ' + e.cancel);
-	    Ti.API.info('e.source.cancel: ' + e.source.cancel);
-	    Ti.API.info('e.index: ' + e.index);
-	  });
-	  */
 	}, 800 ); // This number is the delay so popup box appears after call.
 }
 // Generates a message if the application fails to connect to the server. 
@@ -330,72 +355,5 @@ function serverConnectionError(){
 	  });
 	  serverConnectionError.show();
 }
-
-var win = Titanium.UI.createWindow({  
-  layout:'vertical',
-  backgroundColor:'#fff',
-});
-
-var testData = [ 
-  {title: 'Apples'}, {title: 'Bananas'},
-  {title: 'Carrots'}, {title: 'Potatoes'} ];
-
-var table = Ti.UI.createTableView({
-  top:40,
-  height:Ti.UI.SIZE,
-  editable:true,
-  data: testData
-});
-
-table.addEventListener("dragend", function(){
-  log("Reset table with testData on dragend");
-  table.setData(testData);
-});
-
-table.addEventListener("delete", function(e){
-  var row_index = e.index; 
-  var row_bkup = e.row;
-
-  log("Swipe delete invoked, show the confirm dialog... \n\n" + 
-      "But the " + testData[row_index].title + " are already gone (ouch!)");
-
-  var dialog = Ti.UI.createAlertDialog({
-      cancel: 1,
-      buttonNames: ['Confirm', 'Cancel'],
-      message: 'Confirm delete?',
-      title: 'Delete'
-   });
-   
-  dialog.addEventListener('click', function(e){
-    if (e.index === e.source.cancel){
-      log("Delete cancelled. Keeping " + testData[row_index].title +
-          "\n\nTable Data after cancel: " + JSON.stringify( table.sections[0].getRows() ) + 
-          "\n\nTest data: " + JSON.stringify( testData ) +
-          "\n\nForce pushing the vanished row I choose to keep back into table data");
-      var restored = table.sections[0].getRows();
-      restored.splice(row_index, 0, row_bkup);
-      table.setData(restored);
-
-    } else if (e.index === 0) {
-      log( testData.splice(row_index, 1) + " Deleted!" + "\n\nTable data: " + 
-           JSON.stringify( table.sections[0].getRows() ) + 
-           "\n\nTest data: " + JSON.stringify( testData ));
-    }
-  });
-  dialog.show();
-});
-
-var logView = Ti.UI.createLabel({
-  top:20,
-  text: "Actions log"
-});
-
-
-function log(text){
-  logView.setText(text);
-}
-
-win.add(table);
-win.add(logView);
 
 $.index.open();
