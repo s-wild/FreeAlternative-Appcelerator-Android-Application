@@ -30,9 +30,8 @@ var delay = (function(){
 
 // Global Variables
 call_buttons = [];
-
 var first = true;
-
+// searchInputBox.setValue("e.g. Vodafone or 0870070191");
 searchInputBox.addEventListener('change', function(e) {
 	// Strange bug, I have to declare fullResult in here or it results in an error.
 	fullResult = $.fullResult;
@@ -257,7 +256,6 @@ function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfActi
 			height: '94%',
 			image : 'star.png' 
 	 	});
-	 	Ti.API.log("Call button image", callButtonImage);
     }
     else {
     	var call_buttons = Titanium.UI.createButton({
@@ -270,28 +268,24 @@ function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfActi
 			width: '94%', 
 			height: '94%'
 	 	});
-    }
-	
-	
-	  
-	  if(typeOfAction == "companyRequest") {
-	  	Ti.API.log("Company Requested");
+    } 
+    // Add event listener if iteration request is for company lookups.
+	if(typeOfAction == "companyRequest") {
+		Ti.API.log("Company Requested");
 		call_buttons.addEventListener('click', retriveVariations); 
-	  }
-	  if(typeOfAction == "variationNumbersRequest") {
-	  	Ti.API.log("ids on button", call_buttons.id);
+	}
+	// Add event listener if iteration request is for company variations.
+	if(typeOfAction == "variationNumbersRequest") {
+		Ti.API.log("ids on button", call_buttons.id);
 		call_buttons.addEventListener('click', retriveNumbers); 
-	  }
-	  if(typeOfAction == "numbersRequest") {
-	  	Ti.API.log("ids on button", call_buttons.id);
+	}
+	// Add event listener if iteration request is for telephone numbers. 
+	if(typeOfAction == "numbersRequest") {
+		Ti.API.log("ids on button", call_buttons.id);
 		call_buttons.addEventListener('click', callButton); 
-	  }
-	  row.add(call_buttons);
-	  // if(typeOfAction == "call_buttons") {
-		// call_buttons.addEventListener('click', callButton); 
-	  // }
-	   
-	  return row;
+	}
+	row.add(call_buttons);
+	return row;
 }
 
 function retriveVariations() {
@@ -340,7 +334,6 @@ function numberFeedback(telephoneNumberValue){
 function serverConnectionError(){
 	var serverConnectionError = Ti.UI.createAlertDialog({
 	    cancel: 1,
-	    // buttonNames: ['Yes', 'No'],
 	    message: 'The application is having some problems connecting to the server.' + 
 	    ' Could be the server but make sure your device has access to the internet.',
 	    title: 'Server Connection Error'
