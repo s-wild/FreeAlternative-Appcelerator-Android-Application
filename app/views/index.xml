@@ -1,4 +1,4 @@
-<Alloy>
+ <Alloy>
 	<Window class="container" theme="mytheme">
 		<Label id="serachTitle" >Search for an alternative telephone number, e.g. 'Vodafone' or '0870070191'</Label>
 		<TextField id="searchInputBox" borderStyle="Ti.UI.INPUT_BORDERSTYLE_ROUNDED" color="#336699" top="55" left="10" width="94%" height="60" />
