@@ -13,7 +13,7 @@ numberFeedbackDialog = $.rateNumber;
 $.starwidget.init(); 
 
 var resultsView = Ti.UI.createScrollView({
-	top:140,
+	top:180,
 	layout: 'vertical'
 }); 
 
@@ -58,8 +58,8 @@ searchInputBox.addEventListener('change', function(e) {
 			var checkStringNumber = IsNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
 			if (checkStringNumber == true) {
 				// Adjust positions for number display.
-				resultsView.setTop(165);
-				yesResults.setTop(120);
+				resultsView.setTop(230);
+				yesResults.setTop(190);
 				Ti.API.log("You have entered a number.");
 				Ti.API.log("it's a premium number.");
 				type = "search_by_number";
@@ -69,10 +69,10 @@ searchInputBox.addEventListener('change', function(e) {
 			else {
 				Ti.API.log("You have entered a name.");
 				// Adjust positions for company display.
-				resultsView.setTop(150);
-				yesResults.setTop(120);
+				resultsView.setTop(230);
+				yesResults.setTop(190);
 				// Adjust URL to match name search. 			
-				var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/companies?name=" + searchInput;
+				var url = "http://10.0.3.2/fa.dev/httpdocs/json/company-variations?company_name=" + searchInput;
 				// Define type of search
 				type = "search_by_name";
 				Ti.API.log("URL", url);
@@ -118,17 +118,18 @@ function getUrlContents(url, type, companyID, companyName) {
 		onload: function(e) {
 			resultsView.removeAllChildren();
 			jsonText = this.responseText;
-			Ti.API.log("jsonText",jsonText);
+			Ti.API.log("jsonTextvod",jsonText);
 			// parse the retrieved data, turning it into a JavaScript object
 			var json = JSON.parse(this.responseText);
 			var index;
 			topprop = 0.1; // this is space between two labels one below the other
 			if (type == "search_by_name") {
 				resultNodes = json.companies; 
+				Ti.API.log("resultNodes", resultNodes);
 				resultsLength = JSON.stringify(resultNodes.length);
 				if(resultsLength >= 1) {
 					Ti.API.log("Results for company search: True");
-					noResults.hide();
+					noResults.hide();  
 					yesResults.show();
 				} 
 				if(resultsLength == 0) {
@@ -137,10 +138,13 @@ function getUrlContents(url, type, companyID, companyName) {
 					noResults.show();
 				}
 				for (index = 0; index < resultsLength; ++index) {
-					resultNodeTitle = JSON.stringify(resultNodes[index].name);
-					resultNodeID = JSON.stringify(resultNodes[index].term_id);
-					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
-					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "companyRequest");
+					resultNodeCompany = JSON.stringify(resultNodes[index].company_name);
+					resultNodeVariation = JSON.stringify(resultNodes[index].variation_name);
+					Ti.API.log("resultNodeCompanyvod", resultNodeCompany);
+					Ti.API.log("resultNodeVariation", resultNodeVariation);
+					resultCompanyID = JSON.stringify(resultNodes[index].term_id);
+					var resultCompanyNoQuotes = resultNodeCompany.slice(1, -1);
+					var row = createRowTitle(index, resultCompanyNoQuotes, resultCompanyID, "companyRequest");
 					resultsView.add(row);
 					resultsView.show(); 
 				}
@@ -151,6 +155,7 @@ function getUrlContents(url, type, companyID, companyName) {
 				resultsLength = JSON.stringify(resultNodes.length);
 				for (index = 0; index < resultsLength; ++index) {
 					resultNodeTitle = JSON.stringify(resultNodes[index].name);
+					Ti.API.log("result node title",resultNodeTitle);
 					var companyIDNoQuotes = companyID.slice(1, -1);
 					resultNodeID = companyIDNoQuotes + "," + resultNodes[index].term_id;
 					var resultNodeTitleNoQuotes = companyName + " " + resultNodeTitle.slice(1, -1);
@@ -245,7 +250,7 @@ function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfActi
     	else {
     		ratings = ratings.slice(0, -2) + "   ";
     	}
-    	var call_buttons = Titanium.UI.createButton({
+    	var call_buttons = Titanium.UI.createView({
 		  	id: resultNodeID,
 		    title: ratings + "     " + resultNodeTitleNoQuotes,
 		    font: { fontSize:30 },
@@ -256,18 +261,30 @@ function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfActi
 			height: '94%',
 			image : 'star.png' 
 	 	});
+	 	 	var label = Ti.UI.createLabel({
+		    color: '#000',
+		    text: resultNodeTitleNoQuotes,
+		    textAlign: 'center',
+		});
+		call_buttons.add(label);
     }
     else {
-    	var call_buttons = Titanium.UI.createButton({
+    	var call_buttons = Titanium.UI.createView({
 		  	id: resultNodeID,
 		    title: resultNodeTitleNoQuotes,
-		    keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
 		    top: 1, 
 		    font: { fontSize:23 },
 		    left: '3%',
 			width: '94%', 
-			height: '94%'
+			height: '94%',
+			backgroundColor:'blue'
 	 	});
+	 	var label = Ti.UI.createLabel({
+		    color: '#fff',
+		    text: resultNodeTitleNoQuotes,
+		    textAlign: 'center',
+		});
+		call_buttons.add(label);
     } 
     // Add event listener if iteration request is for company lookups.
 	if(typeOfAction == "companyRequest") {
@@ -300,7 +317,7 @@ function retriveVariations() {
 	var NodeIDNoQuotes = node_id.slice(1, -1);
 	fullResult.setText(fullResultTitle);
 	fullResult.show();
-	var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/company-variations/" + NodeIDNoQuotes;
+	var url = "http://10.0.3.2/fa.dev/httpdocs/json/company-variations?company_name=" + companyName;
 	getUrlContents(url, type, companyID, companyName);
 }
 
