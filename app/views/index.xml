@@ -5,7 +5,6 @@
 		<TextField id="searchInputBox" borderStyle="Ti.UI.INPUT_BORDERSTYLE_ROUNDED" color="#336699" top="120" left="10" width="94%" height="60" />
 		<Label id="noResults" top="140">Sorry, no results.</Label>
 		<Label id="yesResults" top="140">Results:</Label>
-		<Label id="fullResult" top="140">Full Result:</Label>
 		<AlertDialog id="rateNumber" title="Rate your call"
             message="<b>Rate the number</b>" cancel="1">
 			<Widget id="starwidget" src="starrating" max='5' initialRating='0' />

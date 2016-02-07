@@ -5,8 +5,6 @@ noResults.hide();
 yesResults = $.yesResults;
 yesResults.hide();
 searchInputBox = $.searchInputBox;
-fullResult = $.fullResult;
-fullResult.hide(); 
 numberFeedbackDialog = $.rateNumber;
 
 // Initialise rating widget.
@@ -33,9 +31,6 @@ call_buttons = [];
 var first = true;
 // searchInputBox.setValue("e.g. Vodafone or 0870070191");
 searchInputBox.addEventListener('change', function(e) {
-	// Strange bug, I have to declare fullResult in here or it results in an error.
-	fullResult = $.fullResult;
-	fullResult.hide();
 	
 	// Delay function will prevent bombardment of requests to the server.
 	delay(function(){
@@ -117,15 +112,13 @@ function getUrlContents(url, type, companyID, companyName) {
 		// function called when the response data is available
 		onload: function(e) {
 			resultsView.removeAllChildren();
-			jsonText = this.responseText;
-			Ti.API.log("jsonTextvod",jsonText);
 			// parse the retrieved data, turning it into a JavaScript object
 			var json = JSON.parse(this.responseText);
 			var index;
 			topprop = 0.1; // this is space between two labels one below the other
 			if (type == "search_by_name") {
 				resultNodes = json.companies; 
-				Ti.API.log("resultNodes", resultNodes);
+				Ti.API.log("resultNodes", JSON.stringify(resultNodes));
 				resultsLength = JSON.stringify(resultNodes.length);
 				if(resultsLength >= 1) {
 					Ti.API.log("Results for company search: True");
@@ -137,31 +130,38 @@ function getUrlContents(url, type, companyID, companyName) {
 					yesResults.hide();
 					noResults.show();
 				}
+				var companyNames = [];
+				var filtered_results = [];
+				
 				for (index = 0; index < resultsLength; ++index) {
-					resultNodeCompany = JSON.stringify(resultNodes[index].company_name);
-					resultNodeVariation = JSON.stringify(resultNodes[index].variation_name);
-					Ti.API.log("resultNodeCompanyvod", resultNodeCompany);
-					Ti.API.log("resultNodeVariation", resultNodeVariation);
-					resultCompanyID = JSON.stringify(resultNodes[index].term_id);
-					var resultCompanyNoQuotes = resultNodeCompany.slice(1, -1);
-					var row = createRowTitle(index, resultCompanyNoQuotes, resultCompanyID, "companyRequest");
-					resultsView.add(row);
-					resultsView.show(); 
-				}
-			}
-			if (type == "variations") {
-				resultNodes = json.variations; 
-				Ti.API.log("Variations JSON", JSON.stringify(resultNodes));
-				resultsLength = JSON.stringify(resultNodes.length);
-				for (index = 0; index < resultsLength; ++index) {
-					resultNodeTitle = JSON.stringify(resultNodes[index].name);
-					Ti.API.log("result node title",resultNodeTitle);
-					var companyIDNoQuotes = companyID.slice(1, -1);
-					resultNodeID = companyIDNoQuotes + "," + resultNodes[index].term_id;
-					var resultNodeTitleNoQuotes = companyName + " " + resultNodeTitle.slice(1, -1);
-					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "variationNumbersRequest");
-					resultsView.add(row);
-					resultsView.show(); 
+					resultNodeCompany = resultNodes[index].company_name;
+					companyNames.push(resultNodeCompany);
+					resultCompanyID = resultNodes[index].company_id;
+					// Check if duplicates, prevent multiple company names being written.
+					if(hasDuplicates(companyNames) == false) {
+						// Push company name.
+						filtered_results.push({company: resultNodeCompany, company_id: resultCompanyID});
+						// Create company wrapper.
+						var companyWrapper = createCompanyWrapper(resultNodeCompany, resultCompanyID);
+						resultsView.add(companyWrapper);
+						// Wrapper for buttons
+						var variationButtonWrapper = Ti.UI.createView({
+							height: Ti.UI.SIZE,
+						    top: 40, 
+						    left: 0,
+						    left: '3%',
+						    textAlign: 'left',
+							width: '94%'
+					    });
+					    companyWrapper.add(variationButtonWrapper);
+					}
+					
+					resultNodeVariation = resultNodes[index].variation_name;
+					resultCompanyID = resultNodes[index].company_id;
+					variation_id = resultNodes[index].variation_id;
+					var variationButton = createVariationButton(resultCompanyID, resultNodeVariation, variation_id, index);
+					variationButtonWrapper.add(variationButton);
+				
 				}
 			}
 			if (type == "search_by_number") {
@@ -193,20 +193,48 @@ function getUrlContents(url, type, companyID, companyName) {
 				}
 			}
 			if (type == "companyNumbers") {
-				Ti.API.log("CONNECT NUMBERS landed.");
+
+				// Get Response object telephone numbers. 
 				resultNodes = json.telephone_numbers; 
 				resultsLength = JSON.stringify(resultNodes.length);
-				Ti.API.log("Numbers JSON", JSON.stringify(resultNodes));
+				
+				// Get company and variation details for wrapper title.
+				var resultNodeCompany = resultNodes[0].company_name;
+				var resultNodeCompanyID = resultNodes[0].company_id;
+				var resultNodeCompanyVariation = resultNodes[0].variation;
+				resultNodeCompany = resultNodeCompany + " " + resultNodeCompanyVariation;
+				Ti.API.log("companyNumbers2222222222", resultNodeCompany);
+				
+				// Create a company variation wrapper and assign numbers to it.  
+				CompanyVariationWrapper = createCompanyWrapper(resultNodeCompany, resultNodeCompanyID);
+				resultsView.add(CompanyVariationWrapper);
+				resultsView.show();
+				resultsView.setTop(190);
+				
+				// Wrapper for call buttons
+				var callButtonWrapper = Ti.UI.createView({
+					height: Ti.UI.SIZE,
+				    top: 40, 
+				    left: 0,
+				    left: '3%',
+				    textAlign: 'left',
+					width: '94%'
+			    });
+			    
+			    CompanyVariationWrapper.add(callButtonWrapper);
+				
+				// Go through results and generate call buttons.
 				for (index = 0; index < resultsLength; ++index) {
 					resultNodeTitle = JSON.stringify(resultNodes[index].title);
 					resultNodeID = resultNodes[index].title;
 					resultNodeRating = resultNodes[index].rating;
 					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
-					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest", resultNodeRating);
-					resultsView.add(row);
-					resultsView.show(); 
+					 
+					var call_button = createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest", resultNodeRating);
+					callButtonWrapper.add(call_button);
+					//resultsView.show(); 
 				}
-				//createFullResultView(fullResult);
+				// createFullResultView(fullResult);
 			}
 			if (type == "search_by_id") {
 				Ti.API.log("search_by_id");
@@ -235,57 +263,115 @@ function getUrlContents(url, type, companyID, companyName) {
 	xhr.send();
 }
 
-function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings) {
+function hasDuplicates(array) {
+    var valuesSoFar = Object.create(null);
+    for (var i = 0; i < array.length; ++i) {
+        var value = array[i];
+        if (value in valuesSoFar) {
+            return true;
+        }
+        valuesSoFar[value] = true;
+    }
+    return false;
+}
+function createCompanyWrapper(resultNodeCompany, resultCompanyID){
+	Ti.API.log("createCompanyWrapper", resultNodeCompany);
+	topprop = 0.1; // this is space between two wrappers one below the other.
+	var wrapperBox = Ti.UI.createView({
+		id: resultCompanyID,
+		height: Ti.UI.SIZE,
+	    backgroundColor:'#5990DE',
+	    left: '3%',
+	    textAlign: 'left',
+		width: '94%',
+    });
+    var company_label = Ti.UI.createLabel({
+	    color: '#fff',
+	    text: resultNodeCompany,
+	    top: 5,
+	    left: 10,
+	    font: { fontSize:24 }
+	});
+	wrapperBox.add(company_label); 
+	return wrapperBox;
+}
+function createVariationButton(resultCompanyID, resultNodeVariation, variation_id, index){
+	top_spacing = index*70;
+	Ti.API.log("createVariationButton:", resultNodeVariation, variation_id, top_spacing);
+	var variationButton = Ti.UI.createView({
+		top: top_spacing,
+		id: resultCompanyID + "," + variation_id,
+		height: 60,
+	    left: 0,
+	    bottom: 10,
+	    backgroundColor:'#FAB350',
+	    textAlign: 'left',
+		width: '100%'
+    });
+    var variation_label = Ti.UI.createLabel({
+	    color: '#5A92E1',
+	    text: resultNodeVariation,
+	    top: 12,
+	    left: 10,
+	    font: { fontSize:24 }
+	});
+	variationButton.add(variation_label); 
+	variationButton.addEventListener('click', retriveNumbers);
+	return variationButton;
+}
+function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings) {
 	Ti.API.log("Type of action:", typeOfAction);
+	Ti.API.log("createNumberButton company name:", resultNodeTitleNoQuotes);
 	topprop = 0.1; // this is space between two labels one below the other
 	var row = Ti.UI.createView({
-	    height: 80,
-	    top: 1, 
+	    height: 60,
+	    top: index*70, 
 	    left: 0
     }); 
-    if (ratings!=undefined) {
-    	if (ratings == "0/5") {
-    		ratings = "NA";
-    	}
-    	else {
-    		ratings = ratings.slice(0, -2) + "   ";
-    	}
-    	var call_buttons = Titanium.UI.createView({
-		  	id: resultNodeID,
-		    title: ratings + "     " + resultNodeTitleNoQuotes,
-		    font: { fontSize:30 },
-		    textAlign: "left",
-		    top: 1, 
-		    left: '3%',
-			width: '94%', 
-			height: '94%',
-			image : 'star.png' 
-	 	});
-	 	 	var label = Ti.UI.createLabel({
-		    color: '#000',
-		    text: resultNodeTitleNoQuotes,
-		    textAlign: 'center',
+    var call_buttons = Titanium.UI.createView({
+		color: "#000",
+	  	id: resultNodeID,
+	    textAlign: "left",
+	    top: 1,
+		width: '98%', 
+		height: '96%',
+		backgroundColor:'#FCB450'
+ 	});
+	if (ratings == "0/5") {
+		ratings = "NA";
+		
+	}
+	else {
+		ratings = ratings.slice(0, -2) + "   ";
+		var star_image = Ti.UI.createImageView({
+		  image:'star.png',
+		  left: "9%"
 		});
-		call_buttons.add(label);
-    }
-    else {
-    	var call_buttons = Titanium.UI.createView({
-		  	id: resultNodeID,
-		    title: resultNodeTitleNoQuotes,
-		    top: 1, 
-		    font: { fontSize:23 },
-		    left: '3%',
-			width: '94%', 
-			height: '94%',
-			backgroundColor:'blue'
-	 	});
-	 	var label = Ti.UI.createLabel({
+		var star_label = Ti.UI.createLabel({
 		    color: '#fff',
-		    text: resultNodeTitleNoQuotes,
-		    textAlign: 'center',
+		    font: { fontSize:30 },
+		    text: ratings,
+		    textAlign: 'left',
+		    width: "20%",
+		    left: "3%"
 		});
-		call_buttons.add(label);
-    } 
+		call_buttons.add(star_label);
+		call_buttons.add(star_image);
+	}
+	
+ 	
+ 	var number_label = Ti.UI.createLabel({
+	    color: '#fff',
+	    font: { fontSize:30 },
+	    text: resultNodeTitleNoQuotes,
+	    textAlign: 'left',
+	    width: "70%",
+	    left: "30%"
+	});
+
+	call_buttons.add(number_label);
+
+		
     // Add event listener if iteration request is for company lookups.
 	if(typeOfAction == "companyRequest") {
 		Ti.API.log("Company Requested");
@@ -305,9 +391,34 @@ function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfActi
 	return row;
 }
 
+var contains = function(needle) {
+    // Per spec, the way to identify NaN is that it is not equal to itself
+    var findNaN = needle !== needle;
+    var indexOf;
+
+    if(!findNaN && typeof Array.prototype.indexOf === 'function') {
+        indexOf = Array.prototype.indexOf;
+    } else {
+        indexOf = function(needle) {
+            var i = -1, index = -1;
+
+            for(i = 0; i < this.length; i++) {
+                var item = this[i];
+
+                if((findNaN && item !== item) || item === needle) {
+                    index = i;
+                    break;
+                }
+            }
+
+            return index;
+        };
+    }
+
+    return indexOf.call(this, needle) > -1;
+};
+
 function retriveVariations() {
-	fullResult = $.fullResult;
-	yesResults.hide();
 	type = "variations";
 	var node_id = this.id;
 	var companyID = node_id;
@@ -315,8 +426,6 @@ function retriveVariations() {
 	var fullResultTitle = this.title+":"; 
 	var companyName = this.title;
 	var NodeIDNoQuotes = node_id.slice(1, -1);
-	fullResult.setText(fullResultTitle);
-	fullResult.show();
 	var url = "http://10.0.3.2/fa.dev/httpdocs/json/company-variations?company_name=" + companyName;
 	getUrlContents(url, type, companyID, companyName);
 }
@@ -327,10 +436,8 @@ function retriveNumbers() {
 	var idSplitted = node_id.split(',');
 	var companyIDLocal = idSplitted[0];
 	var variationIDLocal = idSplitted[1];
-	Ti.API.log("retriveNumbers() variation id ", idSplitted[0]);
-	var fullResultTitle = this.title+":"; 
-	fullResult.setText(fullResultTitle);
-	fullResult.show();
+	Ti.API.log("company_id", companyIDLocal);
+	Ti.API.log("variation_id", variationIDLocal);
 	var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
 	type = "companyNumbers";
 	getUrlContents(url, type);
