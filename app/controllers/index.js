@@ -29,26 +29,53 @@ var delay = (function(){
 // Global Variables
 call_buttons = [];
 var first = true;
+
+var counter = []; 
+
 // searchInputBox.setValue("e.g. Vodafone or 0870070191");
 searchInputBox.addEventListener('change', function(e) {
+	resultsView.hide();
+	resultsView.removeAllChildren();
+	
+	var backspace = false;
+	var searchInput = searchInputBox.value; // Get searchInput.
+	counter.push(searchInput.length);
+	
+	// Get this input length and last input length to help detect if user has pressed backspace.
+	var last_element = counter[counter.length - 2];
+	var this_element = searchInput.length;
+	
+	if (searchInput.length > 1) {
+		$.activityIndicator.show();
+	}
+	else {
+		$.activityIndicator.hide();
+	}
+	
+	
+	// Check if backspace is pressed. 
+	if (this_element < last_element) {
+		// Reset displays.
+		//resultsView.hide(); 
+	}
+	
 	
 	// Delay function will prevent bombardment of requests to the server.
 	delay(function(){
 		Ti.API.log("Time elapsed!");
-		var searchInput = searchInputBox.value; // Get searchInput.
+		
+		
 		// delete results if no input.
 		if (searchInput.length == 0) {
 			resultsView.hide();
 			noResults.hide();
 			yesResults.hide();
+			$.activityIndicator.hide();
 			resultsView.data = [];
-		}
-		// Show results view on first keyup.
-		if (searchInput.length == 1) {
-			resultsView.show();
 		}
 		// Check user has entered a character, if so, respond with results or no results. 
 		if (searchInput.length > 1) {
+			resultsView.show();
 			var url="";
 			var checkStringNumber = IsNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
 			if (checkStringNumber == true) {
@@ -111,7 +138,7 @@ function getUrlContents(url, type, companyID, companyName) {
 		},
 		// function called when the response data is available
 		onload: function(e) {
-			resultsView.removeAllChildren();
+
 			// parse the retrieved data, turning it into a JavaScript object
 			var json = JSON.parse(this.responseText);
 			var index;
@@ -193,6 +220,7 @@ function getUrlContents(url, type, companyID, companyName) {
 				}
 			}
 			if (type == "companyNumbers") {
+				resultsView.removeAllChildren();
 
 				// Get Response object telephone numbers. 
 				resultNodes = json.telephone_numbers; 

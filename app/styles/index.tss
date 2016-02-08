@@ -18,3 +18,9 @@
 	left: "10dp",
 	top: "10dp"
 }
+"#activityIndicator":{
+	font: { fontSize:18 },
+	color: "#000",
+	style: Titanium.UI.ActivityIndicatorStyle.BIG,
+	top: "50%"
+}

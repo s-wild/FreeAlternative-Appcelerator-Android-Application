@@ -13,5 +13,8 @@
                 <ButtonName>Submit</ButtonName>
             </ButtonNames>
         </AlertDialog> 
+        <!-- Define the styling properties in the TSS file -->
+        <ActivityIndicator id="activityIndicator"/>
 	</Window> 
+
 </Alloy>
