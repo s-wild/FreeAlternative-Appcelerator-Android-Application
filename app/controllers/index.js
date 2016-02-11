@@ -47,34 +47,12 @@ searchInputBox.addEventListener('change', function(e) {
 	
 	if (searchInput.length > 1) {
 		$.activityIndicator.show();
-	}
-	else {
-		$.activityIndicator.hide();
-	}
-	
-	
-	// Check if backspace is pressed. 
-	if (this_element < last_element) {
-		// Reset displays.
-		//resultsView.hide(); 
-	}
-	
-	
-	// Delay function will prevent bombardment of requests to the server.
+		// Delay function will prevent bombardment of requests to the server.
 	delay(function(){
 		Ti.API.log("Time elapsed!");
 		
-		
-		// delete results if no input.
-		if (searchInput.length == 0) {
-			resultsView.hide();
-			noResults.hide();
-			yesResults.hide();
-			$.activityIndicator.hide();
-			resultsView.data = [];
-		}
 		// Check user has entered a character, if so, respond with results or no results. 
-		if (searchInput.length > 1) {
+		if (searchInput.length > 2) {
 			resultsView.show();
 			var url="";
 			var checkStringNumber = IsNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
@@ -85,7 +63,7 @@ searchInputBox.addEventListener('change', function(e) {
 				Ti.API.log("You have entered a number.");
 				Ti.API.log("it's a premium number.");
 				type = "search_by_number";
-				url = "http://10.0.3.2/fa.dev/httpdocs/json/views/phone-number-search?title=" + searchInput;
+				url = "http://10.0.3.2/fa.dev/httpdocs/json/numbers?title=" + searchInput;
 				getUrlContents(url, type);
 			} 
 			else {
@@ -106,6 +84,21 @@ searchInputBox.addEventListener('change', function(e) {
 			Ti.API.log("Nothing has been entered, remove everything!");
 		}
 	}, 800 ); // This number is the delay for when the user types.
+	}
+	else {
+		resultsView.hide();
+		noResults.hide();
+		yesResults.hide();
+		resultsView.data = [];
+		$.activityIndicator.hide();
+	}
+	
+	
+	// Check if backspace is pressed. 
+	if (this_element < last_element) {
+		// Reset displays.
+		//resultsView.hide(); 
+	}
 });
 
 // Call now button.
@@ -206,17 +199,50 @@ function getUrlContents(url, type, companyID, companyName) {
 					yesResults.hide();
 					noResults.show();
 				}
+				// for (index = 0; index < resultsLength; ++index) {
+					// resultNodeTitle = JSON.stringify(resultNodes[index].title);
+					// resultNodeVariationID = resultNodes[index].variation_id;
+					// resultNodeCompanyID = resultNodes[index].company_id;
+					// resultNodeCompanyName = resultNodes[index].name;
+					// resultNodeVariationName = resultNodes[index].variation;
+					// resultNodeID = resultNodeCompanyID + "," + resultNodeVariationID;
+					// var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1) + "\n" + resultNodeCompanyName + " " + resultNodeVariationName;
+					// var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "variationNumbersRequest");
+					// resultsView.add(row);
+					// resultsView.show(); 
+				// }
+				var companyNames = [];
+				var filtered_results = [];
 				for (index = 0; index < resultsLength; ++index) {
-					resultNodeTitle = JSON.stringify(resultNodes[index].title);
-					resultNodeVariationID = resultNodes[index].variation_id;
-					resultNodeCompanyID = resultNodes[index].company_id;
-					resultNodeCompanyName = resultNodes[index].name;
-					resultNodeVariationName = resultNodes[index].variation;
-					resultNodeID = resultNodeCompanyID + "," + resultNodeVariationID;
-					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1) + "\n" + resultNodeCompanyName + " " + resultNodeVariationName;
-					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "variationNumbersRequest");
-					resultsView.add(row);
-					resultsView.show(); 
+					resultNodeCompany = resultNodes[index].company_name;
+					Ti.API.log("resultNodeCompany", resultNodeCompany);
+					companyNames.push(resultNodeCompany);
+					resultCompanyID = resultNodes[index].company_id;
+					// Check if duplicates, prevent multiple company names being written.
+					if(hasDuplicates(companyNames) == false) {
+						// Push company name.
+						filtered_results.push({company: resultNodeCompany, company_id: resultCompanyID});
+						// Create company wrapper.
+						var companyWrapper = createCompanyWrapper(resultNodeCompany, resultCompanyID);
+						resultsView.add(companyWrapper);
+						// Wrapper for buttons
+						var variationButtonWrapper = Ti.UI.createView({
+							height: Ti.UI.SIZE,
+						    top: 40, 
+						    left: 0,
+						    left: '3%',
+						    textAlign: 'left',
+							width: '94%'
+					    });
+					    companyWrapper.add(variationButtonWrapper);
+					}
+					
+					resultNodeVariation = resultNodes[index].variation_name;
+					resultCompanyID = resultNodes[index].company_id;
+					variation_id = resultNodes[index].variation_id;
+					var variationButton = createVariationButton(resultCompanyID, resultNodeVariation, variation_id, index);
+					variationButtonWrapper.add(variationButton);
+				
 				}
 			}
 			if (type == "companyNumbers") {
@@ -291,6 +317,7 @@ function getUrlContents(url, type, companyID, companyName) {
 	// Open URL.		
 	xhr.open("GET", url);
 	xhr.send();
+	$.activityIndicator.hide();
 }
 
 function hasDuplicates(array) {
