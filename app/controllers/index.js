@@ -167,8 +167,7 @@ function getUrlContents(url, type, companyID, companyName) {
 						// Wrapper for buttons
 						var variationButtonWrapper = Ti.UI.createView({
 							height: Ti.UI.SIZE,
-						    top: 40, 
-						    left: 0,
+						    top: '45', 
 						    left: '3%',
 						    textAlign: 'left',
 							width: '94%'
@@ -199,18 +198,6 @@ function getUrlContents(url, type, companyID, companyName) {
 					yesResults.hide();
 					noResults.show();
 				}
-				// for (index = 0; index < resultsLength; ++index) {
-					// resultNodeTitle = JSON.stringify(resultNodes[index].title);
-					// resultNodeVariationID = resultNodes[index].variation_id;
-					// resultNodeCompanyID = resultNodes[index].company_id;
-					// resultNodeCompanyName = resultNodes[index].name;
-					// resultNodeVariationName = resultNodes[index].variation;
-					// resultNodeID = resultNodeCompanyID + "," + resultNodeVariationID;
-					// var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1) + "\n" + resultNodeCompanyName + " " + resultNodeVariationName;
-					// var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, "variationNumbersRequest");
-					// resultsView.add(row);
-					// resultsView.show(); 
-				// }
 				var companyNames = [];
 				var filtered_results = [];
 				for (index = 0; index < resultsLength; ++index) {
@@ -228,8 +215,7 @@ function getUrlContents(url, type, companyID, companyName) {
 						// Wrapper for buttons
 						var variationButtonWrapper = Ti.UI.createView({
 							height: Ti.UI.SIZE,
-						    top: 40, 
-						    left: 0,
+						    top: '15%', 
 						    left: '3%',
 						    textAlign: 'left',
 							width: '94%'
@@ -257,7 +243,7 @@ function getUrlContents(url, type, companyID, companyName) {
 				var resultNodeCompanyID = resultNodes[0].company_id;
 				var resultNodeCompanyVariation = resultNodes[0].variation;
 				resultNodeCompany = resultNodeCompany + " " + resultNodeCompanyVariation;
-				Ti.API.log("companyNumbers2222222222", resultNodeCompany);
+				Ti.API.log("companyNumbers2222222222", resultNodeCompany.length);
 				
 				// Create a company variation wrapper and assign numbers to it.  
 				CompanyVariationWrapper = createCompanyWrapper(resultNodeCompany, resultNodeCompanyID);
@@ -265,12 +251,18 @@ function getUrlContents(url, type, companyID, companyName) {
 				resultsView.show();
 				resultsView.setTop(190);
 				
+				resultNodeCompanyLength = resultNodeCompany.length;
+				top_spacing = 40;
+				if (resultNodeCompanyLength > 27){
+					top_spacing = 80;
+				}
+				
 				// Wrapper for call buttons
 				var callButtonWrapper = Ti.UI.createView({
 					height: Ti.UI.SIZE,
-				    top: 40, 
-				    left: 0,
+				    top: top_spacing, 
 				    left: '3%',
+				    bottom: '3%',
 				    textAlign: 'left',
 					width: '94%'
 			    });
@@ -338,15 +330,19 @@ function createCompanyWrapper(resultNodeCompany, resultCompanyID){
 		id: resultCompanyID,
 		height: Ti.UI.SIZE,
 	    backgroundColor:'#eeeeee',
+	    height: Ti.UI.SIZE,
 	    left: '3%',
 	    textAlign: 'left',
 		width: '94%',
+		top: '0'
    }); 
     var company_label = Ti.UI.createLabel({
 	    color: '#000', 
+	    height: Ti.UI.SIZE,
 	    text: resultNodeCompany,
-	    top: 5,
-	    left: 10,
+	    top: '3%',
+	    bottom: '9%',
+	    left: '3%',
 	    font: { fontSize:24 }
 	});
 	wrapperBox.add(company_label); 
@@ -358,7 +354,7 @@ function createVariationButton(resultCompanyID, resultNodeVariation, variation_i
 	var variationButton = Ti.UI.createView({
 		top: top_spacing,
 		id: resultCompanyID + "," + variation_id,
-		height: 60,
+		height: Ti.UI.SIZE,
 	    left: 0,
 	    bottom: 10,
 	    backgroundColor:'#FAB350',
@@ -369,6 +365,7 @@ function createVariationButton(resultCompanyID, resultNodeVariation, variation_i
 	    color: '#fff',
 	    text: resultNodeVariation,
 	    top: 12,
+	    bottom: 12,
 	    left: 10,
 	    font: { fontSize:24 }
 	});
@@ -377,10 +374,8 @@ function createVariationButton(resultCompanyID, resultNodeVariation, variation_i
 	return variationButton;
 }
 function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings, numberType) {
-	Ti.API.log("numberType:", numberType);
-	Ti.API.log("createNumberButton company name:", resultNodeTitleNoQuotes);
-	background = "";
 	// Check number type and assign background.
+	background = "";
 	if (numberType == "Free Phone") {
 		background = "#388e3c";
 	}
@@ -390,12 +385,20 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	if (numberType == "Premium") {
 		background = "#e65100";
 	}
-	topprop = 0.1; // this is space between two labels one below the other
+	// Add spacing for first button.
+	top_spacing = index*70;
+	if (index == 0) {
+		//top_spacing= 30;
+	}
+	else {
+		//top_spacing= index*70;
+	}
 	var row = Ti.UI.createView({
 	    height: 60,
-	    top: index*70, 
+	    top: top_spacing, 
 	    left: 0
-    }); 
+   	});
+	 
     var call_buttons = Titanium.UI.createView({
 		color: "#000",
 	  	id: resultNodeID,
