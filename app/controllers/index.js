@@ -13,7 +13,7 @@ $.starwidget.init();
 var resultsView = Ti.UI.createScrollView({
 	top:180,
 	layout: 'vertical'
-}); 
+});  
 
 $.index.add(resultsView);
 
@@ -253,12 +253,14 @@ function getUrlContents(url, type, companyID, companyName) {
 				
 				// Go through results and generate call buttons.
 				for (index = 0; index < resultsLength; ++index) {
+					Ti.API.log("resultNodesCALL", JSON.stringify(resultNodes));
 					resultNodeTitle = JSON.stringify(resultNodes[index].title);
 					resultNodeID = resultNodes[index].title;
 					resultNodeRating = resultNodes[index].rating;
+					resultNodeType = resultNodes[index].number_type;
 					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
 					 
-					var call_button = createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest", resultNodeRating);
+					var call_button = createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest", resultNodeRating, resultNodeType);
 					callButtonWrapper.add(call_button);
 					//resultsView.show(); 
 				}
@@ -308,13 +310,13 @@ function createCompanyWrapper(resultNodeCompany, resultCompanyID){
 	var wrapperBox = Ti.UI.createView({
 		id: resultCompanyID,
 		height: Ti.UI.SIZE,
-	    backgroundColor:'#5990DE',
+	    backgroundColor:'#eeeeee',
 	    left: '3%',
 	    textAlign: 'left',
 		width: '94%',
-    });
+   }); 
     var company_label = Ti.UI.createLabel({
-	    color: '#fff',
+	    color: '#000', 
 	    text: resultNodeCompany,
 	    top: 5,
 	    left: 10,
@@ -337,7 +339,7 @@ function createVariationButton(resultCompanyID, resultNodeVariation, variation_i
 		width: '100%'
     });
     var variation_label = Ti.UI.createLabel({
-	    color: '#5A92E1',
+	    color: '#fff',
 	    text: resultNodeVariation,
 	    top: 12,
 	    left: 10,
@@ -347,9 +349,20 @@ function createVariationButton(resultCompanyID, resultNodeVariation, variation_i
 	variationButton.addEventListener('click', retriveNumbers);
 	return variationButton;
 }
-function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings) {
-	Ti.API.log("Type of action:", typeOfAction);
+function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings, numberType) {
+	Ti.API.log("numberType:", numberType);
 	Ti.API.log("createNumberButton company name:", resultNodeTitleNoQuotes);
+	background = "";
+	// Check number type and assign background.
+	if (numberType == "Free Phone") {
+		background = "#388e3c";
+	}
+	if (numberType == "Standard Rate") {
+		background = "#ffb300";
+	}
+	if (numberType == "Premium") {
+		background = "#e65100";
+	}
 	topprop = 0.1; // this is space between two labels one below the other
 	var row = Ti.UI.createView({
 	    height: 60,
@@ -363,8 +376,15 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	    top: 1,
 		width: '98%', 
 		height: '96%',
-		backgroundColor:'#FCB450'
+		backgroundColor:background
  	});
+ 	var call_image = Ti.UI.createImageView({
+	  image:'call_icon.png',
+	  left: "20%",
+	  width: "30",
+	  height: "30"
+	});
+	call_buttons.add(call_image);
 	if (ratings == "0/5") {
 		ratings = "NA";
 		
@@ -375,6 +395,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 		  image:'star.png',
 		  left: "9%"
 		});
+		
 		var star_label = Ti.UI.createLabel({
 		    color: '#fff',
 		    font: { fontSize:30 },
@@ -393,8 +414,8 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	    font: { fontSize:30 },
 	    text: resultNodeTitleNoQuotes,
 	    textAlign: 'left',
-	    width: "70%",
-	    left: "30%"
+	    width: "65%",
+	    left: "35%"
 	});
 
 	call_buttons.add(number_label);
