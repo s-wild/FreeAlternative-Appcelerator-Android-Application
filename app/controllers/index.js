@@ -256,7 +256,7 @@ function getUrlContents(url, type, companyID, companyName) {
 				resultsView.setTop(190);
 				
 				resultNodeCompanyLength = resultNodeCompany.length;
-				top_spacing = 50;
+				top_spacing = 40;
 				if (resultNodeCompanyLength > 27){
 					top_spacing = 80;
 				}
@@ -397,14 +397,8 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	if (numberType == "Premium") {
 		background = "#e65100";
 	}
-	// Add spacing for first button.
+	// Add spacing and create rows for entries.
 	top_spacing = index*70;
-	if (index == 0) {
-		//top_spacing= 30;
-	}
-	else {
-		//top_spacing= index*70;
-	}
 	var row = Ti.UI.createView({
 	    height: 60,
 	    top: top_spacing, 
@@ -422,7 +416,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
  	});
  	var call_image = Ti.UI.createImageView({
 	  image:'call_icon.png',
-	  left: "20%",
+	  left: "25%",
 	  width: "30",
 	  height: "30"
 	});
@@ -432,10 +426,17 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 		
 	}
 	else {
+		// Adjust start position if rating is a decimal. 
 		ratings = ratings.slice(0, -2) + "   ";
+		Ti.API.log("Company rating",ratings);
+		starImageLeftMargin = "9%";
+		if (ratings % 1 != 0) {
+			Ti.API.log("Decimal detected!");
+			starImageLeftMargin = "16%";
+		}
 		var star_image = Ti.UI.createImageView({
 		  image:'star.png',
-		  left: "9%"
+		  left: starImageLeftMargin
 		});
 		
 		var star_label = Ti.UI.createLabel({
@@ -457,7 +458,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	    text: resultNodeTitleNoQuotes,
 	    textAlign: 'left',
 	    width: "65%",
-	    left: "35%"
+	    left: "40%"
 	});
 
 	call_buttons.add(number_label);
