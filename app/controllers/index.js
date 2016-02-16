@@ -29,7 +29,7 @@ var delay = (function(){
 // Global Variables
 call_buttons = [];
 var first = true;
-
+rootURL = "http://10.0.3.2/fa.dev/httpdocs";
 var counter = []; 
 
 // searchInputBox.setValue("e.g. Vodafone or 0870070191");
@@ -63,7 +63,7 @@ searchInputBox.addEventListener('change', function(e) {
 				Ti.API.log("You have entered a number.");
 				Ti.API.log("it's a premium number.");
 				type = "search_by_number";
-				url = "http://10.0.3.2/fa.dev/httpdocs/json/numbers?title=" + searchInput;
+				url = rootURL + "/json/numbers?title=" + searchInput;
 				getUrlContents(url, type);
 			} 
 			else {
@@ -72,7 +72,7 @@ searchInputBox.addEventListener('change', function(e) {
 				resultsView.setTop(230);
 				yesResults.setTop(190);
 				// Adjust URL to match name search. 			
-				var url = "http://10.0.3.2/fa.dev/httpdocs/json/company-variations?company_name=" + searchInput;
+				var url = rootURL + "/json/company-variations?company_name=" + searchInput;
 				// Define type of search
 				type = "search_by_name";
 				Ti.API.log("URL", url);
@@ -104,10 +104,14 @@ searchInputBox.addEventListener('change', function(e) {
 // Call now button.
 function callButton(id, call_button_number) {
 	Ti.API.info('Call function id: ' + this.id);
-	var call = 'tel: ' + this.id;
+	var currentID = this.id
+	var idSplitted = currentID.split('|');
+	var number = idSplitted[0];
+	var nid = idSplitted[1];
+	var call = 'tel: ' + number;
 	Ti.API.info('Call'+ call);
-	var telephoneNumberValue = this.id;
-	numberFeedback(telephoneNumberValue);
+	var telephoneNumberValue = number;
+	numberFeedback(idSplitted);
 	var intent = Ti.Android.createIntent({
 		action: Ti.Android.ACTION_CALL,
 		data: call
@@ -276,9 +280,10 @@ function getUrlContents(url, type, companyID, companyName) {
 					resultNodeID = resultNodes[index].title;
 					resultNodeRating = resultNodes[index].rating;
 					resultNodeType = resultNodes[index].number_type;
+					resultNumberID = resultNodes[index].nid;
 					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
 					 
-					var call_button = createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest", resultNodeRating, resultNodeType);
+					var call_button = createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest", resultNodeRating, resultNodeType, resultNumberID);
 					callButtonWrapper.add(call_button);
 					//resultsView.show(); 
 				}
@@ -309,6 +314,8 @@ function getUrlContents(url, type, companyID, companyName) {
 	// Open URL.		
 	xhr.open("GET", url);
 	xhr.send();
+	
+	// Set activity indicator to hide when results are retrived. 
 	$.activityIndicator.hide();
 }
 
@@ -378,7 +385,7 @@ function createVariationButton(resultCompanyID, resultNodeVariation, variation_i
 	variationButton.addEventListener('click', retriveNumbers);
 	return variationButton;
 }
-function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings, numberType) {
+function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings, numberType, resultNumberID) {
 	// Check number type and assign background.
 	background = "";
 	if (numberType == "Free Phone") {
@@ -406,7 +413,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	 
     var call_buttons = Titanium.UI.createView({
 		color: "#000",
-	  	id: resultNodeID,
+	  	id: resultNodeID+"|"+resultNumberID,
 	    textAlign: "left",
 	    top: 1,
 		width: '98%', 
@@ -510,7 +517,7 @@ function retriveVariations() {
 	var fullResultTitle = this.title+":"; 
 	var companyName = this.title;
 	var NodeIDNoQuotes = node_id.slice(1, -1);
-	var url = "http://10.0.3.2/fa.dev/httpdocs/json/company-variations?company_name=" + companyName;
+	var url = rootURL+"/json/company-variations?company_name=" + companyName;
 	getUrlContents(url, type, companyID, companyName);
 }
 
@@ -522,19 +529,31 @@ function retriveNumbers() {
 	var variationIDLocal = idSplitted[1];
 	Ti.API.log("company_id", companyIDLocal);
 	Ti.API.log("variation_id", variationIDLocal);
-	var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
+	var url = rootURL+"/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
 	type = "companyNumbers";
 	getUrlContents(url, type);
 }
 
 // Generates the feedback box after user dials a number.
-function numberFeedback(telephoneNumberValue){
+function numberFeedback(idSplitted){
 	delay(function(){
-		Ti.API.log("Feedback"); 
-		numberFeedbackDialog.setMessage("Thanks for using this service, please rate " + telephoneNumberValue + " to help other users.");
 		
-		// rateNumber
+		// Set rating to unset to prevent incorrect ratings for multiple calls.
+		$.starwidget.setRating(0);
+		
+		var telePhoneNumber = idSplitted[0];
+		var nodeID = idSplitted[1];
+		
+		// Set message for feedback dialog popup. Include number to tell user what number they are rating.
+		numberFeedbackDialog.setMessage("Thanks for using this service, please rate " + telePhoneNumber + " to help other users.");
+		
+		// Show feedback from XML after phone call. 
 		numberFeedbackDialog.show();
+		
+		// Add event listener for when submit button is clicked. 
+		numberFeedbackDialog.addEventListener('click', function(e){
+			postRatingToServer(e, nodeID);
+	 	});
 	
 	}, 800 ); // This number is the delay so popup box appears after call.
 }
@@ -556,5 +575,45 @@ function serverConnectionError(){
 	  });
 	  serverConnectionError.show();
 }
-
+// Rating post.
+function postRatingToServer(e, nodeID){
+	Ti.API.info('e.postRatingToServer: ' + e.index);
+	// Set post URL.
+	var url = rootURL+"/rest/vote/set_votes";
+	
+	// Get current rating from dialog box stars. 
+	var currentNumberRating = $.starwidget.getRating();
+	
+	// Check if rating is set, if so post to server.
+	if (currentNumberRating > 0) {
+		// Convert Rating to percentage
+		var percentRating = currentNumberRating*20;
+		
+		// Create array structure in prep for sending to server. 
+		var voteEntry = { 
+		    "votes": [{
+			    "entity_id": String(nodeID),
+			    "value": String(percentRating)
+		  	}]
+		};
+		Ti.API.info(JSON.stringify(voteEntry));
+		
+		// Get contents from URL.
+		// var xhr = Ti.Network.createHTTPClient({
+			// // function called when the response data is available
+			// onload: function(e) {
+			// }
+		// });
+		// // Post URL.		
+		// xhr.open("POST", url);
+		// xhr.send(voteEntry);
+		
+		var client = Ti.Network.createHTTPClient();
+		client.open('POST',url);
+		client.setRequestHeader('Content-Type','application/json');
+		client.send(JSON.stringify(voteEntry));
+	}
+	
+	Ti.API.info('postRatingToServer Current Rating: ' + currentNumberRating);
+}
 $.index.open();
