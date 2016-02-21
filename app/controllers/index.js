@@ -641,41 +641,7 @@ function saveSearch(resultNodeCompany, resultNodeCompanyVariation, resultNodeCom
 	//var currentStorage = Ti.App.Properties.getList(searchStorageName);
 	Ti.App.Properties.setList(searchStorageName, searchResultsArray);
 	
-	
-	Ti.API.log("storageAfterProcessing5555555555555" + JSON.stringify(Ti.App.Properties.getList(searchStorageName)));
-	
-	
-	
-	// Check if history exists, if not start a history property.
-	// if (currentStorage === null) {
-		// Ti.API.log("History does not exist, create entry.");
-// 		
-	// }
-	// if (typeof(currentStorage) === "object") {
-		// Ti.API.log("OBBJECTDOOONOTHING");
-// 
-		// if(currentStorage.company_id != resultNodeCompanyID){
-// 			
-		// }
-		// // Ti.API.log("TYPEOFFFFF", typeof(currentStorage));
-		// // // Check entry is not the same as the last.
-		// // if (typeof(currentStorage) === Object) {
-			// // Ti.API.log("OBBJECTDOOONOTHING");
-			// // // previousHistory = Ti.App.Properties.getList(searchStorageName);
-			// // // searchResultsArray.push(previousHistory, localSearchObject);
-			// // // // combinedHistory = combinedArray.push(previousHistory);
-			// // // Ti.App.Properties.setList(searchStorageName, searchResultsArray);
-		// // }	
-		// // Check entry is not the same as the last.
-	// }
-	// if (typeof(currentStorage) === Array) {
-			// Ti.API.log("THIS IS AN ARRAY NOW"); 
-			// // previousHistory = Ti.App.Properties.getList(searchStorageName);
-			// // searchResultsArray.push(previousHistory, localSearchObject);
-			// // // combinedHistory = combinedArray.push(previousHistory);
-			// // Ti.App.Properties.setList(searchStorageName, searchResultsArray);
-	// }
-	// Ti.API.log("storageAfterProcessing5555555555555" + JSON.stringify(Ti.App.Properties.getList(searchStorageName)));
+	Ti.API.log("storageAfterProcessing" + JSON.stringify(Ti.App.Properties.getList(searchStorageName)));
 }
 
 $.index.open();
