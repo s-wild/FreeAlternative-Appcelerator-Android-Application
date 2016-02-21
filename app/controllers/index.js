@@ -626,7 +626,7 @@ function postRatingToServer(e, nodeID){
 // This function saves a user search.
 function saveSearch(resultNodeCompany, resultNodeCompanyVariation, resultNodeCompanyID, resultNodeCompanyVariationID) {
 	// Define storage name.
-	var searchStorageName = "searchHistory106";
+	var searchStorageName = "searchHistory";
 	
 	// Create search entry object.
 	var localSearchObject = {
