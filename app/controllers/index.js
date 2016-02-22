@@ -6,6 +6,10 @@ var first = true;
 rootURL = "http://10.0.3.2/fa.dev/httpdocs";
 var counter = [];
 
+// Search details
+searchStorageName = "searchHistory213";
+searchResultsArray = [];
+
 // Get displays on load, hide if necessary.
 noResults = $.noResults;
 noResults.hide();
@@ -50,18 +54,16 @@ var spacingBox = Titanium.UI.createView({
 });
 $.index.add(spacingBox);
 var searchHistoryResults = Ti.UI.createScrollView({
-	top: "45f%",
+	top: "45%",
 	backgroundColor: '#F3F3F3',
 	layout: 'vertical',
 	width:"92%",
 	showPagingControl:true
 });
 $.index.add(searchHistoryResults);
-previousSearchLabel.hide();
-previousSearchIcon.hide();
-previousSearchLabelText.hide();
-spacingBox.hide();
-searchHistoryResults.hide();
+
+// Hide all user history UI until check is made if it exists.
+hideHistoryBlock(); 
 
 /*
  * Star Widget
@@ -86,9 +88,6 @@ var delay = (function(){
 	};
 })();
 
-// Search results array
-searchResultsArray = [];
-
 /*
  * Search Box Functionality.
  */
@@ -103,47 +102,55 @@ searchInputBox.addEventListener('change', function(e) {
 	// Get this input length and last input length to help detect if user has pressed backspace.
 	var last_element = counter[counter.length - 2];
 	var this_element = searchInput.length;
+	if (searchInput.length == 0) {
+		var initialCheck = false;
+		getPreviousHistorySearches();
+		showHistoryBlock();
+	}
 
 	if (searchInput.length > 1) {
+		hideHistoryBlock(); 
 		$.activityIndicator.show();
 		// Delay function will prevent bombardment of requests to the server.
-	delay(function(){
-		//// Ti.API.log("Time elapsed!");
-
-		// Check user has entered a character, if so, respond with results or no results.
-		if (searchInput.length > 2) {
-			resultsView.show();
-			var url="";
-			var checkStringNumber = IsNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
-			if (checkStringNumber == true) {
-				// Adjust positions for number display.
-				resultsView.setTop(230);
-				yesResults.setTop(190);
-				//// Ti.API.log("You have entered a number.");
-				//// Ti.API.log("it's a premium number.");
-				type = "search_by_number";
-				url = rootURL + "/json/numbers?title=" + searchInput;
-				getUrlContents(url, type);
+		delay(function(){
+			//// Ti.API.log("Time elapsed!");
+	
+			// Check user has entered a character, if so, respond with results or no results.
+			if (searchInput.length > 2) {
+				resultsView.show();
+				var url="";
+				var checkStringNumber = IsNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
+				if (checkStringNumber == true) {
+					// Adjust positions for number display.
+					resultsView.setTop(230);
+					yesResults.setTop(190);
+					//// Ti.API.log("You have entered a number.");
+					//// Ti.API.log("it's a premium number.");
+					type = "search_by_number";
+					url = rootURL + "/json/numbers?title=" + searchInput;
+					getUrlContents(url, type);
+				}
+				else {
+					//// Ti.API.log("You have entered a name.");
+					// Adjust positions for company display.
+					resultsView.setTop(230);
+					yesResults.setTop(190);
+					// Adjust URL to match name search.
+					var url = rootURL + "/json/company-variations?company_name=" + searchInput;
+					// Define type of search
+					type = "search_by_name";
+					//// Ti.API.log("URL", url);
+					getUrlContents(url, type);
+				}
 			}
 			else {
-				//// Ti.API.log("You have entered a name.");
-				// Adjust positions for company display.
-				resultsView.setTop(230);
-				yesResults.setTop(190);
-				// Adjust URL to match name search.
-				var url = rootURL + "/json/company-variations?company_name=" + searchInput;
-				// Define type of search
-				type = "search_by_name";
-				//// Ti.API.log("URL", url);
-				getUrlContents(url, type);
+				// Nothing entered, delete everything!
+				//// Ti.API.log("Nothing has been entered, remove everything!");
+				// Check history if set to 0.
+				//checkIfPreviousHistory();
+				
 			}
-		}
-		else {
-			// Nothing entered, delete everything!
-			//// Ti.API.log("Nothing has been entered, remove everything!");
-			
-		}
-	}, 800 ); // This number is the delay for when the user types.
+		}, 800 ); // This number is the delay for when the user types.
 	}
 	else {
 		resultsView.hide();
@@ -208,7 +215,7 @@ function getUrlContents(url, type, companyID, companyName) {
 			topprop = 0.1; // this is space between two labels one below the other
 			if (type == "search_by_name") {
 				resultNodes = json.companies;
-				// Ti.API.log("resultNodes", JSON.stringify(resultNodes));
+				//Ti.API.log("resultNodes", JSON.stringify(resultNodes));
 				resultsLength = JSON.stringify(resultNodes.length);
 				if(resultsLength >= 1) {
 					// Ti.API.log("Results for company search: True");
@@ -309,20 +316,21 @@ function getUrlContents(url, type, companyID, companyName) {
 				resultsLength = JSON.stringify(resultNodes.length);
 
 				// Get company and variation details for wrapper title.
-				var resultNodeCompany = resultNodes[0].company_name;
-				var resultNodeCompanyID = resultNodes[0].company_id;
-				var resultNodeCompanyVariation = resultNodes[0].variation;
-				var resultNodeCompanyVariationID = resultNodes[0].variation_id;
+				resultNodeCompany = resultNodes[0].company_name;
+				resultNodeCompanyID = resultNodes[0].company_id;
+				resultNodeCompanyVariation = resultNodes[0].variation;
+				resultNodeCompanyVariationID = resultNodes[0].variation_id;
 				resultNodeCompany = resultNodeCompany + " " + resultNodeCompanyVariation;
-				// Ti.API.log("companyNumbers2222222222", resultNodeCompany.length);
-
+				//Ti.API.log("companyNumbers2222222222", resultNodeCompany.length);
+				
+				Ti.API.log("****** GET URL", resultNodeCompany);
+				saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID);
+				
 				// Create a company variation wrapper and assign numbers to it.
 				CompanyVariationWrapper = createCompanyWrapper(resultNodeCompany, resultNodeCompanyID);
 				resultsView.add(CompanyVariationWrapper);
 				resultsView.show(); 
 				resultsView.setTop(190);
-				
-				saveSearch(resultNodeCompany, resultNodeCompanyVariation, resultNodeCompanyID, resultNodeCompanyVariationID);
 
 				resultNodeCompanyLength = resultNodeCompany.length;
 				top_spacing = 40;
@@ -544,18 +552,6 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	return row;
 }
 
-function retriveVariations() {
-	type = "variations";
-	var node_id = this.id;
-	var companyID = node_id;
-	// Ti.API.log("retriveVariations() Node id " + node_id);
-	var fullResultTitle = this.title+":";
-	var companyName = this.title;
-	var NodeIDNoQuotes = node_id.slice(1, -1);
-	var url = rootURL+"/json/company-variations?company_name=" + companyName;
-	getUrlContents(url, type, companyID, companyName);
-}
-
 function retriveNumbers() {
 	yesResults.hide();
 	var node_id = this.id;
@@ -566,6 +562,8 @@ function retriveNumbers() {
 	// Ti.API.log("variation_id", variationIDLocal);
 	var url = rootURL+"/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
 	type = "companyNumbers";
+	companyID = "1";
+	companyName = "test";
 	getUrlContents(url, type);
 }
 
@@ -650,76 +648,111 @@ function postRatingToServer(e, nodeID){
  * User Search Save Functionality.
  * These functions save previous searchs as well as displaying them to the user.  
  */
-function saveSearch(resultNodeCompany, resultNodeCompanyVariation, resultNodeCompanyID, resultNodeCompanyVariationID) {
-	// Define storage name.
-	var searchStorageName = "searchHistory";
+// These functions show/hide history block
+function hideHistoryBlock() {
+	previousSearchLabel.hide();
+	previousSearchIcon.hide();
+	previousSearchLabelText.hide();
+	spacingBox.hide();
+	searchHistoryResults.hide();
+}
+function showHistoryBlock() {
+	previousSearchLabel.show();
+	previousSearchIcon.show();
+	previousSearchLabelText.show();
+	spacingBox.show();
+	searchHistoryResults.show();
+}
+function saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID) {
+	Titanium.API.log("***********","saveSearch init");
+	//searchResultsArray
+	var currentEntries = (Ti.App.Properties.getList(searchStorageName));
 	
 	// Create search entry object.
 	var localSearchObject = {
 	    company_name: resultNodeCompany,
-	    company_variation: resultNodeCompanyVariation,
 	    company_id: resultNodeCompanyID,
 	    variation_id: resultNodeCompanyVariationID
 	};
 	
-	searchResultsArray.push(localSearchObject);
+	if(currentEntries === null || currentEntries === undefined){
+		searchResultsArray.push(localSearchObject); 
+		Ti.App.Properties.setList(searchStorageName, searchResultsArray);
+		// searchResultsArray.push(localSearchObject, currentEntries);
+	}
+	else {
+		searchResultsArray.push(localSearchObject, currentEntries); 
+		Ti.App.Properties.setList(searchStorageName, searchResultsArray);
+	}
+	
 
 	//var currentStorage = Ti.App.Properties.getList(searchStorageName);
-	Ti.App.Properties.setList(searchStorageName, searchResultsArray);
+	
 	
 	// Ti.API.log("storageAfterProcessing" + JSON.stringify(Ti.App.Properties.getList(searchStorageName)));
-	// getPreviousHistorySearchesvoda();
-	
-	
+	// getPreviousHistorySearches();
+	//vodcreateSearchHistoryViewEntry();
+	getPreviousHistorySearches();	
 }
-// Create a previous search results view. 
+// Initialize Function on Load.
+getPreviousHistorySearches();
+ // Create a previous search results view and get entries. . 
 function getPreviousHistorySearches() { 
-	var searchStorageName = "searchHistory";
 	var currentEntries = (Ti.App.Properties.getList(searchStorageName));
-	var currentEntriesLength = (Ti.App.Properties.getList(searchStorageName)).length;
-	//Ti.API.info(':::createPreviousSearchView, currentEntries', JSON.stringify(currentEntries));
-	//Ti.API.info(':::createPreviousSearchView, currentEntriesLength', currentEntriesLength);
-	currentEntries.forEach(function(entry, index) {
-		//Ti.API.info(':::createPreviousSearchView, entry', JSON.stringify(entry.company_name));
-		var company_name = entry.company_name;
-		var company_id = entry.company_id;
-		var variation_id = entry.variation_id;
-		
-		// Create View Entry.
-    	createSearchHistoryViewEntry(index, company_name, company_id, variation_id);
-	});
+	
+	// If history is set to null
+	if (currentEntries === undefined || currentEntries === null) {
+	    Titanium.API.log("***********","checkIfPreviousHistory currentEntries is NULL");
+	}
+	// Assume history is not null
+	else {
+		Titanium.API.log("***********","checkIfPreviousHistory currentEntries", JSON.stringify(currentEntries));
+		showHistoryBlock();
+		var currentEntries = (Ti.App.Properties.getList(searchStorageName));
+		var currentEntriesLength = currentEntries.length;
+		var getPreviousHistorySearchesArray = [];
+		Ti.API.info('******getPreviousHistorySearches, currentEntries', JSON.stringify(currentEntries));
+		Ti.API.info('******getPreviousHistorySearches, currentEntriesLength', currentEntriesLength);
+		currentEntries.forEach(function(entry, index) {
+			Ti.API.info(':::createPreviousSearchView, entry', JSON.stringify(entry.company_name));
+			var company_name = entry.company_name;
+			var company_id = entry.company_id;
+			var variation_id = entry.variation_id;
+			
+			// Create View Entry.
+	    	createSearchHistoryViewEntry(index, company_name, company_id, variation_id);
+		});
+	} 
+	 
 }
-// Create an entry if search entries exist.
+ // Create an entry if search entries exist.
 function createSearchHistoryViewEntry(index, company_name, company_id, variation_id) {
-	company_name = truncate(company_name);
-	//// Ti.API.log("createViewEntry:", top_spacing, company_name, company_id, variation_id);
-	var searchButton = Ti.UI.createView({
-		id: company_id + "," + variation_id,
-		height: Ti.UI.SIZE,
-	    left: 10,
-	    right: 10,
-	    bottom: 10,
-	    backgroundColor:'#5A595B',
-	    textAlign: 'left',
-		width: '98%'
-    });
-    var searchLabel = Ti.UI.createLabel({
-	    color: '#fff',
-	    text: company_name,
-	    top: 12,
-	    bottom: 12,
-	    left: 10,
-	    font: { fontSize:24 }
-	});
-	searchButton.add(searchLabel); 
-	//searchButton.addEventListener('click', retriveVariations); 
-	searchHistoryResults.add(searchButton);
+	Ti.API.log("****createViewEntry:", top_spacing, company_name, company_id, variation_id);
+	//searchHistoryResults.removeAllChildren();
+	//company_name = truncate(company_name);
+	if(company_name !== undefined) {
+		var searchButton = Ti.UI.createView({
+			id: company_id + "," + variation_id,
+			height: Ti.UI.SIZE,
+		    left: "3%", 
+		    bottom: "3%",
+		    backgroundColor:'#5A595B',
+		    textAlign: 'left',
+			width: '94%'
+	    });
+	    var searchLabel = Ti.UI.createLabel({
+		    color: '#fff',
+		    text: company_name,
+		    top: 12,
+		    bottom: 12,
+		    left: 10,
+		    font: { fontSize:24 }
+		});
+		searchButton.add(searchLabel); 
+		//searchButton.addEventListener('click', retriveVariations); 
+		searchHistoryResults.add(searchButton);
+	}
 }
-function checkIfPreviousHistory() {
-	var currentEntries = (Ti.App.Properties.getList(searchStorageName));
-}
-// Initialise check on load.
- 
 
 /*
  * Helper functions
