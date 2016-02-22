@@ -187,6 +187,27 @@ function callButton(id, call_button_number) {
 	});
 	Ti.Android.currentActivity.startActivity(intent);
 }
+/*
+ * Save as contact.
+ */
+function saveAsContact(id, call_button_number) {
+	var currentID = this.id;
+	var idSplitted = currentID.split('|');
+	var number = idSplitted[0];
+	var nid = idSplitted[1];
+	var name = idSplitted[2];
+	if (Titanium.Platform.name == 'android') {
+        var intent = Ti.Android.createIntent
+        ({
+            action: 'com.android.contacts.action.SHOW_OR_CREATE_CONTACT',
+            data: 'mailto:'+name
+        });
+            intent.putExtra('phone', number);
+            intent.putExtra('name',name);
+
+        Ti.Android.currentActivity.startActivity(intent);
+     }
+}
 
 /*
  * Function to check if numeric number is in String. 
@@ -349,10 +370,13 @@ function getUrlContents(url, type, companyID, companyName) {
 			    });
 
 			    CompanyVariationWrapper.add(callButtonWrapper);
+			    
+			   
 
 				// Go through results and generate call buttons.
 				for (index = 0; index < resultsLength; ++index) {
-					// Ti.API.log("resultNodesCALL", JSON.stringify(resultNodes));
+					var combinedTitle = resultNodes[index].company_name + " " +  resultNodes[index].variation;
+					Ti.API.log("resultNodesCALL", JSON.stringify(combinedTitle));
 					resultNodeTitle = JSON.stringify(resultNodes[index].title);
 					resultNodeID = resultNodes[index].title;
 					resultNodeRating = resultNodes[index].rating;
@@ -360,7 +384,7 @@ function getUrlContents(url, type, companyID, companyName) {
 					resultNumberID = resultNodes[index].nid;
 					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
 
-					var call_button = createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest", resultNodeRating, resultNodeType, resultNumberID);
+					var call_button = createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest", resultNodeRating, resultNodeType, resultNumberID, combinedTitle);
 					callButtonWrapper.add(call_button);
 					//resultsView.show();
 				}
@@ -454,9 +478,11 @@ function createVariationButton(resultCompanyID, resultNodeVariation, variation_i
 	variationButton.addEventListener('click', retriveNumbers);
 	return variationButton;
 }
-function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings, numberType, resultNumberID) {
+function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings, numberType, resultNumberID, combinedTitle) {
 	// Check number type and assign background.
 	background = "";
+	var companyVariation = combinedTitle; 
+	Ti.API.log("resultNodeTitleNoQuotes", combinedTitle);
 	if (numberType == "Free Phone") {
 		background = "#388e3c";
 	}
@@ -476,7 +502,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 
     var call_buttons = Titanium.UI.createView({
 		color: "#000",
-	  	id: resultNodeID+"|"+resultNumberID,
+	  	id: resultNodeID+"|"+resultNumberID+"|"+companyVariation,
 	    textAlign: "left",
 	    top: 1,
 		width: '98%',
@@ -547,6 +573,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	if(typeOfAction == "numbersRequest") {
 		// Ti.API.log("ids on button", call_buttons.id);
 		call_buttons.addEventListener('click', callButton);
+		call_buttons.addEventListener('longpress', saveAsContact);
 	}
 	row.add(call_buttons);
 	return row;
@@ -727,7 +754,7 @@ function getPreviousHistorySearches() {
 }
  // Create an entry if search entries exist.
 function createSearchHistoryViewEntry(index, company_name, company_id, variation_id) {
-	Ti.API.log("****createViewEntry:", top_spacing, company_name, company_id, variation_id);
+	Ti.API.log("****createViewEntry:", index, company_name, company_id, variation_id);
 	//searchHistoryResults.removeAllChildren();
 	//company_name = truncate(company_name);
 	if(company_name !== undefined) {
@@ -738,7 +765,6 @@ function createSearchHistoryViewEntry(index, company_name, company_id, variation
 		    bottom: "3%",
 		    backgroundColor:'#5A595B',
 		    textAlign: 'left',
-			width: '94%'
 	    });
 	    var searchLabel = Ti.UI.createLabel({
 		    color: '#fff',
