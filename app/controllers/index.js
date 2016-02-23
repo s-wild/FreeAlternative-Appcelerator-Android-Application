@@ -3,7 +3,7 @@
  */
 call_buttons = [];
 var first = true;
-rootURL = "http://10.0.3.2/fa.dev/httpdocs";
+rootURL = "http://up637415.co.uk/";
 var counter = [];
 
 // Search details
@@ -23,23 +23,23 @@ numberFeedbackDialog = $.rateNumber;
  */ 
 var previousSearchLabel = Titanium.UI.createView({
    backgroundColor:'#DEDEDE',
-   top: "33%",
+   top: "190",
    width:"92%",
-   height:"10%"
+   height:"60"
 });
 var previousSearchIcon = Ti.UI.createImageView({
 	image:'search_icon.png',
-	left: "3%",
-	top: "20%",
+	left: "15",
+	top: "15",
 	width: "30",
 	height: "30"
-}); 
+});  
 var previousSearchLabelText = Ti.UI.createLabel({
 	color:'black',
 	text: 'Previous Searches',
 	textAlign: Ti.UI.TEXT_ALIGNMENT_LEFT,
-	top: "20%",
-	left: "30%",
+	top: "15",
+	left: "60",
 	width: 230, height: 30,
 	font: { fontSize:20 }
 });
@@ -48,13 +48,13 @@ previousSearchLabel.add(previousSearchLabelText);
 $.index.add(previousSearchLabel);
 var spacingBox = Titanium.UI.createView({
    backgroundColor:'#F3F3F3',
-   top: "43%",
+   top: "250",
    width:"92%",
-   height:"2%"
+   height:"30"
 });
 $.index.add(spacingBox);
 var searchHistoryResults = Ti.UI.createScrollView({
-	top: "45%",
+	top: "260",
 	backgroundColor: '#F3F3F3',
 	layout: 'vertical',
 	width:"92%",
@@ -87,7 +87,8 @@ var delay = (function(){
 		timer = setTimeout(callback, ms);
 	};
 })();
-
+// Initialize Function on Load.
+getPreviousHistorySearches();
 /*
  * Search Box Functionality.
  */
@@ -718,11 +719,9 @@ function saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVar
 	
 	// Ti.API.log("storageAfterProcessing" + JSON.stringify(Ti.App.Properties.getList(searchStorageName)));
 	// getPreviousHistorySearches();
-	//vodcreateSearchHistoryViewEntry();
-	getPreviousHistorySearches();	
+	// vodcreateSearchHistoryViewEntry();
+	// getPreviousHistorySearches();	
 }
-// Initialize Function on Load.
-getPreviousHistorySearches();
  // Create a previous search results view and get entries. . 
 function getPreviousHistorySearches() { 
 	var currentEntries = (Ti.App.Properties.getList(searchStorageName));
@@ -803,6 +802,10 @@ function truncate(string){
    else
       return string;
 };
+// Back button handler.
+$.index.addEventListener('androidback' , function(e){
+    searchInputBox.value = "";
+});
 
 /*
  * Page open
