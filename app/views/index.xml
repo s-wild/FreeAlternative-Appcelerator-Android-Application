@@ -1,8 +1,9 @@
  <Alloy>
 	<Window class="container" theme="mytheme">
 		<ImageView id="imageLogo" image="logo.png" top="20" width="92%"/>
-		<Label id="serachTitle" top="80">Search for an alternative telephone number, e.g. 'Vodafone' or '0870070191'</Label>
-		<SearchBar id="searchInputBox"voda color="#336699" top="120" left="10" width="94%" height="60" />
+		<Label id="serachTitle" top="80">Search for an alternative telephone number.</Label>
+		<!-- <SearchBar id="searchInputBox" color="#336699" top="120" left="10" width="94%" height="60" hintText="blah..."/> --> -->
+		
 		<Label id="noResults" top="190">Sorry, no results.</Label>
 		<Label id="yesResults" top="140">Results:</Label>
 		<AlertDialog id="rateNumber" title="Rate your call"

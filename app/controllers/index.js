@@ -15,8 +15,24 @@ noResults = $.noResults;
 noResults.hide();
 yesResults = $.yesResults;
 yesResults.hide();
-searchInputBox = $.searchInputBox;
-numberFeedbackDialog = $.rateNumber;
+var searchInputBox = Titanium.UI.createSearchBar({
+	backgroundColor:'#fff',
+    hintTextColor:'#777',
+    backgroundFocusedColor: "red",
+    color: "#000",
+    showCancel:true,
+    height: 60,
+    width: "94%",
+    top: 100,
+    left: "3%",
+    hintText: "E.g. 'Vodafone' or '0870070191'",
+    font: { color: "#fff"},
+    
+});
+searchInputBox.focus();
+//searchInputBox = $.searchInputBox;
+//searchInputBox.setHintText('0845...or...Vodafone');
+numberFeedbackDialog = $.rateNumber; 
 
 /*
  * User Search UI. 
@@ -92,6 +108,7 @@ getPreviousHistorySearches();
 /*
  * Search Box Functionality.
  */
+showHistoryBlock();
 searchInputBox.addEventListener('change', function(e) {
 	resultsView.hide();
 	resultsView.removeAllChildren();
@@ -104,7 +121,8 @@ searchInputBox.addEventListener('change', function(e) {
 	var last_element = counter[counter.length - 2];
 	var this_element = searchInput.length;
 	if (searchInput.length == 0) {
-		var initialCheck = false;
+		//getPreviousHistorySearches();
+		//showHistoryBlock();
 		getPreviousHistorySearches();
 		showHistoryBlock();
 	}
@@ -346,6 +364,7 @@ function getUrlContents(url, type, companyID, companyName) {
 				//Ti.API.log("companyNumbers2222222222", resultNodeCompany.length);
 				
 				Ti.API.log("****** GET URL", resultNodeCompany);
+				Ti.API.log("****** SAVE SEARCH CALLED"); 
 				saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID);
 				
 				// Create a company variation wrapper and assign numbers to it.
@@ -371,8 +390,6 @@ function getUrlContents(url, type, companyID, companyName) {
 			    });
 
 			    CompanyVariationWrapper.add(callButtonWrapper);
-			    
-			   
 
 				// Go through results and generate call buttons.
 				for (index = 0; index < resultsLength; ++index) {
@@ -419,7 +436,7 @@ function getUrlContents(url, type, companyID, companyName) {
 
 	// Set activity indicator to hide when results are retrived.
 	$.activityIndicator.hide();
-}
+} 
 /*
  * Results Interface.
  * These functions generate the UI for telephone number results.  
@@ -580,22 +597,22 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	return row;
 }
 
-function retriveNumbers() {
+function retriveNumbers() { 
 	yesResults.hide();
 	var node_id = this.id;
 	var idSplitted = node_id.split(',');
 	var companyIDLocal = idSplitted[0];
 	var variationIDLocal = idSplitted[1];
-	// Ti.API.log("company_id", companyIDLocal);
+	Ti.API.log("JKHJHBJHBJH");
 	// Ti.API.log("variation_id", variationIDLocal);
 	var url = rootURL+"/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
 	type = "companyNumbers";
 	companyID = "1";
 	companyName = "test";
 	getUrlContents(url, type);
-}
+} 
 
-/*
+/*gen
  * Error Messages.
  * Generates a message if the application fails to connect to the server.  
  */
@@ -692,74 +709,78 @@ function showHistoryBlock() {
 	searchHistoryResults.show();
 }
 function saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID) {
-	Titanium.API.log("***********","saveSearch init");
-	//searchResultsArray
-	var currentEntries = (Ti.App.Properties.getList(searchStorageName));
-	
-	// Create search entry object.
-	var localSearchObject = {
-	    company_name: resultNodeCompany,
-	    company_id: resultNodeCompanyID,
-	    variation_id: resultNodeCompanyVariationID
-	};
-	
-	if(currentEntries === null || currentEntries === undefined){
-		searchResultsArray.push(localSearchObject); 
-		Ti.App.Properties.setList(searchStorageName, searchResultsArray);
-		// searchResultsArray.push(localSearchObject, currentEntries);
-	}
-	else {
-		searchResultsArray.push(localSearchObject, currentEntries); 
-		Ti.App.Properties.setList(searchStorageName, searchResultsArray);
-	}
-	
-
-	//var currentStorage = Ti.App.Properties.getList(searchStorageName);
-	
-	
-	// Ti.API.log("storageAfterProcessing" + JSON.stringify(Ti.App.Properties.getList(searchStorageName)));
-	// getPreviousHistorySearches();
-	// vodcreateSearchHistoryViewEntry();
-	// getPreviousHistorySearches();	
+	Titanium.API.log("***********saveSearch",resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID);
+	var combinedCompanyIDVariationID = resultNodeCompanyID + resultNodeCompanyVariationID;
+	// etc.
+	var db = Ti.Database.open('userSearches');
+	db.execute('BEGIN'); // begin the transaction
+	//db.execute('DROP TABLE IF EXISTS search_entries');
+	db.execute('CREATE TABLE IF NOT EXISTS search_entries(id INTEGER PRIMARY KEY, company_name TEXT, company_id TEXT, variation_id TEXT);');
+	db.execute('INSERT INTO search_entries (company_name, company_id, variation_id) VALUES (?, ?, ?)', resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID);
+	db.execute('COMMIT'); 
+	db.close();  
+	getPreviousHistorySearches();
 }
  // Create a previous search results view and get entries. . 
 function getPreviousHistorySearches() { 
-	var currentEntries = (Ti.App.Properties.getList(searchStorageName));
-	
-	// If history is set to null
-	if (currentEntries === undefined || currentEntries === null) {
-	    Titanium.API.log("***********","checkIfPreviousHistory currentEntries is NULL");
-	}
-	// Assume history is not null
-	else {
-		Titanium.API.log("***********","checkIfPreviousHistory currentEntries", JSON.stringify(currentEntries));
+	searchHistoryResults.removeAllChildren();
+	Titanium.API.log("***********getPreviousHistorySearches"); 
+	var db = Ti.Database.open('userSearches'); 
+	try {
+	   var searchEntries = db.execute('SELECT DISTINCT company_name,company_id,variation_id FROM search_entries'); 
+		while (searchEntries.isValidRow()) {
+		  var searchCompanyName = searchEntries.fieldByName('company_name');
+		  var searchCompanyID = searchEntries.fieldByName('company_id');
+		  var searchCompanyVariationID = searchEntries.fieldByName('variation_id');
+		  Ti.API.info("****DB SELECT", searchCompanyName + ' ' + searchCompanyID + ' ' + searchCompanyVariationID);
+		  createSearchHistoryViewEntry(searchCompanyName, searchCompanyID, searchCompanyVariationID);
+		  searchEntries.next(); 
+		}
+		searchEntries.close();
 		showHistoryBlock();
-		var currentEntries = (Ti.App.Properties.getList(searchStorageName));
-		var currentEntriesLength = currentEntries.length;
-		var getPreviousHistorySearchesArray = [];
-		Ti.API.info('******getPreviousHistorySearches, currentEntries', JSON.stringify(currentEntries));
-		Ti.API.info('******getPreviousHistorySearches, currentEntriesLength', currentEntriesLength);
-		currentEntries.forEach(function(entry, index) {
-			Ti.API.info(':::createPreviousSearchView, entry', JSON.stringify(entry.company_name));
-			var company_name = entry.company_name;
-			var company_id = entry.company_id;
-			var variation_id = entry.variation_id;
-			
-			// Create View Entry.
-	    	createSearchHistoryViewEntry(index, company_name, company_id, variation_id);
-		});
-	} 
+	}
+	catch(err) { 
+	   Titanium.API.log("***********No database values. ");
+	}
+	
+	// var currentEntries = (Ti.App.Properties.getList(searchStorageName));
+// 	
+	// // If history is set to null
+	// if (currentEntries === undefined || currentEntries === null) {
+	    // Titanium.API.log("***********","checkIfPreviousHistory currentEntries is NULL");
+	// }
+	// // Assume history is not null
+	// else {
+		// Titanium.API.log("***********","checkIfPreviousHistory currentEntries", JSON.stringify(currentEntries));
+		// showHistoryBlock();
+		// var currentEntries = (Ti.App.Properties.getList(searchStorageName));
+		// var currentEntriesLength = currentEntries.length;
+		// var getPreviousHistorySearchesArray = [];
+		// Ti.API.info('******getPreviousHistorySearches, currentEntries', JSON.stringify(currentEntries));
+		// Ti.API.info('******getPreviousHistorySearches, currentEntriesLength', currentEntriesLength);
+		// currentEntries.forEach(function(entry, index) {
+			// Ti.API.info(':::createPreviousSearchView, entry', JSON.stringify(entry.company_name));
+			// var company_name = entry.company_name;
+			// var company_id = entry.company_id;
+			// var variation_id = entry.variation_id;
+// 			
+			// // Create View Entry.
+	    	// createSearchHistoryViewEntry(index, company_name, company_id, variation_id);
+		// });
+	// } 
 	 
 }
+getPreviousHistorySearches(); 
  // Create an entry if search entries exist.
-function createSearchHistoryViewEntry(index, company_name, company_id, variation_id) {
-	Ti.API.log("****createViewEntry:", index, company_name, company_id, variation_id);
+function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
+	Ti.API.log("****createViewEntry:", company_name, company_id, variation_id);
 	//searchHistoryResults.removeAllChildren();
 	//company_name = truncate(company_name);
 	if(company_name !== undefined) {
 		var searchButton = Ti.UI.createView({
 			id: company_id + "," + variation_id,
 			height: Ti.UI.SIZE,
+			width: "94%",
 		    left: "3%", 
 		    bottom: "3%",
 		    backgroundColor:'#5A595B',
@@ -775,7 +796,8 @@ function createSearchHistoryViewEntry(index, company_name, company_id, variation
 		});
 		searchButton.add(searchLabel); 
 		//searchButton.addEventListener('click', retriveVariations); 
-		searchHistoryResults.add(searchButton);
+		searchHistoryResults.add(searchButton); 
+		searchButton.addEventListener('click', retriveNumbers());
 	}
 }
 
@@ -811,4 +833,5 @@ $.index.addEventListener('androidback' , function(e){
  * Page open
  * 
  */
+$.index.add(searchInputBox);
 $.index.open();
