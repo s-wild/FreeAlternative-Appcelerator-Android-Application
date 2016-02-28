@@ -5,7 +5,6 @@ call_buttons = [];
 var first = true;
 rootURL = "http://up637415.co.uk/";
 var counter = [];
-
 // Search details
 searchStorageName = "searchHistory213";
 searchResultsArray = [];
@@ -68,7 +67,7 @@ previousSearchLabel.add(previousSearchLabelText);
 $.index.add(previousSearchLabel);
 var spacingBox = Titanium.UI.createView({
    backgroundColor:'#F3F3F3',
-   top: "210",
+   top: "208",
    width:"92%",
    height:"30"
 });
@@ -107,8 +106,6 @@ var delay = (function(){
 		timer = setTimeout(callback, ms);
 	};
 })();
-// Initialize Function on Load.
-getPreviousHistorySearches();
 /*
  * Search Box Functionality.
  */
@@ -125,8 +122,6 @@ searchInputBox.addEventListener('change', function(e) {
 	var last_element = counter[counter.length - 2];
 	var this_element = searchInput.length;
 	if (searchInput.length == 0) {
-		//getPreviousHistorySearches();
-		//showHistoryBlock();
 		getPreviousHistorySearches();
 		showHistoryBlock();
 		defaultScreenForSearch();
@@ -368,13 +363,13 @@ function getUrlContents(url, type, companyID, companyName) {
 				resultNodeCompany = resultNodes[0].company_name;
 				resultNodeCompanyID = resultNodes[0].company_id;
 				resultNodeCompanyVariation = resultNodes[0].variation;
-				resultNodeCompanyVariationID = resultNodes[0].variation_id;
+				resultNodeVariationID = resultNodes[0].variation_id;
 				resultNodeCompany = resultNodeCompany + " " + resultNodeCompanyVariation;
-				//Ti.API.log("companyNumbers2222222222", resultNodeCompany.length);
+				Ti.API.log("companyNumbers2222222222", JSON.stringify(resultNodes));
 				
 				Ti.API.log("****** GET URL", resultNodeCompany);
 				Ti.API.log("****** SAVE SEARCH CALLED"); 
-				saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID);
+				saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
 				
 				// Create a company variation wrapper and assign numbers to it.
 				CompanyVariationWrapper = createCompanyWrapper(resultNodeCompany, resultNodeCompanyID);
@@ -730,77 +725,62 @@ function defaultScreenForSearch() {
 	instructions.show();
 	searchInputBox.setTop(100);
 	previousSearchLabel.setTop(150); 
-	spacingBox.setTop(220);
-	searchHistoryResults.setTop(210);
+	spacingBox.setTop(210);
+	searchHistoryResults.setTop(220);
 }
-function saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID) {
-	Titanium.API.log("***********saveSearch",resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID);
-	var combinedCompanyIDVariationID = resultNodeCompanyID + resultNodeCompanyVariationID;
+function saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID) {
+	// Send SELECT request to server
+	// check length of result
+	// if length == 0, add result
+	// else don't add
+	//var currentTimeStamp = new Date();;
+	Titanium.API.log("saveSearch() - insert values",resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
 	// etc.
-	var db = Ti.Database.open('userSearches');
-	db.execute('BEGIN'); // begin the transaction
-	//db.execute('DROP TABLE IF EXISTS search_entries');
-	db.execute('CREATE TABLE IF NOT EXISTS search_entries(id INTEGER PRIMARY KEY, company_name TEXT, company_id TEXT, variation_id TEXT);');
-	db.execute('INSERT INTO search_entries (company_name, company_id, variation_id) VALUES (?, ?, ?)', resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID);
-	db.execute('COMMIT'); 
-	db.close();  
+	try {
+		db = Ti.Database.open('userSearches');
+		db.execute('BEGIN'); // begin the transaction
+		//db.execute('DROP TABLE IF EXISTS search_entries'); 
+		db.execute('CREATE TABLE IF NOT EXISTS search_entries(company_name TEXT, company_id INTEGER, variation_id INTEGER, search_time DATETIME, UNIQUE(company_id, variation_id));'); 
+		Titanium.API.log("CHECKKKKKK");   
+		db.execute('INSERT OR IGNORE INTO search_entries (company_name,company_id,variation_id,search_time) VALUES (?,?,?, CURRENT_TIMESTAMP)', resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
+		//db.execute('INSERT OR IGNORE INTO search_entries (company_name, company_id, variation_id, search_time) VALUES (' + resultNodeCompany + ',' + Number(resultNodeCompanyID) + ',' + Number(resultNodeVariationID) +', CURRENT_TIMESTAMP);');
+		db.execute('COMMIT'); 
+		db.close();   
+	}
+	catch(err) { 
+	   Titanium.API.log("saveSearch() - Can't insert values. ");
+	   db.close(); 
+	}
 	getPreviousHistorySearches();
 }
  // Create a previous search results view and get entries. . 
 function getPreviousHistorySearches() { 
 	searchHistoryResults.removeAllChildren();
-	Titanium.API.log("***********getPreviousHistorySearches"); 
-	var db = Ti.Database.open('userSearches'); 
+	Titanium.API.log("888888888888getPreviousHistorySearches");   
 	try {
-	   var searchEntries = db.execute('SELECT DISTINCT company_name,company_id,variation_id FROM search_entries'); 
-		while (searchEntries.isValidRow()) {
-		  var searchCompanyName = searchEntries.fieldByName('company_name');
-		  var searchCompanyID = searchEntries.fieldByName('company_id');
-		  var searchCompanyVariationID = searchEntries.fieldByName('variation_id');
-		  Ti.API.info("****DB SELECT", searchCompanyName + ' ' + searchCompanyID + ' ' + searchCompanyVariationID);
-		  createSearchHistoryViewEntry(searchCompanyName, searchCompanyID, searchCompanyVariationID);
-		  searchEntries.next(); 
+		db = Ti.Database.open('userSearches');
+		var searchResults = db.execute('SELECT company_name,company_id,variation_id,search_time FROM search_entries ORDER BY search_time DESC'); 
+		while (searchResults.isValidRow()) {
+		  Ti.API.info("888888888888DB SELECT" +  searchResults.fieldByName('company_name') + ',' + searchResults.fieldByName('company_id') + ',' + searchResults.fieldByName('variation_id') 
+		  	+ ',' + searchResults.fieldByName('search_time')
+		  );
+		  Ti.API.info("888888888888TEST"); 
+		  createSearchHistoryViewEntry(searchResults.fieldByName('company_name'), searchResults.fieldByName('company_id'), searchResults.fieldByName('variation_id'));
+		  searchResults.next(); 
 		}
-		searchEntries.close();
-		showHistoryBlock();
+		db.close();
 	}
 	catch(err) { 
-	   Titanium.API.log("***********No database values. ");
+	   Titanium.API.log("888888888888getPreviousHistorySearches." , err); 
+	   db.close(); 
 	}
-	
-	// var currentEntries = (Ti.App.Properties.getList(searchStorageName));
-// 	
-	// // If history is set to null
-	// if (currentEntries === undefined || currentEntries === null) {
-	    // Titanium.API.log("***********","checkIfPreviousHistory currentEntries is NULL");
-	// }
-	// // Assume history is not null
-	// else {
-		// Titanium.API.log("***********","checkIfPreviousHistory currentEntries", JSON.stringify(currentEntries));
-		// showHistoryBlock();
-		// var currentEntries = (Ti.App.Properties.getList(searchStorageName));
-		// var currentEntriesLength = currentEntries.length;
-		// var getPreviousHistorySearchesArray = [];
-		// Ti.API.info('******getPreviousHistorySearches, currentEntries', JSON.stringify(currentEntries));
-		// Ti.API.info('******getPreviousHistorySearches, currentEntriesLength', currentEntriesLength);
-		// currentEntries.forEach(function(entry, index) {
-			// Ti.API.info(':::createPreviousSearchView, entry', JSON.stringify(entry.company_name));
-			// var company_name = entry.company_name;
-			// var company_id = entry.company_id;
-			// var variation_id = entry.variation_id;
-// 			
-			// // Create View Entry.
-	    	// createSearchHistoryViewEntry(index, company_name, company_id, variation_id);
-		// });
-	// } 
+	showHistoryBlock(); 
 	 
 }
-getPreviousHistorySearches(); 
+getPreviousHistorySearches();
  // Create an entry if search entries exist.
 function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 	Ti.API.log("****createViewEntry:", company_name, company_id, variation_id);
-	//searchHistoryResults.removeAllChildren();
-	//company_name = truncate(company_name);
 	if(company_name !== undefined) {
 		var searchButton = Ti.UI.createView({
 			id: company_id + "," + variation_id,
@@ -822,7 +802,7 @@ function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 		searchButton.add(searchLabel); 
 		//searchButton.addEventListener('click', retriveVariations); 
 		searchHistoryResults.add(searchButton); 
-		searchButton.addEventListener('click', retriveNumbers());
+		//searchButton.addEventListener('click', retriveNumbers());
 	}
 }
 
