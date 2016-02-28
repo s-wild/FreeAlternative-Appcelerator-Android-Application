@@ -15,7 +15,17 @@ noResults = $.noResults;
 noResults.hide();
 yesResults = $.yesResults;
 yesResults.hide();
-var searchInputBox = Titanium.UI.createSearchBar({
+logo = $.imageLogo; 
+instructions = $.serachTitle;
+
+//searchInputBox = $.searchInputBox;
+//searchInputBox.setHintText('0845...or...Vodafone');
+numberFeedbackDialog = $.rateNumber; 
+
+/*
+ * User Search UI.    
+ */ 
+ var searchInputBox = Titanium.UI.createSearchBar({
 	backgroundColor:'#fff',
     hintTextColor:'#777',
     backgroundFocusedColor: "red",
@@ -29,22 +39,16 @@ var searchInputBox = Titanium.UI.createSearchBar({
     font: { color: "#fff"},
     
 });
+// Focus search on load. 
 searchInputBox.focus();
-//searchInputBox = $.searchInputBox;
-//searchInputBox.setHintText('0845...or...Vodafone');
-numberFeedbackDialog = $.rateNumber; 
-
-/*
- * User Search UI. 
- */ 
 var previousSearchLabel = Titanium.UI.createView({
-   backgroundColor:'#DEDEDE',
-   top: "190",
+   backgroundColor:'#fff',
+   top: "150",
    width:"92%",
    height:"60"
 });
 var previousSearchIcon = Ti.UI.createImageView({
-	image:'search_icon.png',
+	image:'/search_icon.png',
 	left: "15",
 	top: "15",
 	width: "30",
@@ -52,7 +56,7 @@ var previousSearchIcon = Ti.UI.createImageView({
 });  
 var previousSearchLabelText = Ti.UI.createLabel({
 	color:'black',
-	text: 'Previous Searches',
+	text: 'Search History:',
 	textAlign: Ti.UI.TEXT_ALIGNMENT_LEFT,
 	top: "15",
 	left: "60",
@@ -64,13 +68,13 @@ previousSearchLabel.add(previousSearchLabelText);
 $.index.add(previousSearchLabel);
 var spacingBox = Titanium.UI.createView({
    backgroundColor:'#F3F3F3',
-   top: "250",
+   top: "210",
    width:"92%",
    height:"30"
 });
 $.index.add(spacingBox);
 var searchHistoryResults = Ti.UI.createScrollView({
-	top: "260",
+	top: "220",
 	backgroundColor: '#F3F3F3',
 	layout: 'vertical',
 	width:"92%",
@@ -125,11 +129,16 @@ searchInputBox.addEventListener('change', function(e) {
 		//showHistoryBlock();
 		getPreviousHistorySearches();
 		showHistoryBlock();
+		defaultScreenForSearch();
 	}
 
 	if (searchInput.length > 1) {
 		hideHistoryBlock(); 
-		$.activityIndicator.show();
+		rearrangeScreenForSearch();
+		
+		if(searchInput.length > 2){ 
+			$.activityIndicator.show();
+		}
 		// Delay function will prevent bombardment of requests to the server.
 		delay(function(){
 			//// Ti.API.log("Time elapsed!");
@@ -142,7 +151,7 @@ searchInputBox.addEventListener('change', function(e) {
 				if (checkStringNumber == true) {
 					// Adjust positions for number display.
 					resultsView.setTop(230);
-					yesResults.setTop(190);
+					yesResults.setTop(60);
 					//// Ti.API.log("You have entered a number.");
 					//// Ti.API.log("it's a premium number.");
 					type = "search_by_number";
@@ -152,8 +161,8 @@ searchInputBox.addEventListener('change', function(e) {
 				else {
 					//// Ti.API.log("You have entered a name.");
 					// Adjust positions for company display.
-					resultsView.setTop(230);
-					yesResults.setTop(190);
+					resultsView.setTop(100);
+					yesResults.setTop(70);
 					// Adjust URL to match name search.
 					var url = rootURL + "/json/company-variations?company_name=" + searchInput;
 					// Define type of search
@@ -371,7 +380,7 @@ function getUrlContents(url, type, companyID, companyName) {
 				CompanyVariationWrapper = createCompanyWrapper(resultNodeCompany, resultNodeCompanyID);
 				resultsView.add(CompanyVariationWrapper);
 				resultsView.show(); 
-				resultsView.setTop(190);
+				resultsView.setTop(70);
 
 				resultNodeCompanyLength = resultNodeCompany.length;
 				top_spacing = 40;
@@ -528,7 +537,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 		backgroundColor:background
  	});
  	var call_image = Ti.UI.createImageView({
-	  image:'call_icon.png',
+	  image:'/call_icon.png',
 	  left: "25%",
 	  width: "30",
 	  height: "30"
@@ -548,7 +557,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 			starImageLeftMargin = "16%";
 		}
 		var star_image = Ti.UI.createImageView({
-		  image:'star.png',
+		  image:'/star.png',
 		  left: starImageLeftMargin
 		});
 
@@ -706,7 +715,23 @@ function showHistoryBlock() {
 	previousSearchIcon.show();
 	previousSearchLabelText.show();
 	spacingBox.show();
-	searchHistoryResults.show();
+	searchHistoryResults.show(); 
+}
+function rearrangeScreenForSearch() {
+	logo.hide();
+	instructions.hide();
+	searchInputBox.setTop(8);
+	previousSearchLabel.setTop(60); 
+	spacingBox.setTop(120);
+	searchHistoryResults.setTop(130);
+}
+function defaultScreenForSearch() {
+	logo.show();
+	instructions.show();
+	searchInputBox.setTop(100);
+	previousSearchLabel.setTop(150); 
+	spacingBox.setTop(220);
+	searchHistoryResults.setTop(210);
 }
 function saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID) {
 	Titanium.API.log("***********saveSearch",resultNodeCompany, resultNodeCompanyID, resultNodeCompanyVariationID);
@@ -801,7 +826,7 @@ function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 	}
 }
 
-/*
+/* 
  * Helper functions
  * These functions are used continuously through the old. 
  */

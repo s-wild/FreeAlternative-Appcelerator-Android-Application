@@ -49,7 +49,7 @@
     <mobileweb>
         <precache/>
         <splash>
-            <enabled>true</enabled>
+            <enabled>false</enabled>
             <inline-css-images>true</inline-css-images>
         </splash>
         <theme>default</theme>
