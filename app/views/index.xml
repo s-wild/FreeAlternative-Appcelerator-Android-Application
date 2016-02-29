@@ -4,7 +4,7 @@
 		<Label id="serachTitle" top="80">Search for an alternative telephone number.</Label>
 		<!-- <SearchBar id="searchInputBox" color="#336699" top="120" left="10" width="94%" height="60" hintText="blah..."/> --> -->
 		
-		<Label id="noResults" top="190">Sorry, no results.</Label>
+		<Label id="noResults" top="80">Sorry, no results.</Label>
 		<Label id="yesResults" top="60">Results:</Label>
 		<AlertDialog id="rateNumber" title="Rate your call"
             message="<b>Rate the number</b>" cancel="1">
