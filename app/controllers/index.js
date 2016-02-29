@@ -1,13 +1,9 @@
 /*
  * Global Variables
  */
-call_buttons = [];
-var first = true;
 rootURL = "http://up637415.co.uk/";
 var counter = [];
 // Search details
-searchStorageName = "searchHistory213";
-searchResultsArray = [];
 searchHistoryFlag = true;
 
 // Get displays on load, hide if necessary.
@@ -352,7 +348,7 @@ function callNumber() {
 		action: Ti.Android.ACTION_CALL,
 		data: call
 	});
-	//Ti.Android.currentActivity.startActivity(intent);
+	Ti.Android.currentActivity.startActivity(intent);
 	try {
 		callDB = Ti.Database.open('userSearches');
 		callDB.execute('BEGIN'); // begin the transaction
