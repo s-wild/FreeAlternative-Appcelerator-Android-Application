@@ -8,6 +8,7 @@ var counter = [];
 // Search details
 searchStorageName = "searchHistory213";
 searchResultsArray = [];
+searchHistoryFlag = true;
 
 // Get displays on load, hide if necessary.
 noResults = $.noResults;
@@ -91,10 +92,11 @@ $.starwidget.init();
 
 var resultsView = Ti.UI.createScrollView({
 	top:180,
-	layout: 'vertical'
-});
+	layout: 'vertical' 
+}); 
 
 $.index.add(resultsView);
+resultsView.hide();
 
 /*
  * Delay function for when user types.
@@ -125,9 +127,11 @@ searchInputBox.addEventListener('change', function(e) {
 		getPreviousHistorySearches();
 		showHistoryBlock();
 		defaultScreenForSearch();
+		searchHistoryFlag = true;
 	}
 
 	if (searchInput.length > 1) {
+		searchHistoryFlag = false;
 		hideHistoryBlock(); 
 		rearrangeScreenForSearch();
 		
@@ -353,7 +357,6 @@ function getUrlContents(url, type, companyID, companyName) {
 				}
 			}
 			if (type == "companyNumbers") {
-				resultsView.removeAllChildren();
 
 				// Get Response object telephone numbers.
 				resultNodes = json.telephone_numbers;
@@ -374,8 +377,17 @@ function getUrlContents(url, type, companyID, companyName) {
 				// Create a company variation wrapper and assign numbers to it.
 				CompanyVariationWrapper = createCompanyWrapper(resultNodeCompany, resultNodeCompanyID);
 				resultsView.add(CompanyVariationWrapper);
-				resultsView.show(); 
-				resultsView.setTop(70);
+				hideHistoryBlock();
+				if (searchHistoryFlag == true) {
+					rearrangeScreenForSearch(); 
+					Ti.API.log("****** searchHistoryFlag is true"); 
+					resultsView.show();
+					resultsView.setTop(70);
+				}
+				else {
+					resultsView.setTop(70);
+					Ti.API.log("****** searchHistoryFlag is false"); 
+				}
 
 				resultNodeCompanyLength = resultNodeCompany.length;
 				top_spacing = 40;
@@ -601,12 +613,13 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	return row;
 }
 
-function retriveNumbers() { 
+function retriveNumbers() {
+	resultsView.removeAllChildren();
 	yesResults.hide();
 	var node_id = this.id;
 	var idSplitted = node_id.split(',');
 	var companyIDLocal = idSplitted[0];
-	var variationIDLocal = idSplitted[1];
+	var variationIDLocal = idSplitted[1]; 
 	Ti.API.log("JKHJHBJHBJH");
 	// Ti.API.log("variation_id", variationIDLocal);
 	var url = rootURL+"/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
@@ -615,8 +628,7 @@ function retriveNumbers() {
 	companyName = "test";
 	getUrlContents(url, type);
 } 
-
-/*gen
+/*
  * Error Messages.
  * Generates a message if the application fails to connect to the server.  
  */
@@ -800,9 +812,8 @@ function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 		    font: { fontSize:24 }
 		});
 		searchButton.add(searchLabel); 
-		//searchButton.addEventListener('click', retriveVariations); 
+		searchButton.addEventListener('click', retriveNumbers);  
 		searchHistoryResults.add(searchButton); 
-		//searchButton.addEventListener('click', retriveNumbers());
 	}
 }
 

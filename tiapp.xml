@@ -6,11 +6,11 @@
     <publisher>simonwild</publisher>
     <url>http://www.freealternative.co.uk</url>
     <description>Find phone telephone numbers using FreeAlternative.</description>
-    <copyright>2015 by simonwild</copyright>
+    <copyright>2015 by Simon Wild</copyright>
     <icon>appicon.png</icon>
     <fullscreen>false</fullscreen>
     <navbar-hidden>false</navbar-hidden>
-    <analytics>true</analytics>
+    <analytics>false</analytics>
     <guid>e4d48f65-4101-4caa-9111-09b250867e16</guid>
     <property name="ti.ui.defaultunit" type="string">dp</property>
     <ios>
