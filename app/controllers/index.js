@@ -18,8 +18,6 @@ yesResults.hide();
 logo = $.imageLogo; 
 instructions = $.serachTitle;
 
-//searchInputBox = $.searchInputBox;
-//searchInputBox.setHintText('0845...or...Vodafone');
 numberFeedbackDialog = $.rateNumber; 
 
 /*
@@ -198,8 +196,150 @@ searchInputBox.addEventListener('change', function(e) {
 /*
  * Call now button.
  */
-function callButton(id, call_button_number) {
-	//Ti.API.info('Call function id: ' + this.id);
+function numberDetails(id, call_button_number) {
+	var currentID = this.id;
+	var idSplitted = currentID.split('|');
+	var number = idSplitted[0];
+	var nid = idSplitted[1];
+	
+	var numberWindow = Ti.UI.createWindow({
+    	fullscreen: false,
+    	backgroundColor: "#fff"
+	});
+	
+	// Title object.
+	var numberTitle = Ti.UI.createLabel({
+		color:'black',
+		text: "Number: " + number,
+		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+		top: "15",
+		left: "0",
+		width: "100%", height: 30,
+		font: { fontSize:23 }
+	});
+	
+	// Call button objects.
+	var callButton = Titanium.UI.createView({
+	   backgroundColor:'#4993DF',
+	   top: "70",
+	   width:"92%",
+	   height:"60",
+	   id: currentID
+	});
+	var callLabel = Ti.UI.createLabel({
+		color:'#fff',
+		text: "Call This Number",
+		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+		top: "15",
+		left: "0",
+		width: "100%", height: 30,
+		font: { fontSize:23 }
+	});
+	callButton.addEventListener('click', callNumber);
+	callButton.add(callLabel);
+	
+	// Get price objects.
+	var getPrice = Titanium.UI.createView({
+	   backgroundColor:'#4993DF',
+	   top: "150",
+	   width:"92%",
+	   height:"60",
+	   id: currentID
+	});
+	var getPriceLabel = Ti.UI.createLabel({
+		color:'#fff',
+		text: "Pricing Information",
+		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+		top: "15",
+		left: "0",
+		width: "100%", height: 30,
+		font: { fontSize:23 }
+	});
+	getPrice.add(getPriceLabel);
+	
+	// Add to contacts objects.
+	var contactsAdd = Titanium.UI.createView({
+	   backgroundColor:'#4993DF',
+	   top: "230",
+	   width:"92%",
+	   height:"60",
+	   id: currentID
+	});
+	var contactsAddLabel = Ti.UI.createLabel({
+		color:'#fff',
+		text: "Add to Contacts.",
+		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+		top: "15",
+		left: "0",
+		width: "100%", height: 30,
+		font: { fontSize:23 }
+	});
+	contactsAdd.add(contactsAddLabel);
+	contactsAdd.addEventListener('click', saveAsContact);
+	
+	// Rating objects.
+	var leaveRating = Titanium.UI.createView({
+	   backgroundColor:'#A7A5A4',
+	   top: "310",
+	   width:"92%",
+	   height:"60",
+	   id: currentID
+	});
+	var ratingLabel = Ti.UI.createLabel({
+		color:'#fff',
+		text: "Leave a rating",
+		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+		top: "15",
+		left: "0",
+		width: "100%", height: 30,
+		font: { fontSize:23 }
+	});
+	// Connect to SQL, check if the number has been previous called to enable rating button.
+	try {
+		callHistoryDB = Ti.Database.open('userSearches');
+		var callResults = callHistoryDB.execute('SELECT phone_number FROM call_entries'); 
+		while (callResults.isValidRow()) {
+			var callResult = callResults.fieldByName('phone_number');
+		  	Ti.API.info("111111 UerCalls" +  callResult + number);
+		  	if (callResult == number) {
+		  		Ti.API.info("There is a match!!!");
+		  		leaveRating.setBackgroundColor("#3096E0");
+		  		//leaveRating.addEventListener(numberFeedback);
+		  		leaveRating.addEventListener('click', function(e){
+					numberFeedback(idSplitted);
+				});
+		  	}
+		  	else {
+		  		Ti.API.info("No match...");
+		  	}
+		  Ti.API.info("CHECK CALL HISTORY"); 
+		  callResults.next(); 
+		}
+		callHistoryDB.close();
+	}
+	catch(err) { 
+	   Titanium.API.log("111111 USerCalls." , err); 
+	   callHistoryDB.close();  
+	}
+	//leaveRating.addEventListener('click', callNumber);
+	leaveRating.add(ratingLabel);
+	
+	// Add declared objects to Window.
+	numberWindow.add(numberTitle);
+	numberWindow.add(callButton);
+	numberWindow.add(getPrice);
+	numberWindow.add(contactsAdd);
+	numberWindow.add(leaveRating);
+	
+	// Open Window with animation effect.
+	numberWindow.open({
+	    activityEnterAnimation: Ti.Android.R.anim.fade_in,
+	    activityExitAnimation: Ti.Android.R.anim.fade_out
+	});
+	
+}
+function callNumber() { 
+	Ti.API.info('Call function id: ' + this.id);
 	var currentID = this.id;
 	var idSplitted = currentID.split('|');
 	var number = idSplitted[0];
@@ -212,7 +352,23 @@ function callButton(id, call_button_number) {
 		action: Ti.Android.ACTION_CALL,
 		data: call
 	});
-	Ti.Android.currentActivity.startActivity(intent);
+	//Ti.Android.currentActivity.startActivity(intent);
+	try {
+		callDB = Ti.Database.open('userSearches');
+		callDB.execute('BEGIN'); // begin the transaction
+		//db.execute('DROP TABLE IF EXISTS search_entries'); 
+		callDB.execute('CREATE TABLE IF NOT EXISTS call_entries(phone_number TEXT, UNIQUE(phone_number));'); 
+		Titanium.API.log("CHECKKKKKK");   
+		callDB.execute('INSERT OR IGNORE INTO call_entries (phone_number) VALUES (?)', number);
+		//db.execute('INSERT OR IGNORE INTO search_entries (company_name, company_id, variation_id, search_time) VALUES (' + resultNodeCompany + ',' + Number(resultNodeCompanyID) + ',' + Number(resultNodeVariationID) +', CURRENT_TIMESTAMP);');
+		callDB.execute('COMMIT'); 
+		callDB.close();
+		Titanium.API.log("Entered Call into DB.");   
+	}
+	catch(err) { 
+	   Titanium.API.log("saveSearch() - Can't insert values. ");
+	   callDB.close(); 
+	}
 }
 /*
  * Save as contact.
@@ -606,7 +762,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	// Add event listener if iteration request is for telephone numbers.
 	if(typeOfAction == "numbersRequest") {
 		// Ti.API.log("ids on button", call_buttons.id);
-		call_buttons.addEventListener('click', callButton);
+		call_buttons.addEventListener('click', numberDetails);
 		call_buttons.addEventListener('longpress', saveAsContact);
 	}
 	row.add(call_buttons);
