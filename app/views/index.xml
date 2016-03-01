@@ -5,7 +5,7 @@
 		<!-- <SearchBar id="searchInputBox" color="#336699" top="120" left="10" width="94%" height="60" hintText="blah..."/> --> -->
 		
 		<Label id="noResults" top="80">Sorry, no results.</Label>
-		<Label id="yesResults" top="60">Results:</Label>
+		<Label id="yesResults" top="80">Results:</Label>
 		<AlertDialog id="rateNumber" title="Rate your call"
             message="<b>Rate the number</b>" cancel="1">
 			<Widget id="starwidget" src="starrating" max='5' initialRating='0' />
@@ -17,4 +17,4 @@
         <!-- Define the styling properties in the TSS file -->
         <ActivityIndicator id="activityIndicator" top="100"/>
 	</Window> 
-</Alloy>
+</Alloy> 

@@ -34,7 +34,9 @@ numberFeedbackDialog = $.rateNumber;
     
 });
 // Focus search on load. 
-searchInputBox.focus();
+$.index.addEventListener("focus",function(e){
+	searchInputBox.focus(); 
+}); 
 var previousSearchLabel = Titanium.UI.createView({
    backgroundColor:'#fff',
    top: "150",
@@ -143,8 +145,8 @@ searchInputBox.addEventListener('change', function(e) {
 				var checkStringNumber = IsNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
 				if (checkStringNumber == true) {
 					// Adjust positions for number display.
-					resultsView.setTop(230);
-					yesResults.setTop(60);
+					resultsView.setTop(100);
+					yesResults.setTop(70);
 					//// Ti.API.log("You have entered a number.");
 					//// Ti.API.log("it's a premium number.");
 					type = "search_by_number";
