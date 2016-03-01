@@ -15,6 +15,7 @@ logo = $.imageLogo;
 instructions = $.serachTitle;
 
 numberFeedbackDialog = $.rateNumber; 
+priceDialog = $.numberPriceInformation;
 
 /*
  * User Search UI.    
@@ -145,7 +146,7 @@ searchInputBox.addEventListener('change', function(e) {
 				var checkStringNumber = IsNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
 				if (checkStringNumber == true) {
 					// Adjust positions for number display.
-					resultsView.setTop(100);
+					resultsView.setTop(150);
 					yesResults.setTop(70);
 					//// Ti.API.log("You have entered a number.");
 					//// Ti.API.log("it's a premium number.");
@@ -253,6 +254,7 @@ function numberDetails(id, call_button_number) {
 		width: "100%", height: 30,
 		font: { fontSize:23 }
 	});
+	getPrice.addEventListener('click', getNumberPrice);
 	getPrice.add(getPriceLabel);
 	
 	// Add to contacts objects.
@@ -335,6 +337,50 @@ function numberDetails(id, call_button_number) {
 	    activityExitAnimation: Ti.Android.R.anim.fade_out
 	});
 	
+}
+function getNumberPrice(){
+	var currentID = this.id;
+	var idSplitted = currentID.split('|');
+	var number = idSplitted[0];
+	var nid = idSplitted[1];
+	var numberType = getNumberType(number);
+	Titanium.API.log("numberPrice9999999999" , numberType); 
+	// Set message for feedback dialog popup. Include number to tell user what number they are rating.
+
+	var priceWindow = Ti.UI.createWindow({
+    	fullscreen: false,
+    	backgroundColor: "#fff"
+	});
+	var priceLabel = Ti.UI.createLabel({
+		color:'#000',
+		text: "Pricing Information for " + number,
+		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+		top: "15",
+		left: "3%",
+		width: "94%",
+		font: { fontSize:23 }
+	});
+	var numberTypeLabel = Ti.UI.createLabel({
+		color:'#000',
+		text: numberType + " Detected... More to come! Need to connect to server with detected value and operator name to get pricing information!",
+		textAlign: Ti.UI.TEXT_ALIGNMENT_LEFT,
+		top: "80",
+		wordWrap : true, 
+		left: "3%",
+		width: "94%",
+		font: { fontSize:23 }
+	});
+	priceWindow.add(priceLabel);
+	priceWindow.add(numberTypeLabel);
+	priceWindow.open({
+	    activityEnterAnimation: Ti.Android.R.anim.fade_in,
+	    activityExitAnimation: Ti.Android.R.anim.fade_out
+	});
+
+	// Add event listener for when submit button is clicked.
+	// numberFeedbackDialog.addEventListener('click', function(e){
+		// postRatingToServer(e, nodeID);
+ 	// });
 }
 function callNumber() { 
 	Ti.API.info('Call function id: ' + this.id);
@@ -994,6 +1040,23 @@ function truncate(string){
    else
       return string;
 };
+function getNumberType(number) {
+	number_type = "na"; 
+    switch (true) {
+		case (number.indexOf("0870") > -1):
+			number_type = "0870";
+			return number_type;
+		  break;
+		case (number.indexOf("0800") > -1):
+		    number_type = "0800";
+		    return number_type;
+		  break;
+		case (number.indexOf("0845") > -1):
+		    number_type = "0845";
+		    return number_type;
+		  break;
+	}
+}
 // Back button handler.
 $.index.addEventListener('androidback' , function(e){
     searchInputBox.value = "";
