@@ -1,7 +1,7 @@
  <Alloy>
 	<Window class="container" theme="mytheme">
-		<ImageView id="imageLogo" image="/logo.png" top="20" width="92%"/>
-		<Label id="serachTitle" top="80">Search for an alternative telephone number.</Label>
+		<ImageView id="imageLogo" image="/logo.png" top="15" width="92%"/>
+		<Label id="serachTitle" top="75">Search for an alternative telephone number.</Label>
 		<!-- <SearchBar id="searchInputBox" color="#336699" top="120" left="10" width="94%" height="60" hintText="blah..."/> --> -->
 		
 		<Label id="noResults" top="80">Sorry, no results.</Label>

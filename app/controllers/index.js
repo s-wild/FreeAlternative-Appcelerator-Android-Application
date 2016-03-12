@@ -1,3 +1,5 @@
+
+
 /*
  * Global Variables
  */
@@ -201,89 +203,129 @@ function numberDetails(id, call_button_number) {
 	var number = idSplitted[0];
 	var nid = idSplitted[1];
 	
-	var numberWindow = Ti.UI.createWindow({
-    	fullscreen: false,
-    	backgroundColor: "#fff"
+	// Create modal box to display results (global variable to close after action).
+	modalBox = Ti.UI.createWindow({
+	    backgroundColor : 'transparent',
+	    statusBarHidden:true,
+	    tabBarHidden:true,
+	    navBarHidden:true
 	});
 	
-	// Title object.
-	var numberTitle = Ti.UI.createLabel({
-		color:'black',
-		text: "Number: " + number,
-		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
-		top: "15",
-		left: "0",
-		width: "100%", height: 30,
-		font: { fontSize:23 }
+	// Create wrapper, background and container view. 
+	var wrapperView    = Ti.UI.createView(); // Full screen
+	var backgroundView = Ti.UI.createView({  // Also full screen
+	    backgroundColor : '#000',
+	    opacity         : 0.5
+	});
+	var containerView  = Ti.UI.createView({  // Set height appropriately
+	    height          : 400,
+	    backgroundColor : '#FFF',
+	    width: "90%"
 	});
 	
-	// Call button objects.
+	/*
+	 * Add number buttons
+	 */
+	var startingTopPosition = 10;
+	var buttonWidth = "94%";
+	var buttonHeight = 60;
+	var iconWidth = 30;
+	var iconHeight = 30;
+	var iconLeftSpacing = "30%";
+	
 	var callButton = Titanium.UI.createView({
 	   backgroundColor:'#4993DF',
-	   top: "70",
-	   width:"92%",
-	   height:"60",
+	   top: startingTopPosition,
+	   width: buttonWidth,
+	   height: buttonHeight,
 	   id: currentID
 	});
-	var callLabel = Ti.UI.createLabel({
+	var callButtonImage = Ti.UI.createImageView({
+	  image:'/outgoing_call_icon.png',
+	  left: iconLeftSpacing,
+	  width: iconWidth,
+	  height: iconHeight
+	});
+	// Add label to call button.
+	callButton.add(callButtonImage);
+	// Call button label.
+	var callButtonLabel = Ti.UI.createLabel({
 		color:'#fff',
-		text: "Call This Number",
+		text: "Call",
 		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
 		top: "15",
 		left: "0",
 		width: "100%", height: 30,
 		font: { fontSize:23 }
 	});
-	callButton.addEventListener('click', callNumber);
-	callButton.add(callLabel);
-	
+	// Add label to call button.
+	callButton.add(callButtonLabel);
 	// Get price objects.
-	var getPrice = Titanium.UI.createView({
+	var getPriceButton = Titanium.UI.createView({
 	   backgroundColor:'#4993DF',
-	   top: "150",
-	   width:"92%",
-	   height:"60",
+	   top: startingTopPosition + 70,
+	   width: buttonWidth,
+	   height: buttonHeight,
 	   id: currentID
 	});
+	var getPriceImage = Ti.UI.createImageView({
+	  image:'/call_price_icon.png',
+	  left: "12%",
+	  width: iconWidth,
+	  height: iconHeight
+	});
+	// Add label to call button.
+	getPriceButton.add(getPriceImage);
 	var getPriceLabel = Ti.UI.createLabel({
 		color:'#fff',
 		text: "Pricing Information",
 		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
 		top: "15",
-		left: "0",
+		left: "6%",
 		width: "100%", height: 30,
 		font: { fontSize:23 }
 	});
-	getPrice.addEventListener('click', getNumberPrice);
-	getPrice.add(getPriceLabel);
-	
-	// Add to contacts objects.
-	var contactsAdd = Titanium.UI.createView({
+	// Add label to get price button.
+	getPriceButton.add(getPriceLabel);
+	// Add to contacts button.
+	var contactsAddButton = Titanium.UI.createView({
 	   backgroundColor:'#4993DF',
-	   top: "230",
-	   width:"92%",
-	   height:"60",
+	   top: startingTopPosition + 140,
+	   width: buttonWidth,
+	   height: buttonHeight,
 	   id: currentID
+	});
+	var contactsAddImage = Ti.UI.createImageView({
+	  image:'/add_contact_icon.png',
+	  left: "16%",
+	  width: iconWidth,
+	  height: iconHeight
 	});
 	var contactsAddLabel = Ti.UI.createLabel({
 		color:'#fff',
 		text: "Add to Contacts.",
 		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
 		top: "15",
-		left: "0",
+		left: "6%",
 		width: "100%", height: 30,
 		font: { fontSize:23 }
 	});
-	contactsAdd.add(contactsAddLabel);
-	contactsAdd.addEventListener('click', saveAsContact);
+	contactsAddButton.add(contactsAddImage);
+	contactsAddButton.add(contactsAddLabel);
 	
-	// Rating objects.
-	var leaveRating = Titanium.UI.createView({
+	// Ratings Button + check to see if existing rating exists. It not, disable button.
+	var leaveRatingButton = Titanium.UI.createView({
 	   backgroundColor:'#A7A5A4',
-	   top: "310",
-	   width:"92%",
-	   height:"60",
+	     top: startingTopPosition + 210,
+	   width: buttonWidth,
+	   height: buttonHeight,
 	   id: currentID
+	});
+	var ratingImage = Ti.UI.createImageView({
+	  image:'/rating_icon.png',
+	  left: "16%",
+	  width: iconWidth,
+	  height: iconHeight
 	});
 	var ratingLabel = Ti.UI.createLabel({
 		color:'#fff',
@@ -303,9 +345,9 @@ function numberDetails(id, call_button_number) {
 		  	Ti.API.info("111111 UerCalls" +  callResult + number);
 		  	if (callResult == number) {
 		  		Ti.API.info("There is a match!!!");
-		  		leaveRating.setBackgroundColor("#3096E0");
+		  		leaveRatingButton.setBackgroundColor("#3096E0");
 		  		//leaveRating.addEventListener(numberFeedback);
-		  		leaveRating.addEventListener('click', function(e){
+		  		leaveRatingButton.addEventListener('click', function(e){
 					numberFeedback(idSplitted);
 				});
 		  	}
@@ -322,20 +364,60 @@ function numberDetails(id, call_button_number) {
 	   callHistoryDB.close();  
 	}
 	//leaveRating.addEventListener('click', callNumber);
-	leaveRating.add(ratingLabel);
+	leaveRatingButton.add(ratingImage);
+	leaveRatingButton.add(ratingLabel);
 	
-	// Add declared objects to Window.
-	numberWindow.add(numberTitle);
-	numberWindow.add(callButton);
-	numberWindow.add(getPrice);
-	numberWindow.add(contactsAdd);
-	numberWindow.add(leaveRating);
 	
-	// Open Window with animation effect.
-	numberWindow.open({
-	    activityEnterAnimation: Ti.Android.R.anim.fade_in,
-	    activityExitAnimation: Ti.Android.R.anim.fade_out
+	// Add event listeners to buttons.
+	callButton.addEventListener('click', callNumber);
+	getPriceButton.addEventListener('click', getNumberPrice);
+	contactsAddButton.addEventListener('click', saveAsContact);
+	
+	// Add buttons to container view. 
+	containerView.add(callButton);
+	containerView.add(getPriceButton);
+	containerView.add(contactsAddButton);
+	containerView.add(leaveRatingButton);
+	
+	// Close button.
+	var closeButton    = Ti.UI.createButton({
+	    title  : 'Close',
+	    bottom : 40
 	});
+	// Add event listeners to close modal box.
+	closeButton.addEventListener('click', function () {
+	    modalBox.close();
+	});
+	backgroundView.addEventListener('click', function () {
+	    modalBox.close();
+	});
+	
+	//containerView.add(someLabel);
+	containerView.add(closeButton);
+	
+	wrapperView.add(backgroundView);
+	wrapperView.add(containerView);
+	
+	modalBox.add(wrapperView);
+	//myModal.open({fullscreen:true});
+	modalBox.open({modal:true});
+
+
+
+
+// 	
+	// // Add declared objects to Window.
+	// numberWindow.add(numberTitle);
+	// numberWindow.add(callButton);
+	// numberWindow.add(getPrice);
+	// numberWindow.add(contactsAdd);
+	// numberWindow.add(leaveRating);
+// 	
+	// // Open Window with animation effect.
+	// numberWindow.open({
+	    // activityEnterAnimation: Ti.Android.R.anim.fade_in,
+	    // activityExitAnimation: Ti.Android.R.anim.fade_out
+	// });
 	
 }
 function getNumberPrice(){
@@ -383,6 +465,8 @@ function getNumberPrice(){
  	// });
 }
 function callNumber() { 
+	// Close modal box after button is pressed.
+	modalBox.close();
 	Ti.API.info('Call function id: ' + this.id);
 	var currentID = this.id;
 	var idSplitted = currentID.split('|');
@@ -855,6 +939,8 @@ function serverConnectionError(){
  */
 // Generates the feedback box after user dials a number.
 function numberFeedback(idSplitted){
+	// Close modal box after action.
+	modalBox.close();
 	delay(function(){
 
 		// Set rating to unset to prevent incorrect ratings for multiple calls.
