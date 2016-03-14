@@ -427,41 +427,22 @@ function getNumberPrice(){
     	fullscreen: false,
     	backgroundColor: "#fff"
 	});
-	// Create activity loader. 
-	activityIndicatorPricing = Ti.UI.createActivityIndicator({
-		color: '#000',
-		  font: {fontFamily:'Helvetica Neue', fontSize:26, fontWeight:'bold'},
-		  message: 'Loading...',
-		  style: Titanium.UI.ActivityIndicatorStyle.BIG,
-		  top:"40%",
-		  left: "15%",
-		  height:Ti.UI.SIZE,
-		  width:Ti.UI.SIZE
-	});
-	priceWindow.add(activityIndicatorPricing);
-	// eventListeners must always be loaded before the event is likely to fire
-	// hence, the open() method must be positioned before the window is opened
-	priceWindow.addEventListener('open', function (e) {
-	  activityIndicatorPricing.show();
-	  // do some work that takes 6 seconds
-	  // ie. replace the following setTimeout block with your code
-	});
 
+	// Open Price Window.
 	priceWindow.open({
 	    activityEnterAnimation: Ti.Android.R.anim.fade_in,
 	    activityExitAnimation: Ti.Android.R.anim.fade_out
 	});
+	
+	// 
 	var currentID = this.id;
 	var idSplitted = currentID.split('|');
 	var number = idSplitted[0];
 	var nid = idSplitted[1];
 	var numberType = getNumberType(number);
 	var numberPrice = getPrice(numberType);
-	
-	Titanium.API.log("numberPrice9999999999" , numberType); 
-	// Set message for feedback dialog popup. Include number to tell user what number they are rating.
 
-	
+	// Add title to top of page showing number.
 	var priceLabel = Ti.UI.createLabel({
 		color:'#000',
 		text: "Pricing Information for " + number,
@@ -471,25 +452,7 @@ function getNumberPrice(){
 		width: "94%",
 		font: { fontSize:23 }
 	});
-	// var numberTypeLabel = Ti.UI.createLabel({
-		// color:'#000',
-		// //text: numberType + " Detected... More to come! Need to connect to server with detected value and operator name to get pricing information!",
-		// text: "+",
-		// textAlign: Ti.UI.TEXT_ALIGNMENT_LEFT,
-		// top: "80",
-		// wordWrap : true, 
-		// left: "3%",
-		// width: "94%",
-		// font: { fontSize:23 }
-	// });
 	priceWindow.add(priceLabel);
-	// priceWindow.add(numberTypeLabel);
-	
-
-	// Add event listener for when submit button is clicked.
-	// numberFeedbackDialog.addEventListener('click', function(e){
-		// postRatingToServer(e, nodeID);
- 	// });
 }
 function callNumber() { 
 	// Close modal box after button is pressed.
@@ -1173,7 +1136,6 @@ function getPrice(numberType) {
 	var companyNamesPrice = [];
 	var filtered_results_companies = [];
 	
-
 	if (numberType == "na") {
 		Ti.API.log("::::::::::getPrice", "Number not found.");
 	}
@@ -1183,19 +1145,12 @@ function getPrice(numberType) {
 		 var client = Ti.Network.createHTTPClient({
 		     // function called when the response data is available
 		     onload : function(e) {
-		         Ti.API.info("Received text: " + this.responseText);
-		         //alert('success');
-		        scrollViewPrices = Ti.UI.createScrollView({
-					 showVerticalScrollIndicator: true,
-					 showHorizontalScrollIndicator: true,
-					 top: "20%",
-					 height: '80%',
-					 width: '94%',
-					 backgroundColor: "#EEEEEE"
-				}); 
-		         var json = JSON.parse(this.responseText);
-		         resultNodes = json.prices;
-				//Ti.API.log("resultNodes", JSON.stringify(resultNodes));
+		        
+		        Ti.API.info("Received text: " + this.responseText);
+
+		        var json = JSON.parse(this.responseText);
+		        resultNodes = json.prices;
+
 				resultsLength = resultNodes.length;
 				Ti.API.info("resultsLength ", resultsLength);
 				for (index = 0; index < resultsLength; ++index) {
@@ -1203,12 +1158,9 @@ function getPrice(numberType) {
 					var numberType = resultNodes[index].number_type;
 					var accessCharge = resultNodes[index].access_charge;
 					var phonePlan = resultNodes[index].plan;
-					
 					companyNamesPrice.push({company: companyName, number_type: numberType, access_charge: accessCharge, phone_plan: phonePlan});
 				}
 
-				
-	
 				// Group results based on company name.
 				grouped = {};
 				
@@ -1216,60 +1168,62 @@ function getPrice(numberType) {
 				    grouped[a.company] = grouped[a.company] || [];
 				    grouped[a.company].push({ number_type: a.number_type, access_charge: a.access_charge, phone_plan: a.phone_plan });
 				});
+				
 				groupedResults = JSON.stringify(grouped);
 				groupedResultsLength = Object.keys(grouped).length;
 				Ti.API.info("companyNamesPricegrouped ", JSON.stringify(grouped));
+				
+				var companyData = [];
 				// Loop over companies in grouped results.
 				for (var key in grouped) {
 					var indexCompany = Object.keys(grouped).indexOf(key);
-					// createPriceView(index, key);
 					var groupKey = grouped[key];
 					
-					var companyPriceLabel = Ti.UI.createLabel({
-					    color: '#000',
-					    text: key,
-					    top: indexCompany*80 + 10,
-					    font: { fontSize:28 }
-					});
-					scrollViewPrices.add(companyPriceLabel);
-					// Loop over details for each company. 
-					for (index = 0; index < groupKey.length; ++index) {
-						Ti.API.info("groupKeyIndex", JSON.stringify(groupKey[index]));
-						var priceValue = groupKey[index].access_charge;
-						// Check if variable is contract or pay as you go.
-						Ti.API.info("companyNamesPricegrouped ", priceValue.length);
-						if (priceValue != 0) {
-							if (groupKey[index].phone_plan == 0 ) {
-								//createPriceEntry(planType, priceValue);
-								var paygValue = Ti.UI.createLabel({
-								    color: '#000',
-								    text: "Contract: £" + priceValue,
-								    top: indexCompany*80+50,
-								    left: "6%",
-								    font: { fontSize:22 }
-								});
-								scrollViewPrices.add(paygValue);
-							}
-							else {
-								Ti.API.info("phone plan is contract");
-								//createPriceEntry(planType, priceValue);
-								var contractValue = Ti.UI.createLabel({
-								    color: '#000',
-								    text: "PAYG: £" + priceValue,
-								    top: indexCompany*80+50,
-								    left: "60%",
-								    font: { fontSize:22 }
-								});
-								scrollViewPrices.add(contractValue);
-							}
-						}
-					}
+					Ti.API.info("getPrice() indexCompany ", key);
+					Ti.API.info("getPrice() indexCompany ", JSON.stringify(indexCompany));
+					Ti.API.info("getPrice() groupKey ", JSON.stringify(groupKey));
+
+					// Create Company Table
+					createCompanyTable(key, indexCompany, groupKey);
+					companyData.push(row);
 				}
+				var createCustomView = function() {
+					var view = Ti.UI.createView({
+						backgroundColor: '#222',
+						height: 40
+					});
+					var operator = Ti.UI.createLabel({
+						text: "Operator Name",
+						left: "10%",
+						color: '#fff'
+					});
+					view.add(operator);
+					var payg = Ti.UI.createLabel({
+						text: "Contract",
+						left: "50%",
+						color: '#fff'
+					});
+					view.add(payg);
+					var contract = Ti.UI.createLabel({
+						text: "PAYG",
+						left: "70%",
+						color: '#fff'
+					});
+					view.add(contract);
+					return view;
+				};
 				
-		        // resultsLength = json.length;
-		        // Ti.API.info("groupedResultsLength ", groupedResultsLength);
-		        // Ti.API.info("groupedResults ", groupedResults);
-		        priceWindow.add(scrollViewPrices);
+				var tableOfCompanies = Ti.UI.createTableView({
+				  backgroundColor:'white',
+				  headerView: createCustomView(),
+				  data: companyData,
+				  top: 100
+				});
+				
+				Ti.API.info("operatorNames ", JSON.stringify(filtered_results_companies));
+	
+				// Add table of companies. 
+				priceWindow.add(tableOfCompanies);
 		        activityIndicatorPricing.hide();
 				
 		     },
@@ -1287,7 +1241,86 @@ function getPrice(numberType) {
 	}
 	
 }
-
+function createCompanyTable(key, indexCompany, groupKey){
+	var defaultFontSize = Ti.Platform.name === 'android' ? 16 : 14;
+	
+	for (index = 0; index < groupKey.length; ++index){
+	  row = Ti.UI.createTableViewRow({
+	    className:'numberPricing', // used to improve table performance
+	    rowIndex:index, // custom property, useful for determining the row during events
+	    height:40,
+	    backgroundColor: "#eee"
+	  });
+	
+	  var labelCompanyName = Ti.UI.createLabel({
+	    color:'#000',
+	    font:{fontFamily:'Arial', fontSize:defaultFontSize+6, fontWeight:'bold'},
+	    text: key,
+	    left:"10%",
+	    width:200, height: 30,
+	    background: "#000"
+	  });
+	  row.add(labelCompanyName);
+	  
+	  	// Loop over details for each company. 
+		for (index = 0; index < groupKey.length; ++index) {
+			// Add Prices to table.
+			Ti.API.info("groupKeyIndex", JSON.stringify(groupKey[index]));
+		  //addPricesToTable();
+		  var type = "NA";
+		  if(groupKey[index].phone_plan == "0"){
+		  	  var labelDetails = Ti.UI.createLabel({
+			    color:'#000',
+			    font:{fontFamily:'Arial', fontSize:defaultFontSize+2, fontWeight:'normal'},
+			    text: "£" + groupKey[index].access_charge,
+			    left:"50%",
+			    width:360
+			  });
+			  row.add(labelDetails);
+		  }
+		  else if (groupKey[index].phone_plan == "1") {
+		  	 var labelDetails = Ti.UI.createLabel({
+			    color:'#000',
+			    font:{fontFamily:'Arial', fontSize:defaultFontSize+2, fontWeight:'normal'},
+			    text: "£" + groupKey[index].access_charge,
+			    left:"70%",
+			    width:360
+			  });
+			  row.add(labelDetails);
+		  }
+		  
+		}
+	
+	  // var labelDate = Ti.UI.createLabel({
+	    // color:'#999',
+	    // font:{fontFamily:'Arial', fontSize:defaultFontSize, fontWeight:'normal'},
+	    // text:'on ' + ' Nov 2012',
+	    // left:105, bottom:10,
+	    // width:200, height:20
+	  // });
+	  // row.add(labelDate);
+	
+	  companyData.push(row);
+	}
+	
+	return row;
+}
+// Add prices table. 
+function addPricesToTable(){
+	Ti.API.info("groupKeyIndex", JSON.stringify(groupKey[index]));
+	var priceValue = groupKey[index].access_charge;
+	// Check if variable is contract or pay as you go.
+	Ti.API.info("companyNamesPricegrouped ", priceValue.length);
+	if (priceValue != 0) {
+		if (groupKey[index].phone_plan == 0 ) {
+			filtered_results_companies.push(priceValue);
+		}
+		else {
+			filtered_results_companies.push("na");
+			Ti.API.info("phone plan is contract");
+		}
+	}
+}
 function createPriceEntry(planType, priceValue){
 	if (planType == "payg") {
 		Ti.API.info("phone plan is PAYG");
