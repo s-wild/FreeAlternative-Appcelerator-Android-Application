@@ -701,7 +701,7 @@ function getUrlContents(url, type, companyID, companyName) {
 				}
 
 				resultNodeCompanyLength = resultNodeCompany.length;
-				top_spacing = 40;
+				top_spacing = 50;
 				if (resultNodeCompanyLength > 27){
 					top_spacing = 80;
 				}
@@ -966,7 +966,7 @@ function serverConnectionError(){
  */
 // Generates the feedback box after user dials a number.
 function numberFeedback(idSplitted){
-	// Close modal box after action.
+	// Close modal box after clicking feedback button. This prevents 
 	modalBox.close();
 	delay(function(){
 
