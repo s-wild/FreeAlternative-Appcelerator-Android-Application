@@ -427,6 +427,11 @@ function getNumberPrice(){
     	fullscreen: false,
     	backgroundColor: "#fff"
 	});
+	
+	// Back button handler for price page.
+	priceWindow.addEventListener('androidback' , function(e){
+	    Ti.API.info("Price back is pressed.");
+	});
 
 	// Open Price Window.
 	priceWindow.open({
@@ -1224,7 +1229,6 @@ function getPrice(numberType) {
 	
 				// Add table of companies. 
 				priceWindow.add(tableOfCompanies);
-		        activityIndicatorPricing.hide();
 				
 		     },
 		     // function called when an error occurs, including a timeout
@@ -1290,17 +1294,6 @@ function createCompanyTable(key, indexCompany, groupKey){
 		  }
 		  
 		}
-	
-	  // var labelDate = Ti.UI.createLabel({
-	    // color:'#999',
-	    // font:{fontFamily:'Arial', fontSize:defaultFontSize, fontWeight:'normal'},
-	    // text:'on ' + ' Nov 2012',
-	    // left:105, bottom:10,
-	    // width:200, height:20
-	  // });
-	  // row.add(labelDate);
-	
-	  companyData.push(row);
 	}
 	
 	return row;
@@ -1330,10 +1323,11 @@ function createPriceEntry(planType, priceValue){
 	}
 	Ti.API.info("createPriceEntry ");
 }
-// Back button handler.
+// Back button handler for Index.
 $.index.addEventListener('androidback' , function(e){
     searchInputBox.value = "";
 });
+
 
 /*
  * Page open
