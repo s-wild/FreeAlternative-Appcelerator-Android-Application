@@ -15,8 +15,6 @@ yesResults = $.yesResults;
 yesResults.hide();
 logo = $.imageLogo; 
 instructions = $.serachTitle;
-
-numberFeedbackDialog = $.rateNumber; 
 priceDialog = $.numberPriceInformation;
 
 /*
@@ -82,7 +80,7 @@ var searchHistoryResults = Ti.UI.createScrollView({
 $.index.add(searchHistoryResults);
 
 // Hide all user history UI until check is made if it exists.
-hideHistoryBlock(); 
+elementDisplay.hideHistoryBlock();
 
 /*
  * Star Widget
@@ -110,7 +108,7 @@ var delay = (function(){
 /*
  * Search Box Functionality.
  */
-showHistoryBlock();
+elementDisplay.showHistoryBlock();
 searchInputBox.addEventListener('change', function(e) {
 	resultsView.hide();
 	resultsView.removeAllChildren();
@@ -122,17 +120,20 @@ searchInputBox.addEventListener('change', function(e) {
 	// Get this input length and last input length to help detect if user has pressed backspace.
 	var last_element = counter[counter.length - 2];
 	var this_element = searchInput.length;
+	
+	// If user has removed text in search box field, get history and rearrange display.
 	if (searchInput.length == 0) {
-		getPreviousHistorySearches();
-		showHistoryBlock();
-		defaultScreenForSearch();
+		sqlLite.getSearchHistory();
+		
+		elementDisplay.showHistoryBlock();
+		elementDisplay.defaultScreenForSearch();
 		searchHistoryFlag = true;
 	}
 
 	if (searchInput.length > 1) {
 		searchHistoryFlag = false;
-		hideHistoryBlock(); 
-		rearrangeScreenForSearch();
+		elementDisplay.hideHistoryBlock();
+		elementDisplay.rearrangeScreenForSearch();
 		
 		if(searchInput.length > 2){ 
 			$.activityIndicator.show();
@@ -399,29 +400,9 @@ function numberDetails(id, call_button_number) {
 	wrapperView.add(containerView);
 	
 	modalBox.add(wrapperView);
-	//myModal.open({fullscreen:true});
 	modalBox.open({modal:true});
-
-
-
-
-// 	
-	// // Add declared objects to Window.
-	// numberWindow.add(numberTitle);
-	// numberWindow.add(callButton);
-	// numberWindow.add(getPrice);
-	// numberWindow.add(contactsAdd);
-	// numberWindow.add(leaveRating);
-// 	
-	// // Open Window with animation effect.
-	// numberWindow.open({
-	    // activityEnterAnimation: Ti.Android.R.anim.fade_in,
-	    // activityExitAnimation: Ti.Android.R.anim.fade_out
-	// });
-	
 }
 function getNumberPrice(){
-	
 	// Create Price Window.
 	priceWindow = Ti.UI.createWindow({
     	fullscreen: false,
@@ -429,9 +410,9 @@ function getNumberPrice(){
 	});
 	
 	// Back button handler for price page.
-	priceWindow.addEventListener('androidback' , function(e){
-	    Ti.API.info("Price back is pressed.");
-	});
+	// priceWindow.addEventListener('androidback' , function(e){
+	    // Ti.API.info("Price back is pressed.");
+	// });
 
 	// Open Price Window.
 	priceWindow.open({
@@ -651,14 +632,14 @@ function getUrlContents(url, type, companyID, companyName) {
 				
 				Ti.API.log("****** GET URL", resultNodeCompany);
 				Ti.API.log("****** SAVE SEARCH CALLED"); 
-				saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
+				sqlLite.saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
 				
 				// Create a company variation wrapper and assign numbers to it.
 				CompanyVariationWrapper = createCompanyWrapper(resultNodeCompany, resultNodeCompanyID);
 				resultsView.add(CompanyVariationWrapper);
-				hideHistoryBlock();
+				elementDisplay.hideHistoryBlock();
 				if (searchHistoryFlag == true) {
-					rearrangeScreenForSearch(); 
+					elementDisplay.rearrangeScreenForSearch(); 
 					Ti.API.log("****** searchHistoryFlag is true"); 
 					resultsView.show();
 					resultsView.setTop(70);
@@ -719,9 +700,8 @@ function getUrlContents(url, type, companyID, companyName) {
 
 	    },
 	    onerror: function() {
-	    	// function called when an error occurs, including a timeout
-	    	// Ti.API.log("Connection Error :/");
-	    	serverConnectionError();
+	    	// Set Server Connection Error.
+	    	messages.serverConnectionError();
 	    },
     	timeout: 5000 // in milliseconds
 	});
@@ -894,48 +874,53 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 
 function retriveNumbers() {
 	resultsView.removeAllChildren();
-	yesResults.hide();
-	var node_id = this.id;
-	var idSplitted = node_id.split(',');
-	var companyIDLocal = idSplitted[0];
-	var variationIDLocal = idSplitted[1]; 
-	Ti.API.log("JKHJHBJHBJH");
-	// Ti.API.log("variation_id", variationIDLocal);
-	var url = rootURL+"/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
-	type = "companyNumbers";
-	companyID = "1";
-	companyName = "test";
-	getUrlContents(url, type);
+		yesResults.hide();
+		var node_id = this.id;
+		var idSplitted = node_id.split(',');
+		var companyIDLocal = idSplitted[0];
+		var variationIDLocal = idSplitted[1]; 
+		Ti.API.log("JKHJHBJHBJH");
+		// Ti.API.log("variation_id", variationIDLocal);
+		var url = rootURL+"/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
+		type = "companyNumbers";
+		companyID = "1";
+		companyName = "test";
+		getUrlContents(url, type);
 } 
+
+webService = {
+	getNumbers: function() {
+		
+	}    
+};
 /*
  * Error Messages.
- * Generates a message if the application fails to connect to the server.  
+ * Custom error messages if application fails to connect to server.  
  */
-function serverConnectionError(){
-	var serverConnectionError = Ti.UI.createAlertDialog({
+messages = {
+	serverConnectionError: function() {
+    	var serverConnectionError = Ti.UI.createAlertDialog({
 	    cancel: 1,
 	    message: 'The application is having some problems connecting to the server.' +
 	    ' Could be the server but make sure your device has access to the internet.',
 	    title: 'Server Connection Error'
-	  });
-	  serverConnectionError.addEventListener('click', function(e){
-	    if (e.index === e.source.cancel){
-	      //Ti.API.info('The cancel button was clicked');
-	    }
-	    // Ti.API.info('e.cancel: ' + e.cancel);
-	    // Ti.API.info('e.source.cancel: ' + e.source.cancel);
-	    // Ti.API.info('e.index: ' + e.index);
-	  });
+	    });
 	  serverConnectionError.show();
-}
+    }
+};
 /*
  * Rating functionality.
  * These functions show, get and post information about user ratings to the server.  
  */
 // Generates the feedback box after user dials a number.
 function numberFeedback(idSplitted){
+	// Get Number Feedback Dialog from XML.
+	var numberFeedbackDialog = $.rateNumber; 
+	
 	// Close modal box after clicking feedback button. This prevents 
 	modalBox.close();
+	
+	// Delay, so popup box appears after call.
 	delay(function(){
 
 		// Set rating to unset to prevent incorrect ratings for multiple calls.
@@ -952,13 +937,15 @@ function numberFeedback(idSplitted){
 
 		// Add event listener for when submit button is clicked.
 		numberFeedbackDialog.addEventListener('click', function(e){
-			postRatingToServer(e, nodeID);
+			postRatingToServer(nodeID);
 	 	});
 
-	}, 800 ); // This number is the delay so popup box appears after call.
+	}, 800 ); 
 }
-function postRatingToServer(e, nodeID){
-	//Ti.API.info('e.postRatingToServer: ' + e.index);
+/*
+ * Post Rating To Server. 
+ */
+function postRatingToServer(nodeID){
 	// Set post URL.
 	var url = rootURL+"/rest/vote/set_votes";
 
@@ -978,99 +965,94 @@ function postRatingToServer(e, nodeID){
 		  	}]
 		};
 
+		// Set HTTP Client and post Vote entry. 
 		var client = Ti.Network.createHTTPClient();
 		client.open('POST',url);
 		client.setRequestHeader('Content-Type','application/json');
 		client.send(JSON.stringify(voteEntry));
 	}
-
-	//Ti.API.info('postRatingToServer Current Rating: ' + currentNumberRating);
 }
 /*
- * User Search Save Functionality.
- * These functions save previous searchs as well as displaying them to the user.  
+ * Show or hide element functions. 
  */
-// These functions show/hide history block
-function hideHistoryBlock() {
-	previousSearchLabel.hide();
-	previousSearchIcon.hide();
-	previousSearchLabelText.hide();
-	spacingBox.hide();
-	searchHistoryResults.hide();
-}
-function showHistoryBlock() {
-	previousSearchLabel.show();
-	previousSearchIcon.show();
-	previousSearchLabelText.show();
-	spacingBox.show();
-	searchHistoryResults.show(); 
-}
-function rearrangeScreenForSearch() {
-	logo.hide();
-	instructions.hide();
-	searchInputBox.setTop(8);
-	previousSearchLabel.setTop(60); 
-	spacingBox.setTop(120);
-	searchHistoryResults.setTop(130);
-}
-function defaultScreenForSearch() {
-	logo.show();
-	instructions.show();
-	searchInputBox.setTop(100);
-	previousSearchLabel.setTop(150); 
-	spacingBox.setTop(210);
-	searchHistoryResults.setTop(220);
-}
-function saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID) {
-	// Send SELECT request to server
-	// check length of result
-	// if length == 0, add result
-	// else don't add
-	//var currentTimeStamp = new Date();;
-	Titanium.API.log("saveSearch() - insert values",resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
-	// etc.
-	try {
-		db = Ti.Database.open('userSearches');
-		db.execute('BEGIN'); // begin the transaction
-		//db.execute('DROP TABLE IF EXISTS search_entries'); 
-		db.execute('CREATE TABLE IF NOT EXISTS search_entries(company_name TEXT, company_id INTEGER, variation_id INTEGER, search_time DATETIME, UNIQUE(company_id, variation_id));'); 
-		Titanium.API.log("CHECKKKKKK");   
-		db.execute('INSERT OR IGNORE INTO search_entries (company_name,company_id,variation_id,search_time) VALUES (?,?,?, CURRENT_TIMESTAMP)', resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
-		//db.execute('INSERT OR IGNORE INTO search_entries (company_name, company_id, variation_id, search_time) VALUES (' + resultNodeCompany + ',' + Number(resultNodeCompanyID) + ',' + Number(resultNodeVariationID) +', CURRENT_TIMESTAMP);');
-		db.execute('COMMIT'); 
-		db.close();   
-	}
-	catch(err) { 
-	   Titanium.API.log("saveSearch() - Can't insert values. ");
-	   db.close(); 
-	}
-	getPreviousHistorySearches();
-}
- // Create a previous search results view and get entries. . 
-function getPreviousHistorySearches() { 
-	searchHistoryResults.removeAllChildren();
-	Titanium.API.log("888888888888getPreviousHistorySearches");   
-	try {
-		db = Ti.Database.open('userSearches');
-		var searchResults = db.execute('SELECT company_name,company_id,variation_id,search_time FROM search_entries ORDER BY search_time DESC'); 
-		while (searchResults.isValidRow()) {
-		  Ti.API.info("888888888888DB SELECT" +  searchResults.fieldByName('company_name') + ',' + searchResults.fieldByName('company_id') + ',' + searchResults.fieldByName('variation_id') 
-		  	+ ',' + searchResults.fieldByName('search_time')
-		  );
-		  Ti.API.info("888888888888TEST"); 
-		  createSearchHistoryViewEntry(searchResults.fieldByName('company_name'), searchResults.fieldByName('company_id'), searchResults.fieldByName('variation_id'));
-		  searchResults.next(); 
+elementDisplay = {
+    hideHistoryBlock: function() {
+        previousSearchLabel.hide();
+		previousSearchIcon.hide();
+		previousSearchLabelText.hide();
+		spacingBox.hide();
+		searchHistoryResults.hide();
+    }, 
+    showHistoryBlock: function() {
+        previousSearchLabel.show();
+		previousSearchIcon.show();
+		previousSearchLabelText.show();
+		spacingBox.show();
+		searchHistoryResults.show();
+    },
+    rearrangeScreenForSearch: function() {
+        logo.hide();
+		instructions.hide();
+		searchInputBox.setTop(8);
+		previousSearchLabel.setTop(60); 
+		spacingBox.setTop(120);
+		searchHistoryResults.setTop(130);
+    },
+    defaultScreenForSearch: function() {
+        logo.show();
+		instructions.show();
+		searchInputBox.setTop(100);
+		previousSearchLabel.setTop(150); 
+		spacingBox.setTop(210);
+		searchHistoryResults.setTop(220);
+    } 
+};
+/*
+ * SQL Lite Functions.
+ */
+sqlLite = {
+	saveSearch: function() {
+		// Try and save, a user search. If error, close DB and log. 
+		try {
+			db = Ti.Database.open('userSearches');
+			db.execute('BEGIN'); // begin the transaction
+			//db.execute('DROP TABLE IF EXISTS search_entries'); 
+			db.execute('CREATE TABLE IF NOT EXISTS search_entries(company_name TEXT, company_id INTEGER, variation_id INTEGER, search_time DATETIME, UNIQUE(company_id, variation_id));'); 
+			Titanium.API.log("CHECKKKKKK");   
+			db.execute('INSERT OR IGNORE INTO search_entries (company_name,company_id,variation_id,search_time) VALUES (?,?,?, CURRENT_TIMESTAMP)', resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
+			//db.execute('INSERT OR IGNORE INTO search_entries (company_name, company_id, variation_id, search_time) VALUES (' + resultNodeCompany + ',' + Number(resultNodeCompanyID) + ',' + Number(resultNodeVariationID) +', CURRENT_TIMESTAMP);');
+			db.execute('COMMIT'); 
+			db.close();   
 		}
-		db.close();
+		catch(err) { 
+		   Titanium.API.log("saveSearch() - Can't insert values. ");
+		   db.close(); 
+		}
+		sqlLite.getSearchHistory();
+	},
+	getSearchHistory: function() {
+		searchHistoryResults.removeAllChildren();
+		Titanium.API.log("888888888888getPreviousHistorySearches");   
+		try {
+			db = Ti.Database.open('userSearches');
+			var searchResults = db.execute('SELECT company_name,company_id,variation_id,search_time FROM search_entries ORDER BY search_time DESC'); 
+			while (searchResults.isValidRow()) {
+			  Ti.API.info("888888888888DB SELECT" +  searchResults.fieldByName('company_name') + ',' + searchResults.fieldByName('company_id') + ',' + searchResults.fieldByName('variation_id') 
+			  	+ ',' + searchResults.fieldByName('search_time')
+			  );
+			  Ti.API.info("888888888888TEST"); 
+			  createSearchHistoryViewEntry(searchResults.fieldByName('company_name'), searchResults.fieldByName('company_id'), searchResults.fieldByName('variation_id'));
+			  searchResults.next(); 
+			}
+			db.close();
+		}
+		catch(err) { 
+		   Titanium.API.log("888888888888getPreviousHistorySearches." , err); 
+		   db.close(); 
+		}
+		elementDisplay.showHistoryBlock(); 
 	}
-	catch(err) { 
-	   Titanium.API.log("888888888888getPreviousHistorySearches." , err); 
-	   db.close(); 
-	}
-	showHistoryBlock(); 
-	 
-}
-getPreviousHistorySearches();
+};
  // Create an entry if search entries exist.
 function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 	Ti.API.log("****createViewEntry:", company_name, company_id, variation_id);
@@ -1100,7 +1082,7 @@ function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 
 /* 
  * Helper functions
- * These functions are used continuously through the old. 
+ * These functions are used continuously through the code. 
  */
 // This function checks if an array contains duplicates, if so, it returns true. 
 function hasDuplicates(array) {
@@ -1270,7 +1252,6 @@ function createCompanyTable(key, indexCompany, groupKey){
 		for (index = 0; index < groupKey.length; ++index) {
 			// Add Prices to table.
 			Ti.API.info("groupKeyIndex", JSON.stringify(groupKey[index]));
-		  //addPricesToTable();
 		  var type = "NA";
 		  if(groupKey[index].phone_plan == "0"){
 		  	  var labelDetails = Ti.UI.createLabel({
@@ -1298,22 +1279,7 @@ function createCompanyTable(key, indexCompany, groupKey){
 	
 	return row;
 }
-// Add prices table. 
-function addPricesToTable(){
-	Ti.API.info("groupKeyIndex", JSON.stringify(groupKey[index]));
-	var priceValue = groupKey[index].access_charge;
-	// Check if variable is contract or pay as you go.
-	Ti.API.info("companyNamesPricegrouped ", priceValue.length);
-	if (priceValue != 0) {
-		if (groupKey[index].phone_plan == 0 ) {
-			filtered_results_companies.push(priceValue);
-		}
-		else {
-			filtered_results_companies.push("na");
-			Ti.API.info("phone plan is contract");
-		}
-	}
-}
+
 function createPriceEntry(planType, priceValue){
 	if (planType == "payg") {
 		Ti.API.info("phone plan is PAYG");
@@ -1333,5 +1299,6 @@ $.index.addEventListener('androidback' , function(e){
  * Page open
  * 
  */
+sqlLite.getSearchHistory();
 $.index.add(searchInputBox);
 $.index.open();
