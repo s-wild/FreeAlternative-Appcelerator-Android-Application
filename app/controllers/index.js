@@ -430,7 +430,9 @@ function getNumberPrice(){
 	
 	// Back button handler for price page.
 	priceWindow.addEventListener('androidback' , function(e){
-	    Ti.API.info("Price back is pressed.");
+		// When user goes back, empty window contents. 
+		priceWindow.removeAllChildren();
+		priceWindow.close();
 	});
 
 	// Open Price Window.
@@ -1022,21 +1024,16 @@ function defaultScreenForSearch() {
 	searchHistoryResults.setTop(220);
 }
 function saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID) {
-	// Send SELECT request to server
-	// check length of result
-	// if length == 0, add result
-	// else don't add
-	//var currentTimeStamp = new Date();;
+
 	Titanium.API.log("saveSearch() - insert values",resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
-	// etc.
+	
+	// Save search to SQL Lite Database. 
 	try {
 		db = Ti.Database.open('userSearches');
-		db.execute('BEGIN'); // begin the transaction
-		//db.execute('DROP TABLE IF EXISTS search_entries'); 
+		db.execute('BEGIN'); // begin the transaction 
 		db.execute('CREATE TABLE IF NOT EXISTS search_entries(company_name TEXT, company_id INTEGER, variation_id INTEGER, search_time DATETIME, UNIQUE(company_id, variation_id));'); 
 		Titanium.API.log("CHECKKKKKK");   
-		db.execute('INSERT OR IGNORE INTO search_entries (company_name,company_id,variation_id,search_time) VALUES (?,?,?, CURRENT_TIMESTAMP)', resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
-		//db.execute('INSERT OR IGNORE INTO search_entries (company_name, company_id, variation_id, search_time) VALUES (' + resultNodeCompany + ',' + Number(resultNodeCompanyID) + ',' + Number(resultNodeVariationID) +', CURRENT_TIMESTAMP);');
+		db.execute('INSERT OR REPLACE INTO search_entries (company_name,company_id,variation_id,search_time) VALUES (?,?,?, CURRENT_TIMESTAMP)', resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
 		db.execute('COMMIT'); 
 		db.close();   
 	}
@@ -1044,6 +1041,7 @@ function saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationI
 	   Titanium.API.log("saveSearch() - Can't insert values. ");
 	   db.close(); 
 	}
+	// On Save, update view for previous histories. 
 	getPreviousHistorySearches();
 }
  // Create a previous search results view and get entries. . 
@@ -1067,10 +1065,13 @@ function getPreviousHistorySearches() {
 	   Titanium.API.log("888888888888getPreviousHistorySearches." , err); 
 	   db.close(); 
 	}
+	
+	// Show history block after creating new entries. 
 	showHistoryBlock(); 
 	 
 }
 getPreviousHistorySearches();
+
  // Create an entry if search entries exist.
 function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 	Ti.API.log("****createViewEntry:", company_name, company_id, variation_id);
@@ -1245,6 +1246,8 @@ function getPrice(numberType) {
 	}
 	
 }
+
+// Create company table for pricing.
 function createCompanyTable(key, indexCompany, groupKey){
 	var defaultFontSize = Ti.Platform.name === 'android' ? 16 : 14;
 	
