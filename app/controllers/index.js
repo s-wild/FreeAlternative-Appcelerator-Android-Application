@@ -379,49 +379,17 @@ function numberDetails(id, call_button_number) {
 	containerView.add(contactsAddButton);
 	containerView.add(leaveRatingButton);
 	
-	// Close button.
-	var closeButton    = Ti.UI.createButton({
-	    title  : 'Close',
-	    bottom : 40
-	});
-	// Add event listeners to close modal box.
-	closeButton.addEventListener('click', function () {
-	    modalBox.close();
-	});
 	backgroundView.addEventListener('click', function () {
 	    modalBox.close();
 	});
-	
-	//containerView.add(someLabel);
-	containerView.add(closeButton);
 	
 	wrapperView.add(backgroundView);
 	wrapperView.add(containerView);
 	
 	modalBox.add(wrapperView);
-	//myModal.open({fullscreen:true});
 	modalBox.open({modal:true});
-
-
-
-
-// 	
-	// // Add declared objects to Window.
-	// numberWindow.add(numberTitle);
-	// numberWindow.add(callButton);
-	// numberWindow.add(getPrice);
-	// numberWindow.add(contactsAdd);
-	// numberWindow.add(leaveRating);
-// 	
-	// // Open Window with animation effect.
-	// numberWindow.open({
-	    // activityEnterAnimation: Ti.Android.R.anim.fade_in,
-	    // activityExitAnimation: Ti.Android.R.anim.fade_out
-	// });
-	
 }
 function getNumberPrice(){
-	
 	// Create Price Window.
 	priceWindow = Ti.UI.createWindow({
     	fullscreen: false,
@@ -871,7 +839,6 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 		call_buttons.add(star_image);
 	}
 
-
  	var number_label = Ti.UI.createLabel({
 	    color: '#fff',
 	    font: { fontSize:30 },
@@ -882,7 +849,6 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	});
 
 	call_buttons.add(number_label);
-
 
     // Add event listener if iteration request is for company lookups.
 	if(typeOfAction == "companyRequest") {
@@ -1132,16 +1098,17 @@ function truncate(string){
    else
       return string;
 };
+// Set number type functionality.
 function getNumberType(number) {
 	number_type = "na"; 
     switch (true) {
-		case (number.indexOf("0870") > -1):
+		case number.substring(0, 4) == "0870":
 			number_type = "0870";
 		  break;
-		case (number.indexOf("0800") > -1):
+		case number.substring(0, 4) == "0800":
 		    number_type = "0800";
 		  break;
-		case (number.indexOf("0845") > -1):
+		case number.substring(0, 4) == "0845":
 		    number_type = "0845";
 		  break;
 	}
@@ -1340,7 +1307,6 @@ function createPriceEntry(planType, priceValue){
 $.index.addEventListener('androidback' , function(e){
     searchInputBox.value = "";
 });
-
 
 /*
  * Page open
