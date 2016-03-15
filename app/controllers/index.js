@@ -459,7 +459,17 @@ function getNumberPrice(){
 		width: "94%",
 		font: { fontSize:23 }
 	});
+	var priceDescription = Ti.UI.createLabel({
+		color:'#000',
+		text: "*Please note that the table below accounts for access charges based on network providers. It does not include a service charge.",
+		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+		top: "80",
+		left: "3%",
+		width: "94%",
+		font: { fontSize:16 }
+	});
 	priceWindow.add(priceLabel);
+	priceWindow.add(priceDescription);
 }
 function callNumber() { 
 	// Close modal box after button is pressed.
@@ -1223,7 +1233,7 @@ function getPrice(numberType) {
 				  backgroundColor:'white',
 				  headerView: createCustomView(),
 				  data: companyData,
-				  top: 100
+				  top: 160
 				});
 				
 				Ti.API.info("operatorNames ", JSON.stringify(filtered_results_companies));
