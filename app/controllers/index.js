@@ -1,97 +1,21 @@
-/*
- * Global Variables
- */
-rootURL = "http://up637415.co.uk/";
-var counter = [];
-// Search details
-searchHistoryFlag = true;
+// Perform tasks on page load.
+(function () {
 
-// Get displays on load, hide if necessary.
-noResults = $.noResults;
-noResults.hide();
-yesResults = $.yesResults;
-yesResults.hide();
-logo = $.imageLogo;
-instructions = $.serachTitle;
-numberFeedbackDialog = $.rateNumber;
-priceDialog = $.numberPriceInformation;
+  // Hide elements on page until user searches.
+  $.noResults.hide();
+  $.yesResults.hide();
+  $.searchResultsContainer.hide();
 
-/*
- * User Search UI.
- */
- var searchInputBox = Titanium.UI.createSearchBar({
-	backgroundColor:'#fff',
-    hintTextColor:'#777',
-    backgroundFocusedColor: "red",
-    color: "#000",
-    showCancel:true,
-    height: 60,
-    width: "94%",
-    top: 100,
-    left: "3%",
-    hintText: "E.g. 'Vodafone' or '0870070191'",
-    font: { color: "#fff"},
-});
-// Focus search on load.
-$.index.addEventListener("focus",function(e){
-	searchInputBox.focus();
-});
-var previousSearchLabel = Titanium.UI.createView({
-   backgroundColor:'#fff',
-   top: "150",
-   width:"92%",
-   height:"60"
-});
-var previousSearchIcon = Ti.UI.createImageView({
-	image:'/search_icon.png',
-	left: "15",
-	top: "15",
-	width: "30",
-	height: "30"
-});
-var previousSearchLabelText = Ti.UI.createLabel({
-	color:'black',
-	text: 'Search History:',
-	textAlign: Ti.UI.TEXT_ALIGNMENT_LEFT,
-	top: "17",
-	left: "60",
-	width: 230, height: 30,
-	font: { fontSize:20 }
-});
-previousSearchLabel.add(previousSearchIcon);
-previousSearchLabel.add(previousSearchLabelText);
-$.index.add(previousSearchLabel);
-var spacingBox = Titanium.UI.createView({
-   backgroundColor:'#F3F3F3',
-   top: "208",
-   width:"92%",
-   height:"30"
-});
-$.index.add(spacingBox);
-var searchHistoryResults = Ti.UI.createScrollView({
-	top: "220",
-	backgroundColor: '#F3F3F3',
-	layout: 'vertical',
-	width:"92%",
-	showPagingControl:true
-});
-$.index.add(searchHistoryResults);
+  // Activate cursor in search box on page load for index.
+  $.index.addEventListener("focus",function(e){
+  	$.searchInputBox.focus();
+  });
 
-// Hide all user history UI until check is made if it exists.
-hideHistoryBlock();
+  // Initialize Star Widget for rating a phone call.
+  $.starwidget.init();
 
-/*
- * Star Widget
- */
-$.starwidget.init();
+})();
 
-var resultsView = Ti.UI.createScrollView({
-	top:120,
-	layout: 'vertical'
-});
-
-$.index.add(resultsView);
-resultsView.hide();
 
 /*
  * Delay function for when user types.
@@ -106,28 +30,23 @@ var delay = (function(){
 /*
  * Search Box Functionality.
  */
-showHistoryBlock();
-searchInputBox.addEventListener('change', function(e) {
-	resultsView.hide();
-	resultsView.removeAllChildren();
+$.searchInputBox.addEventListener('change', function(e) {
 
-	var backspace = false;
-	var searchInput = searchInputBox.value; // Get searchInput.
-	counter.push(searchInput.length);
+	$.searchResultsContainer.hide();
+	$.searchResultsContainer.removeAllChildren();
 
-	// Get this input length and last input length to help detect if user has pressed backspace.
-	var last_element = counter[counter.length - 2];
-	var this_element = searchInput.length;
+	var searchInput = $.searchInputBox.value; // Get searchInput value.
+
 	if (searchInput.length == 0) {
-		getPreviousHistorySearches();
-		showHistoryBlock();
+		sqlLite.getPreviousSearches();
+		$.previousSearchBox.show();;
 		defaultScreenForSearch();
 		searchHistoryFlag = true;
 	}
 
 	if (searchInput.length > 1) {
 		searchHistoryFlag = false;
-		hideHistoryBlock();
+		$.previousSearchBox.hide();;
 		rearrangeScreenForSearch();
 
 		if(searchInput.length > 2){
@@ -139,9 +58,9 @@ searchInputBox.addEventListener('change', function(e) {
 
 			// Check user has entered a character, if so, respond with results or no results.
 			if (searchInput.length > 2) {
-				resultsView.show();
+				$.searchResultsContainer.show();
 				var url="";
-				var checkStringNumber = IsNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
+				var checkStringNumber = Alloy.Globals.checkNumeric(searchInput); // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
 				if (checkStringNumber == true) {
 					type = "search_by_number";
 					url = rootURL + "/json/numbers?title=" + searchInput;
@@ -165,18 +84,11 @@ searchInputBox.addEventListener('change', function(e) {
 		}, 800 ); // This number is the delay for when the user types.
 	}
 	else {
-		resultsView.hide();
-		noResults.hide();
-		yesResults.hide();
-		resultsView.data = [];
+		$.searchResultsContainer.hide();
+		$.noResults.hide();
+		$.yesResults.hide();
+		$.searchResultsContainer.data = [];
 		$.activityIndicator.hide();
-	}
-
-
-	// Check if backspace is pressed.
-	if (this_element < last_element) {
-		// Reset displays.
-		//resultsView.hide();
 	}
 });
 
@@ -433,22 +345,9 @@ function callNumber() {
 		data: call
 	});
 	Ti.Android.currentActivity.startActivity(intent);
-	try {
-		callDB = Ti.Database.open('userSearches');
-		callDB.execute('BEGIN'); // begin the transaction
-		//db.execute('DROP TABLE IF EXISTS search_entries');
-		callDB.execute('CREATE TABLE IF NOT EXISTS call_entries(phone_number TEXT, UNIQUE(phone_number));');
-		Titanium.API.log("CHECKKKKKK");
-		callDB.execute('INSERT OR IGNORE INTO call_entries (phone_number) VALUES (?)', number);
-		//db.execute('INSERT OR IGNORE INTO search_entries (company_name, company_id, variation_id, search_time) VALUES (' + resultNodeCompany + ',' + Number(resultNodeCompanyID) + ',' + Number(resultNodeVariationID) +', CURRENT_TIMESTAMP);');
-		callDB.execute('COMMIT');
-		callDB.close();
-		Titanium.API.log("Entered Call into DB.");
-	}
-	catch(err) {
-	   Titanium.API.log("saveSearch() - Can't insert values. ");
-	   callDB.close();
-	}
+
+  // Save call in history log.
+  Alloy.Globals.sqlLite.saveCallInHistory(number);
 }
 /*
  * Save as contact.
@@ -473,14 +372,6 @@ function saveAsContact(id, call_button_number) {
 }
 
 /*
- * Function to check if numeric number is in String.
- * This checks if a user is searching by company or by a telephone number.
- */
-function IsNumeric(searchInput) {
-	return (searchInput - 0) == searchInput && ('' + searchInput).trim().length > 0;
-}
-
-/*
  * Connect to server and get JSON
  * The type variable determines the type of request. All requests in this program
  * are made from this function.
@@ -496,34 +387,35 @@ function getUrlContents(url, type, companyID, companyName) {
 			// parse the retrieved data, turning it into a JavaScript object
 			var json = JSON.parse(this.responseText);
 			var index;
+      companyNames = [];
+      filtered_results = [];
 			topprop = 0.1; // this is space between two labels one below the other
 			if (type == "search_by_name") {
-				resultNodes = json.companies;
+				var resultNodes = json.companies;
 				//Ti.API.log("resultNodes", JSON.stringify(resultNodes));
-				resultsLength = JSON.stringify(resultNodes.length);
+				var resultsLength = JSON.stringify(resultNodes.length);
 				if(resultsLength >= 1) {
 					// Ti.API.log("Results for company search: True");
-					noResults.hide();
-					yesResults.show();
+					$.noResults.hide();
+					$.yesResults.show();
 				}
 				if(resultsLength == 0) {
-					// Ti.API.log("Results for company search: False");
-					yesResults.hide();
-					noResults.show();
+
+					$.yesResults.hide();
+					$.noResults.show();
 				}
-				var companyNames = [];
-				var filtered_results = [];
 
 				for (index = 0; index < resultsLength; ++index) {
+          Ti.API.log("resultNodeCompany", resultNodeCompany);
 					resultNodeCompany = resultNodes[index].company_name;
 					companyNames.push(resultNodeCompany);
 					resultCompanyID = resultNodes[index].company_id;
 					// Check if duplicates, prevent multiple company names being written.
-					if(hasDuplicates(companyNames) == false) {
+					if(Alloy.Globals.checkArrayForDuplicates(companyNames) == false) {
 						// Push company name.
 						filtered_results.push({company: resultNodeCompany, company_id: resultCompanyID});
 						var companyWrapper = createCompanyWrapper(resultNodeCompany, resultCompanyID);
-						resultsView.add(companyWrapper);
+						$.searchResultsContainer.add(companyWrapper);
 						// Wrapper for buttons
 						var variationButtonWrapper = Ti.UI.createView({
 							height: Ti.UI.SIZE,
@@ -551,13 +443,13 @@ function getUrlContents(url, type, companyID, companyName) {
 				resultsLength = JSON.stringify(resultNodes.length);
 				if(resultsLength >= 1) {
 					// Ti.API.log("Results for company search: True");
-					noResults.hide();
-					yesResults.show();
+					$.noResults.hide();
+					$.yesResults.show();
 				}
 				if(resultsLength == 0) {
 					// Ti.API.log("Results for company search: False");
-					yesResults.hide();
-					noResults.show();
+					$.yesResults.hide();
+					$.noResults.show();
 				}
 				var companyNames = [];
 				var filtered_results = [];
@@ -567,12 +459,12 @@ function getUrlContents(url, type, companyID, companyName) {
 					companyNames.push(resultNodeCompany);
 					resultCompanyID = resultNodes[index].company_id;
 					// Check if duplicates, prevent multiple company names being written.
-					if(hasDuplicates(companyNames) == false) {
+					if(Alloy.Globals.checkArrayForDuplicates(companyNames) == false) {
 						// Push company name.
 						filtered_results.push({company: resultNodeCompany, company_id: resultCompanyID});
 						// Create company wrapper.
 						var companyWrapper = createCompanyWrapper(resultNodeCompany, resultCompanyID);
-						resultsView.add(companyWrapper);
+						$.searchResultsContainer.add(companyWrapper);
 						// Wrapper for buttons
 						var variationButtonWrapper = Ti.UI.createView({
 							height: Ti.UI.SIZE,
@@ -608,20 +500,21 @@ function getUrlContents(url, type, companyID, companyName) {
 
 				Ti.API.log("****** GET URL", resultNodeCompany);
 				Ti.API.log("****** SAVE SEARCH CALLED");
-				saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
-
+				Alloy.Globals.sqlLite.saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
+        // On Save, update view for previous histories.
+      	sqlLite.getPreviousSearches();
 				// Create a company variation wrapper and assign numbers to it.
 				CompanyVariationWrapper = createCompanyWrapper(resultNodeCompany, resultNodeCompanyID);
-				resultsView.add(CompanyVariationWrapper);
-				hideHistoryBlock();
+				$.searchResultsContainer.add(CompanyVariationWrapper);
+				$.previousSearchBox.hide();;
 				if (searchHistoryFlag == true) {
 					rearrangeScreenForSearch();
 					Ti.API.log("****** searchHistoryFlag is true");
-					resultsView.show();
-					resultsView.setTop(70);
+					$.searchResultsContainer.show();
+					$.searchResultsContainer.setTop(70);
 				}
-				else { 
-					resultsView.setTop(70); 
+				else {
+					$.searchResultsContainer.setTop(70);
 					Ti.API.log("****** searchHistoryFlag is false");
 				}
 
@@ -656,7 +549,7 @@ function getUrlContents(url, type, companyID, companyName) {
 
 					var call_button = createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, "numbersRequest", resultNodeRating, resultNodeType, resultNumberID, combinedTitle);
 					callButtonWrapper.add(call_button);
-					//resultsView.show();
+					//$.searchResultsContainer.show();
 				}
 				// createFullResultView(fullResult);
 			}
@@ -678,7 +571,7 @@ function getUrlContents(url, type, companyID, companyName) {
 	    onerror: function() {
 	    	// function called when an error occurs, including a timeout
 	    	// Ti.API.log("Connection Error :/");
-	    	serverConnectionError();
+	    	Alloy.Globals.errorMessages.serverConnection();
 	    },
     	timeout: 5000 // in milliseconds
 	});
@@ -770,13 +663,13 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
    });
 
     var call_buttons = Titanium.UI.createView({
-		color: "#000",
-	  	id: resultNodeID+"|"+resultNumberID+"|"+companyVariation,
-	    textAlign: "left",
-	    top: 1,
-		width: '98%',
-		height: '96%',
-		backgroundColor:background
+  		color: "#000",
+  	  id: resultNodeID+"|"+resultNumberID+"|"+companyVariation,
+  	  textAlign: "left",
+  	  top: 1,
+  		width: '98%',
+  		height: '96%',
+  		backgroundColor:background
  	});
  	var call_image = Ti.UI.createImageView({
 	  image:'/call_icon.png',
@@ -847,8 +740,8 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 }
 
 function retriveNumbers() {
-	resultsView.removeAllChildren();
-	yesResults.hide();
+	$.searchResultsContainer.removeAllChildren();
+	$.yesResults.hide();
 	var node_id = this.id;
 	var idSplitted = node_id.split(',');
 	var companyIDLocal = idSplitted[0];
@@ -860,27 +753,6 @@ function retriveNumbers() {
 	companyID = "1";
 	companyName = "test";
 	getUrlContents(url, type);
-}
-/*
- * Error Messages.
- * Generates a message if the application fails to connect to the server.
- */
-function serverConnectionError(){
-	var serverConnectionError = Ti.UI.createAlertDialog({
-	    cancel: 1,
-	    message: 'The application is having some problems connecting to the server.' +
-	    ' Could be the server but make sure your device has access to the internet.',
-	    title: 'Server Connection Error'
-	  });
-	  serverConnectionError.addEventListener('click', function(e){
-	    if (e.index === e.source.cancel){
-	      //Ti.API.info('The cancel button was clicked');
-	    }
-	    // Ti.API.info('e.cancel: ' + e.cancel);
-	    // Ti.API.info('e.source.cancel: ' + e.source.cancel);
-	    // Ti.API.info('e.index: ' + e.index);
-	  });
-	  serverConnectionError.show();
 }
 /*
  * Rating functionality.
@@ -899,13 +771,13 @@ function numberFeedback(idSplitted){
 		var nodeID = idSplitted[1];
 
 		// Set message for feedback dialog popup. Include number to tell user what number they are rating.
-		numberFeedbackDialog.setMessage("Thanks for using this service, please rate " + telePhoneNumber + " to help other users.");
+		$.rateNumber.setMessage("Thanks for using this service, please rate " + telePhoneNumber + " to help other users.");
 
 		// Show feedback from XML after phone call.
-		numberFeedbackDialog.show();
+		$.rateNumber.show();
 
 		// Add event listener for when submit button is clicked.
-		numberFeedbackDialog.addEventListener('click', function(e){
+		$.rateNumber.addEventListener('click', function(e){
 			postRatingToServer(e, nodeID);
 	 	});
 
@@ -937,93 +809,84 @@ function postRatingToServer(e, nodeID){
 		client.setRequestHeader('Content-Type','application/json');
 		client.send(JSON.stringify(voteEntry));
 	}
-
-	//Ti.API.info('postRatingToServer Current Rating: ' + currentNumberRating);
 }
 /*
  * User Search Save Functionality.
  * These functions save previous searchs as well as displaying them to the user.
  */
-// These functions show/hide history block
-function hideHistoryBlock() {
-	previousSearchLabel.hide();
-	previousSearchIcon.hide();
-	previousSearchLabelText.hide();
-	spacingBox.hide();
-	searchHistoryResults.hide();
-}
-function showHistoryBlock() {
-	previousSearchLabel.show();
-	previousSearchIcon.show();
-	previousSearchLabelText.show();
-	spacingBox.show();
-	searchHistoryResults.show();
-}
 function rearrangeScreenForSearch() {
-	logo.hide();
-	instructions.hide();
-	searchInputBox.setTop(8);
-	previousSearchLabel.setTop(60);
-	spacingBox.setTop(120);
-	searchHistoryResults.setTop(130);
+	$.imageLogo.hide();
+	$.searchTitle.hide();
+  $.previousSearchBox.hide();
+  $.addClass($.searchInputBox, 'afterSearch');
+  $.removeClass($.searchInputBox, 'beforeSearch');
 }
 function defaultScreenForSearch() {
-	logo.show();
-	instructions.show();
-	searchInputBox.setTop(100);
-	previousSearchLabel.setTop(150);
-	spacingBox.setTop(210);
-	searchHistoryResults.setTop(220);
+	$.imageLogo.show();
+	$.searchTitle.show();
+  $.addClass($.searchInputBox, 'beforeSearch');
+  $.removeClass($.searchInputBox, 'afterSearch');
 }
-function saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID) {
+/*
+* SQL Lite Functions relating to index page.
+*/
+sqlLite = {
+    getPreviousSearches: function() {
+      // Remove all previous entries in case new entries have occured.
+      $.searchHistoryResults.removeAllChildren();
 
-	Titanium.API.log("saveSearch() - insert values",resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
+      // Try to see if any entries exist in database.
+      try {
+        db = Ti.Database.open('userSearches');
+        var searchResults = db.execute('SELECT company_name,company_id,variation_id,search_time FROM search_entries ORDER BY search_time DESC');
+        while (searchResults.isValidRow()) {
+          Ti.API.info("888888888888DB SELECT" +  searchResults.fieldByName('company_name') + ',' + searchResults.fieldByName('company_id') + ',' + searchResults.fieldByName('variation_id')
+            + ',' + searchResults.fieldByName('search_time')
+          );
+          Ti.API.info("888888888888TEST");
+          createSearchHistoryViewEntry(searchResults.fieldByName('company_name'), searchResults.fieldByName('company_id'), searchResults.fieldByName('variation_id'));
+          searchResults.next();
+        }
+        db.close();
+      }
+      catch(err) {
+         Titanium.API.log("888888888888sqlLite.getPreviousSearches." , err);
+         db.close();
+      }
 
-	// Save search to SQL Lite Database.
-	try {
-		db = Ti.Database.open('userSearches');
-		db.execute('BEGIN'); // begin the transaction
-		db.execute('CREATE TABLE IF NOT EXISTS search_entries(company_name TEXT, company_id INTEGER, variation_id INTEGER, search_time DATETIME, UNIQUE(company_id, variation_id));');
-		Titanium.API.log("CHECKKKKKK");
-		db.execute('INSERT OR REPLACE INTO search_entries (company_name,company_id,variation_id,search_time) VALUES (?,?,?, CURRENT_TIMESTAMP)', resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
-		db.execute('COMMIT');
-		db.close();
-	}
-	catch(err) {
-	   Titanium.API.log("saveSearch() - Can't insert values. ");
-	   db.close();
-	}
-	// On Save, update view for previous histories.
-	getPreviousHistorySearches();
+      // Show history block after creating new entries.
+      $.previousSearchBox.show();;
+    },
+    getCallHistory: function() {
+      // Connect to SQL, check if the number has been previous called to enable rating button.
+    	try {
+    		callHistoryDB = Ti.Database.open('userSearches');
+    		var callResults = callHistoryDB.execute('SELECT phone_number FROM call_entries');
+    		while (callResults.isValidRow()) {
+    			var callResult = callResults.fieldByName('phone_number');
+    		  	Ti.API.info("111111 UerCalls" +  callResult + number);
+    		  	if (callResult == number) {
+    		  		Ti.API.info("There is a match!!!");
+    		  		leaveRatingButton.setBackgroundColor("#3096E0");
+    		  		leaveRatingButton.addEventListener('click', function(e){
+    					numberFeedback(idSplitted);
+    				});
+    		  	}
+    		  	else {
+    		  		Ti.API.info("No match...");
+    		  	}
+    		  Ti.API.info("CHECK CALL HISTORY");
+    		  callResults.next();
+    		}
+    		callHistoryDB.close();
+    	}
+    	catch(err) {
+    	   Titanium.API.log("111111 USerCalls." , err);
+    	   callHistoryDB.close();
+    	}
+    }
 }
- // Create a previous search results view and get entries. .
-function getPreviousHistorySearches() {
-	searchHistoryResults.removeAllChildren();
-	Titanium.API.log("888888888888getPreviousHistorySearches");
-	try {
-		db = Ti.Database.open('userSearches');
-		var searchResults = db.execute('SELECT company_name,company_id,variation_id,search_time FROM search_entries ORDER BY search_time DESC');
-		while (searchResults.isValidRow()) {
-		  Ti.API.info("888888888888DB SELECT" +  searchResults.fieldByName('company_name') + ',' + searchResults.fieldByName('company_id') + ',' + searchResults.fieldByName('variation_id')
-		  	+ ',' + searchResults.fieldByName('search_time')
-		  );
-		  Ti.API.info("888888888888TEST");
-		  createSearchHistoryViewEntry(searchResults.fieldByName('company_name'), searchResults.fieldByName('company_id'), searchResults.fieldByName('variation_id'));
-		  searchResults.next();
-		}
-		db.close();
-	}
-	catch(err) {
-	   Titanium.API.log("888888888888getPreviousHistorySearches." , err);
-	   db.close();
-	}
-
-	// Show history block after creating new entries.
-	showHistoryBlock();
-
-}
-getPreviousHistorySearches();
-
+sqlLite.getPreviousSearches();
  // Create an entry if search entries exist.
 function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 	Ti.API.log("****createViewEntry:", company_name, company_id, variation_id);
@@ -1047,266 +910,16 @@ function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 		});
 		searchButton.add(searchLabel);
 		searchButton.addEventListener('click', retriveNumbers);
-		searchHistoryResults.add(searchButton);
+		$.searchHistoryResults.add(searchButton);
 	}
-}
-
-/*
- * Helper functions
- * These functions are used continuously through the old.
- */
-// This function checks if an array contains duplicates, if so, it returns true.
-function hasDuplicates(array) {
-    var valuesSoFar = Object.create(null);
-    for (var i = 0; i < array.length; ++i) {
-        var value = array[i];
-        if (value in valuesSoFar) {
-            return true;
-        }
-        valuesSoFar[value] = true;
-    }
-    return false;
-}
-// This function trims a string so it can fit into the user interface.
-function truncate(string){
-   if (string.length > 25)
-      return string.substring(0,25)+'...';
-   else
-      return string;
-};
-// Set number type functionality.
-function getNumberType(number) {
-
-	var startOfNum = number.substring(0,4);
-    switch (startOfNum) {
-		case "0870":
-			number_type = "0870";
-		  break;
-		case "0800":
-		    number_type = "0800";
-		  break;
-		case "0845":
-		    number_type = "0845";
-		  break;
-		default:
-		number_type = "na";
-	}
-	return number_type;
-}
-// Get Number Price Functionality.
-function getPrice(numberType) {
-	var companyNamesPrice = [];
-	var filtered_results_companies = [];
-
-	if (numberType == "na") {
-		Ti.API.log("Number not found.");
-		var noPricing = Ti.UI.createLabel({
-			text: "Pricing not found.",
-			textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
-			width: "100%",
-			top: "80",
-			color: '#000',
-			font: { fontSize:18 }
-		});
-		priceWindow.add(noPricing);
-	}
-	else {
-		var priceDescription = Ti.UI.createLabel({
-			color:'#000',
-			text: "*Please note that the table below accounts for access charges based on network providers. It does not include a service charge.",
-			textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
-			top: "80",
-			left: "3%",
-			width: "94%",
-			font: { fontSize:16 }
-		});
-		priceWindow.add(priceDescription);
-		Ti.API.log("getPrice", numberType);
-		var url = "http://up637415.co.uk/telephone-numbers/pricing/" + numberType;
-		 var client = Ti.Network.createHTTPClient({
-		     // function called when the response data is available
-		     onload : function(e) {
-
-		        Ti.API.info("Received text: " + this.responseText);
-
-		        var json = JSON.parse(this.responseText);
-		        resultNodes = json.prices;
-
-				resultsLength = resultNodes.length;
-				Ti.API.info("resultsLength ", resultsLength);
-				for (index = 0; index < resultsLength; ++index) {
-					var companyName = resultNodes[index].title;
-					var numberType = resultNodes[index].number_type;
-					var accessCharge = resultNodes[index].access_charge;
-					var phonePlan = resultNodes[index].plan;
-					companyNamesPrice.push({company: companyName, number_type: numberType, access_charge: accessCharge, phone_plan: phonePlan});
-				}
-
-				// Group results based on company name.
-				grouped = {};
-
-				companyNamesPrice.forEach(function (a) {
-				    grouped[a.company] = grouped[a.company] || [];
-				    grouped[a.company].push({ number_type: a.number_type, access_charge: a.access_charge, phone_plan: a.phone_plan });
-				});
-
-				groupedResults = JSON.stringify(grouped);
-				groupedResultsLength = Object.keys(grouped).length;
-				Ti.API.info("companyNamesPricegrouped ", JSON.stringify(grouped));
-
-				var companyData = [];
-				// Loop over companies in grouped results.
-				for (var key in grouped) {
-					var indexCompany = Object.keys(grouped).indexOf(key);
-					var groupKey = grouped[key];
-
-					Ti.API.info("getPrice() indexCompany ", key);
-					Ti.API.info("getPrice() indexCompany ", JSON.stringify(indexCompany));
-					Ti.API.info("getPrice() groupKey ", JSON.stringify(groupKey));
-
-					// Create Company Table
-					createCompanyTable(key, indexCompany, groupKey);
-					companyData.push(row);
-				}
-				var createCustomView = function() {
-					var view = Ti.UI.createView({
-						backgroundColor: '#222',
-						height: 40
-					});
-					var operator = Ti.UI.createLabel({
-						text: "Operator Name",
-						left: "10%",
-						color: '#fff'
-					});
-					view.add(operator);
-					var payg = Ti.UI.createLabel({
-						text: "Contract",
-						left: "50%",
-						color: '#fff'
-					});
-					view.add(payg);
-					var contract = Ti.UI.createLabel({
-						text: "PAYG",
-						left: "70%",
-						color: '#fff'
-					});
-					view.add(contract);
-					return view;
-				};
-
-				var tableOfCompanies = Ti.UI.createTableView({
-				  backgroundColor:'white',
-				  headerView: createCustomView(),
-				  data: companyData,
-				  top: 160
-				});
-
-				Ti.API.info("operatorNames ", JSON.stringify(filtered_results_companies));
-
-				// Add table of companies.
-				priceWindow.add(tableOfCompanies);
-
-		     },
-		     // function called when an error occurs, including a timeout
-		     onerror : function(e) {
-		         Ti.API.debug(e.error);
-		         //alert('error');
-		     },
-		     timeout : 5000  // in milliseconds
-		 });
-		 // Prepare the connection.
-		 client.open("GET", url);
-		 // Send the request.
-		 client.send();
-	}
-}
-
-// Create company table for pricing.
-function createCompanyTable(key, indexCompany, groupKey){
-	var defaultFontSize = Ti.Platform.name === 'android' ? 16 : 14;
-
-	for (index = 0; index < groupKey.length; ++index){
-	  row = Ti.UI.createTableViewRow({
-	    className:'numberPricing', // used to improve table performance
-	    rowIndex:index, // custom property, useful for determining the row during events
-	    height:40,
-	    backgroundColor: "#eee"
-	  });
-
-	  var labelCompanyName = Ti.UI.createLabel({
-	    color:'#000',
-	    font:{fontFamily:'Arial', fontSize:defaultFontSize+6, fontWeight:'bold'},
-	    text: key,
-	    left:"10%",
-	    width:200, height: 30,
-	    background: "#000"
-	  });
-	  row.add(labelCompanyName);
-
-	  	// Loop over details for each company.
-		for (index = 0; index < groupKey.length; ++index) {
-			// Add Prices to table.
-			Ti.API.info("groupKeyIndex", JSON.stringify(groupKey[index]));
-		  //addPricesToTable();
-		  var type = "NA";
-		  if(groupKey[index].phone_plan == "0"){
-		  	  var labelDetails = Ti.UI.createLabel({
-			    color:'#000',
-			    font:{fontFamily:'Arial', fontSize:defaultFontSize+2, fontWeight:'normal'},
-			    text: "£" + groupKey[index].access_charge,
-			    left:"50%",
-			    width:360
-			  });
-			  row.add(labelDetails);
-		  }
-		  else if (groupKey[index].phone_plan == "1") {
-		  	 var labelDetails = Ti.UI.createLabel({
-			    color:'#000',
-			    font:{fontFamily:'Arial', fontSize:defaultFontSize+2, fontWeight:'normal'},
-			    text: "£" + groupKey[index].access_charge,
-			    left:"70%",
-			    width:360
-			  });
-			  row.add(labelDetails);
-		  }
-
-		}
-	}
-	return row;
-}
-// Add prices table.
-function addPricesToTable(){
-	Ti.API.info("groupKeyIndex", JSON.stringify(groupKey[index]));
-	var priceValue = groupKey[index].access_charge;
-	// Check if variable is contract or pay as you go.
-	Ti.API.info("companyNamesPricegrouped ", priceValue.length);
-	if (priceValue != 0) {
-		if (groupKey[index].phone_plan == 0 ) {
-			filtered_results_companies.push(priceValue);
-		}
-		else {
-			filtered_results_companies.push("na");
-			Ti.API.info("phone plan is contract");
-		}
-	}
-}
-function createPriceEntry(planType, priceValue){
-	if (planType == "payg") {
-		Ti.API.info("phone plan is PAYG");
-	}
-	if (planType == "contract") {
-		Ti.API.info("phone plan is contract");
-	}
-	Ti.API.info("createPriceEntry ");
 }
 // Back button handler for Index.
 $.index.addEventListener('androidback' , function(e){
-    searchInputBox.value = "";
+    $.searchInputBox.value = "";
 });
 
 /*
  * Page open
  *
  */
-$.index.add(searchInputBox);
 $.index.open();
