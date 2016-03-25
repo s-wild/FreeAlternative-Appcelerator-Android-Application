@@ -40,10 +40,29 @@
     </ios>
     <android xmlns:android="http://schemas.android.com/apk/res/android">
         <manifest>
-            <application android:theme="@style/mytheme"/>
+            <!--<application android:theme="@style/mytheme"/>-->
+            <application android:theme="@style/mytheme">
+	            <activity
+	                android:configChanges="keyboardHidden|orientation|screenSize"
+	                android:screenOrientation="portrait"
+	                android:name=".altphoneActivity">
+	                <intent-filter>
+	                    <action android:name="android.intent.action.MAIN"/>
+	                    <category android:name="android.intent.category.LAUNCHER"/>
+	                </intent-filter>
+	            </activity> 
+	            <activity
+	                android:configChanges="keyboardHidden|orientation|screenSize"
+	                android:name="org.appcelerator.titanium.TiActivity"
+	                android:screenOrientation="portrait"/>
+	            <activity
+	                android:configChanges="keyboardHidden|orientation|screenSize"
+	                android:name="org.appcelerator.titanium.TiTranslucentActivity"
+	                android:screenOrientation="portrait" android:theme="@style/Theme.AppCompat.Translucent"/>
+	        </application>
             <uses-permission android:name="android.permission.CALL_PHONE"/>
             <uses-permission android:name="android.permission.INTERNET"/>
-            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/> 
         </manifest>
     </android>
     <mobileweb>
