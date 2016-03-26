@@ -1,11 +1,11 @@
 // Arguments passed into this controller can be accessed off of the `$.args` object directly or:
 var args = $.args;
-var currentID = this.id;
-Titanium.API.log("currentID**********:" , currentID);
 
-idSplitted = currentID.split('|');
-var number = idSplitted[0];
-var nid = idSplitted[1];
+var currentID = Ti.App.Properties.getString('currentID');
+var currentTelephoneNumber = Ti.App.Properties.getString('telephoneNumber');
+var nid = Ti.App.Properties.getString('node_id');
+
+Titanium.API.log("currentTelephoneNumber**********:" , currentTelephoneNumber);
 
 
 // Create modal box to display results (global variable to close after action).
@@ -142,16 +142,16 @@ var ratingLabel = Ti.UI.createLabel({
   font: { fontSize:23 }
 });
 // Connect to SQL, check if the number has been previous called to enable rating button.
-sqlLite.getCallHistory(number, idSplitted, leaveRatingButton);
+sqlLite.getCallHistory(currentTelephoneNumber, idSplitted, leaveRatingButton);
 //leaveRating.addEventListener('click', callNumber);
 leaveRatingButton.add(ratingImage);
 leaveRatingButton.add(ratingLabel);
 
 
 // Add event listeners to buttons.
-callButton.addEventListener('click', Alloy.Globals.numberOptions.call);
-// getPriceButton.addEventListener('click', getNumberPrice);
-// contactsAddButton.addEventListener('click', saveAsContact);
+callButton.addEventListener('click', callNumber);
+getPriceButton.addEventListener('click', getNumberPrice);
+contactsAddButton.addEventListener('click', saveAsContact);
 
 // Add buttons to container view.
 containerView.add(callButton);
@@ -168,3 +168,93 @@ wrapperView.add(containerView);
 
 modalBox.add(wrapperView);
 modalBox.open({modal:true});
+
+/*
+ * Number Options.
+ */
+function callNumber() {
+	// Close modal box after button is pressed.
+	modalBox.close();
+	Ti.API.info('Call function id: ' + this.id);
+	var currentID = this.id;
+	var idSplitted = currentID.split('|');
+	var number = idSplitted[0];
+	var nid = idSplitted[1];
+	var call = 'tel: ' + number;
+	//Ti.API.info('Call'+ call);
+	var telephoneNumberValue = number;
+	//numberFeedback(idSplitted);
+	var intent = Ti.Android.createIntent({
+		action: Ti.Android.ACTION_CALL,
+		data: call
+	});
+	Ti.Android.currentActivity.startActivity(intent);
+
+  // Save call in history log.
+  Alloy.Globals.sqlLite.saveCallInHistory(number);
+}
+/*
+ * Save as contact.
+ */
+function getNumberPrice(){
+	// Create Price Window.
+	priceWindow = Ti.UI.createWindow({
+    	fullscreen: false,
+    	backgroundColor: "#fff"
+	}); 
+
+	// Back button handler for price page.
+	priceWindow.addEventListener('androidback' , function(e){
+		// When user goes back, empty window contents.
+		priceWindow.removeAllChildren();
+		priceWindow.close();
+	});
+
+	// Open Price Window.
+	priceWindow.open({
+	    activityEnterAnimation: Ti.Android.R.anim.fade_in,
+	    activityExitAnimation: Ti.Android.R.anim.fade_out
+	});
+
+	//
+	var currentID = this.id;
+	var idSplitted = currentID.split('|');
+	var number = idSplitted[0];
+	var nid = idSplitted[1];
+	var numberType = getNumberType(number);
+	var numberPrice = getPrice(numberType);
+
+	// Add title to top of page showing number.
+	var priceLabel = Ti.UI.createLabel({
+		color:'#000',
+		text: "Pricing Information for " + number,
+		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+		top: "15",
+		left: "3%",
+		width: "94%",
+		font: { fontSize:23 }
+	});
+	priceWindow.add(priceLabel);
+
+}
+/*
+ * Save as contact.
+ */
+function saveAsContact(id, call_button_number) {
+	var currentID = this.id;
+	var idSplitted = currentID.split('|');
+	var number = idSplitted[0];
+	var nid = idSplitted[1];
+	var name = idSplitted[2];
+	if (Titanium.Platform.name == 'android') {
+        var intent = Ti.Android.createIntent
+        ({
+            action: 'com.android.contacts.action.SHOW_OR_CREATE_CONTACT',
+            data: 'mailto:'+name
+        });
+            intent.putExtra('phone', number);
+            intent.putExtra('name',name);
+
+        Ti.Android.currentActivity.startActivity(intent);
+     }
+}

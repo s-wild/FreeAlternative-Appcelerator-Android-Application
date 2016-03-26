@@ -10,9 +10,6 @@
 //
 // Alloy.Globals.someGlobalFunction = function(){};
 
-
-//Alloy.Globals.someGlobalFunction = function(){};
-
 /*
  * Global Variables
  */
@@ -113,19 +110,5 @@ Alloy.Globals.errorMessages = {
         }
       });
       serverConnectionError.show();
-    }
-};
-/*
- * Number Options.
- */
-Alloy.Globals.numberOptions = {
-    call: function(call) {
-      var localTelephoneNumber = Ti.App.Properties.getString('currentTelephoneNumber');
-      Ti.API.log("localTelephoneNumber", JSON.stringify(localTelephoneNumber));
-      var intent = Ti.Android.createIntent({
-        action: Ti.Android.ACTION_CALL,
-        data: localTelephoneNumber
-      });
-      Ti.Android.currentActivity.startActivity(intent);
     }
 };
