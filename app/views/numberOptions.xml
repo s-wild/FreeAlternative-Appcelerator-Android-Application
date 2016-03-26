@@ -1,5 +1,14 @@
 <Alloy>
 	<View class="container">
 		<Label id="searchTitle">It's working!</Label>
+		<!-- Alert Box for rating a call. -->
+		<AlertDialog id="rateNumber" title="Rate your call"
+									message="<b>Rate the number</b>" cancel="1">
+			<Widget id="starwidget" src="starrating" max='5' initialRating='0' />
+			<!-- The ButtonNames tag sets the buttonNames property. -->
+			<ButtonNames>
+				<ButtonName>Submit</ButtonName>
+			</ButtonNames>
+		</AlertDialog>
 	</View>
 </Alloy>

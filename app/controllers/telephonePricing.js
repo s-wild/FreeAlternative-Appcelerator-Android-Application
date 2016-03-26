@@ -1,51 +1,34 @@
-// Set number type functionality.
-function getNumberType(number) {
-	var startOfNum = number.substring(0,4);
-    switch (startOfNum) {
-		case "0870":
-			number_type = "0870";
-		  break;
-		case "0800":
-		    number_type = "0800";
-		  break;
-		case "0845":
-		    number_type = "0845";
-		  break;
-		default:
-		number_type = "na";
-	}
-	return number_type;
-}
+
+// Arguments passed into this controller can be accessed off of the `$.args` object directly or:
+var args = $.args;
+
+// Back button handler for price page.
+$.telephonePricing.addEventListener('androidback' , function(e){
+  // When user goes back, empty window contents.
+  $.telephonePricing.removeAllChildren();
+  $.telephonePricing.close();
+});
+
+var pricingID = Ti.App.Properties.getString('pricingID');
+var idSplitted = pricingID.split('|');
+var number = idSplitted[0];
+var nid = idSplitted[1];
+var numberType = Alloy.Globals.helpers.getNumberType(number);
+var numberPrice = getPrice(numberType);
+
+$.priceTitle.setText(number + " Pricing");
+
 // Get Number Price Functionality.
 function getPrice(numberType) {
 	var companyNamesPrice = [];
 	var filtered_results_companies = [];
 
 	if (numberType == "na") {
-		Ti.API.log("Number not found.");
-		var noPricing = Ti.UI.createLabel({
-			text: "Pricing not found.",
-			textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
-			width: "100%",
-			top: "80",
-			color: '#000',
-			font: { fontSize:18 }
-		});
-		priceWindow.add(noPricing);
+		Ti.API.log("getPrice", "Number not found.");
 	}
 	else {
-		var priceDescription = Ti.UI.createLabel({
-			color:'#000',
-			text: "*Please note that the table below accounts for access charges based on network providers. It does not include a service charge.",
-			textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
-			top: "80",
-			left: "3%",
-			width: "94%",
-			font: { fontSize:16 }
-		});
-		priceWindow.add(priceDescription);
 		Ti.API.log("getPrice", numberType);
-		var url = "http://up637415.co.uk/telephone-numbers/pricing/" + numberType;
+		var url = Alloy.Globals.rootURL + "/telephone-numbers/pricing/" + numberType;
 		 var client = Ti.Network.createHTTPClient({
 		     // function called when the response data is available
 		     onload : function(e) {
@@ -121,13 +104,13 @@ function getPrice(numberType) {
 				  backgroundColor:'white',
 				  headerView: createCustomView(),
 				  data: companyData,
-				  top: 160
+				  top: 130
 				});
 
 				Ti.API.info("operatorNames ", JSON.stringify(filtered_results_companies));
 
 				// Add table of companies.
-				priceWindow.add(tableOfCompanies);
+				$.telephonePricing.add(tableOfCompanies);
 
 		     },
 		     // function called when an error occurs, including a timeout
@@ -142,6 +125,7 @@ function getPrice(numberType) {
 		 // Send the request.
 		 client.send();
 	}
+
 }
 
 // Create company table for pricing.
@@ -195,6 +179,7 @@ function createCompanyTable(key, indexCompany, groupKey){
 
 		}
 	}
+
 	return row;
 }
 // Add prices table.
@@ -222,3 +207,10 @@ function createPriceEntry(planType, priceValue){
 	}
 	Ti.API.info("createPriceEntry ");
 }
+
+// Open telephone pricing.
+// Open Price Window.
+$.telephonePricing.open({
+    activityEnterAnimation: Ti.Android.R.anim.fade_in,
+    activityExitAnimation: Ti.Android.R.anim.fade_out
+});

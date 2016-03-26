@@ -2,7 +2,6 @@
 (function () {
 
   // Hide elements on page until user searches.
-  $.resultsTitle.hide();
   $.searchResultsContainer.hide();
 
   // Activate cursor in search box on page load for index.
@@ -10,51 +9,35 @@
   	$.searchInputBox.focus();
   });
 
-  // Initialize Star Widget for rating a phone call.
-  $.starwidget.init();
-
 })();
 
 
-/*
- * Delay function for when user types.
- */
-var delay = (function(){
-	var timer = 0;
-	return function(callback, ms){
-		clearTimeout (timer);
-		timer = setTimeout(callback, ms);
-	};
-})();
+
 /*
  * Search Box Functionality.
  */
 $.searchInputBox.addEventListener('change', function(e) {
-
-	$.searchResultsContainer.hide();
 	$.searchResultsContainer.removeAllChildren();
-  $.resultsTitle.show();
-  $.resultsTitle.setText("");
 
 	var searchInput = $.searchInputBox.value; // Get searchInput value.
-  if(searchInput.length >= 2){
-    searchHistoryFlag = false;
+  if(searchInput.length >= 1){
+    Alloy.Globals.searchHistoryFlag = false;
 		$.previousSearchBox.hide();;
 		rearrangeScreenForSearch();
     $.activityIndicator.show();
     // Delay function will prevent bombardment of requests to the server.
-    delay(function(){
+    Alloy.Globals.delay(function(){
       $.searchResultsContainer.show();
       // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
-      var checkStringNumber = Alloy.Globals.checkNumeric(searchInput);
+      var checkStringNumber = Alloy.Globals.helpers.checkNumeric(searchInput);
       if (checkStringNumber == true) {
         type = "search_by_number";
-        url = rootURL + "/json/numbers?title=" + searchInput;
+        url = Alloy.Globals.rootURL + "/json/numbers?title=" + searchInput;
         getUrlContents(url, type);
       }
       else {
         // Adjust URL to match name search.
-        var url = rootURL + "/json/company-variations?company_name=" + searchInput;
+        var url = Alloy.Globals.rootURL + "/json/company-variations?company_name=" + searchInput;
         // Define type of search
         type = "search_by_name";
         getUrlContents(url, type);
@@ -62,14 +45,21 @@ $.searchInputBox.addEventListener('change', function(e) {
     }, 800 ); // This number is the delay for when the user types.
   }
   else {
-    sqlLite.getPreviousSearches();
-		defaultScreenForSearch();
-		searchHistoryFlag = true;
+  $.searchResultsContainer.hide();
+		var userHasSearched = true;
+    preventRequest(userHasSearched);
     $.searchResultsContainer.hide();
 		$.searchResultsContainer.data = [];
 		$.activityIndicator.hide();
   }
 });
+function preventRequest(userHasSearched) {
+  if(userHasSearched === true){
+    defaultScreenForSearch();
+    sqlLite.getPreviousSearches();
+  }
+  var userHasSearched = false;
+}
 
 /*
  * Call now button.
@@ -108,12 +98,8 @@ function getUrlContents(url, type, companyID, companyName) {
 				var resultNodes = json.companies;
 				//Ti.API.log("resultNodes", JSON.stringify(resultNodes));
 				var resultsLength = JSON.stringify(resultNodes.length);
-				if(resultsLength >= 1) {
-					// Ti.API.log("Results for company search: True");
-					$.resultsTitle.setText("Results");
-				}
 				if(resultsLength == 0) {
-          $.resultsTitle.setText("No Results Found");
+          //$.resultsTitle.setText("No Results Found");
 				}
 
 				for (index = 0; index < resultsLength; ++index) {
@@ -123,7 +109,7 @@ function getUrlContents(url, type, companyID, companyName) {
 					companyNames.push(resultNodeCompany);
 					resultCompanyID = resultNodes[index].company_id;
 					// Check if duplicates, prevent multiple company names being written.
-					if(Alloy.Globals.checkArrayForDuplicates(companyNames) == false) {
+					if(Alloy.Globals.helpers.checkArrayForDuplicates(companyNames) == false) {
 						// Push company name.
 						filtered_results.push({company: resultNodeCompany, company_id: resultCompanyID});
 						var companyWrapper = createCompanyWrapper(resultNodeCompany, resultCompanyID);
@@ -131,12 +117,12 @@ function getUrlContents(url, type, companyID, companyName) {
 						// Wrapper for buttons
 						var variationButtonWrapper = Ti.UI.createView({
 							height: Ti.UI.SIZE,
-						    top: '45',
-						    left: '3%',
-						    textAlign: 'left',
+					    top: '45',
+					    left: '3%',
+					    textAlign: 'left',
 							width: '94%'
-					    });
-					    companyWrapper.add(variationButtonWrapper);
+					  });
+					  companyWrapper.add(variationButtonWrapper);
 					}
 
 					resultNodeVariation = resultNodes[index].variation_name;
@@ -153,13 +139,9 @@ function getUrlContents(url, type, companyID, companyName) {
 				resultNodes = json.companies;
 				// Ti.API.log("JSON result", JSON.stringify(resultNodes));
 				resultsLength = JSON.stringify(resultNodes.length);
-				if(resultsLength >= 1) {
-					// Ti.API.log("Results for company search: True");
-					$.resultsTitle.setText("Results");
-				}
 				if(resultsLength == 0) {
 					// Ti.API.log("Results for company search: False");
-					$.resultsTitle.setText("No Results Found");
+					//$.resultsTitle.setText("No Results Found");
 				}
 				var companyNames = [];
 				var filtered_results = [];
@@ -169,7 +151,7 @@ function getUrlContents(url, type, companyID, companyName) {
 					companyNames.push(resultNodeCompany);
 					resultCompanyID = resultNodes[index].company_id;
 					// Check if duplicates, prevent multiple company names being written.
-					if(Alloy.Globals.checkArrayForDuplicates(companyNames) == false) {
+					if(Alloy.Globals.helpers.checkArrayForDuplicates(companyNames) == false) {
 						// Push company name.
 						filtered_results.push({company: resultNodeCompany, company_id: resultCompanyID});
 						// Create company wrapper.
@@ -217,7 +199,7 @@ function getUrlContents(url, type, companyID, companyName) {
 				CompanyVariationWrapper = createCompanyWrapper(resultNodeCompany, resultNodeCompanyID);
 				$.searchResultsContainer.add(CompanyVariationWrapper);
 				$.previousSearchBox.hide();;
-				if (searchHistoryFlag == true) {
+				if (Alloy.Globals.searchHistoryFlag == true) {
 					rearrangeScreenForSearch();
 					Ti.API.log("****** searchHistoryFlag is true");
 					$.searchResultsContainer.show();
@@ -302,10 +284,9 @@ function createCompanyWrapper(resultNodeCompany, resultCompanyID){
 	var wrapperBox = Ti.UI.createView({
 		id: resultCompanyID,
 		height: Ti.UI.SIZE,
-	    backgroundColor:'#eee',
-	    left: '3%',
-	    textAlign: 'left',
-		width: '94%',
+    backgroundColor:'#eee',
+    textAlign: 'left',
+		width: '100%',
 		top: 0
    });
     var company_label = Ti.UI.createLabel({
@@ -450,74 +431,17 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 }
 
 function retriveNumbers() {
-	$.searchResultsContainer.removeAllChildren();
-  $.resultsTitle.setText("Results");
 	var node_id = this.id;
 	var idSplitted = node_id.split(',');
 	var companyIDLocal = idSplitted[0];
 	var variationIDLocal = idSplitted[1];
 	Ti.API.log("JKHJHBJHBJH");
 	// Ti.API.log("variation_id", variationIDLocal);
-	var url = rootURL+"/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
+	var url = Alloy.Globals.rootURL+"/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
 	type = "companyNumbers";
 	companyID = "1";
 	companyName = "test";
 	getUrlContents(url, type);
-}
-/*
- * Rating functionality.
- * These functions show, get and post information about user ratings to the server.
- */
-// Generates the feedback box after user dials a number.
-function numberFeedback(idSplitted){
-	// Close modal box after clicking feedback button. This prevents
-	modalBox.close();
-	delay(function(){
-
-		// Set rating to unset to prevent incorrect ratings for multiple calls.
-		$.starwidget.setRating(0);
-
-		var telePhoneNumber = idSplitted[0];
-		var nodeID = idSplitted[1];
-
-		// Set message for feedback dialog popup. Include number to tell user what number they are rating.
-		$.rateNumber.setMessage("Thanks for using this service, please rate " + telePhoneNumber + " to help other users.");
-
-		// Show feedback from XML after phone call.
-		$.rateNumber.show();
-
-		// Add event listener for when submit button is clicked.
-		$.rateNumber.addEventListener('click', function(e){
-			postRatingToServer(e, nodeID);
-	 	});
-
-	}, 800 ); // This number is the delay so popup box appears after call.
-}
-function postRatingToServer(e, nodeID){
-	// Set post URL.
-	var url = rootURL+"/rest/vote/set_votes";
-
-	// Get current rating from dialog box stars.
-	var currentNumberRating = $.starwidget.getRating();
-
-	// Check if rating is set, if so post to server.
-	if (currentNumberRating > 0) {
-		// Convert Rating to percentage
-		var percentRating = currentNumberRating*20;
-
-		// Create array structure in prep for sending to server.
-		var voteEntry = {
-		    "votes": [{
-			    "entity_id": String(nodeID),
-			    "value": String(percentRating)
-		  	}]
-		};
-
-		var client = Ti.Network.createHTTPClient();
-		client.open('POST',url);
-		client.setRequestHeader('Content-Type','application/json');
-		client.send(JSON.stringify(voteEntry));
-	}
 }
 /*
  * User Search Save Functionality.
@@ -561,39 +485,6 @@ sqlLite = {
 
       // Show history block after creating new entries.
       $.previousSearchBox.show();;
-    },
-    /**
-     * Get Call History, enable feedback button if exists..
-     * @param {string} number - The telephone number.
-     * @param {string} idSplitted - Contains ID and phone number passed from button.
-     * @param {object} leaveRatingButton - Button View.
-     */
-    getCallHistory: function(number, idSplitted, leaveRatingButton) {
-      // Connect to SQL, check if the number has been previous called to enable rating button.
-    	try {
-        Titanium.API.log("getCallHistory @param:" , number + " " + idSplitted);
-    		callHistoryDB = Ti.Database.open('userSearches');
-    		var callResults = callHistoryDB.execute('SELECT phone_number FROM call_entries');
-    		while (callResults.isValidRow()) {
-    			var callResult = callResults.fieldByName('phone_number');
-    		  	if (callResult == number) {
-    		  		Ti.API.info("getCallHistory: Matched.");
-    		  		leaveRatingButton.setBackgroundColor("#3096E0");
-    		  		leaveRatingButton.addEventListener('click', function(e){
-    					numberFeedback(idSplitted);
-    				});
-    		  	}
-    		  	else {
-    		  		Ti.API.info("getCallHistory: No match.");
-    		  	}
-    		  callResults.next();
-    		}
-    		callHistoryDB.close();
-    	}
-    	catch(err) {
-    	   Titanium.API.log("getCallHistory error:" , err);
-    	   callHistoryDB.close();
-    	}
     }
 }
 sqlLite.getPreviousSearches();

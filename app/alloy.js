@@ -14,43 +14,90 @@
  * Global Variables
  */
 // Root url to connect to server.
-var rootURL = "http://up637415.co.uk/";
+Alloy.Globals.rootURL = "http://up637415.co.uk/";
 // Search details
-searchHistoryFlag = false;
-url="na";
-type = "search_by_number";
+Alloy.Globals.searchHistoryFlag = false;
+Alloy.Globals.searchType = "na";
 
-// Trim string if too long for display. Used for company/variation.
-Alloy.Globals.truncateString = function(string){
-  if (string.length > 25) {
-    return string.substring(0,25)+'...';
-  }
-  else {
-    return string;
-  }
-};
-// This function checks if an array contains duplicates, if so, it returns true.
-Alloy.Globals.checkArrayForDuplicates = function(array) {
-  var valuesSoFar = Object.create(null);
-  for (var i = 0; i < array.length; ++i) {
-      var value = array[i];
-      if (value in valuesSoFar) {
-          return true;
+/*
+ * Delay function for when user types.
+ */
+Alloy.Globals.delay = (function(){
+	var timer = 0;
+	return function(callback, ms){
+		clearTimeout (timer);
+		timer = setTimeout(callback, ms);
+	};
+})();
+
+/*
+ * Global helper functions.
+ */
+Alloy.Globals.helpers = {
+    /**
+    * Returns a trimmed a string to prevent layout issues.
+    * from http://stackoverflow.com/questions/4700226/i-want-to-truncate-a-text-or-line-with-ellipsis-using-javascript
+    * @param {string} string - The full length of a string.
+    */
+    truncateString: function(string) {
+      if (string.length > 25) {
+        return string.substring(0,25)+'...';
       }
-      valuesSoFar[value] = true;
-  }
-  return false;
-};
-// Check if numeric number is in String.
-Alloy.Globals.checkNumeric = function(searchInput) {
-	return (searchInput - 0) == searchInput && ('' + searchInput).trim().length > 0;
+      else {
+        return string;
+      }
+    },
+    /**
+    * Filters companies for display.
+    * from http://stackoverflow.com/questions/7376598/in-javascript-how-do-i-check-if-an-array-has-duplicate-values
+    * @param {array} Array - Array of companies.
+    */
+    checkArrayForDuplicates: function(array) {
+      var valuesSoFar = Object.create(null);
+      for (var i = 0; i < array.length; ++i) {
+          var value = array[i];
+          if (value in valuesSoFar) {
+              return true;
+          }
+          valuesSoFar[value] = true;
+      }
+      return false;
+    },
+    /**
+    * Numeric check, the returned value is used to set the URL for HTTP request.
+    * from http://stackoverflow.com/questions/9716468/is-there-any-function-like-isnumeric-in-javascript-to-validate-numbers
+    * @param {searchInput} string - Value from search box on startup screen.
+    */
+    checkNumeric: function(searchInput) {
+      return !isNaN(parseFloat(searchInput)) && isFinite(searchInput);
+    },
+    /**
+    * Checks the telephone number type, this is passed to the server.
+    * The return value is passed to the server which sets the pricing.
+    * @param {number} string - Telephone number value.
+    */
+    getNumberType: function(number) {
+        number_type = "na";
+        switch (true) {
+    		case number.substring(0, 4) == "0870":
+    			number_type = "0870";
+    		  break;
+    		case number.substring(0, 4) == "0800":
+    		    number_type = "0800";
+    		  break;
+    		case number.substring(0, 4) == "0845":
+    		    number_type = "0845";
+    		  break;
+    	}
+    	return number_type;
+    }
 };
 /*
  * SQL Lite Functions.
  */
 Alloy.Globals.sqlLite = {
   /**
-  * Create a point.
+  * Create a user search entry.
   * @param {string} resultNodeCompany - The company name.
   * @param {string} resultNodeCompanyID - The company ID from database.
   * @param {string} resultNodeVariationID - The company variation ID from database.
@@ -111,4 +158,34 @@ Alloy.Globals.errorMessages = {
       });
       serverConnectionError.show();
     }
+};
+/**
+ * Post's the users rating to server. .
+ * @param {nodeID} string - Drupal API needs node id to leave a rating.
+ */
+Alloy.Globals.postRatingToServer = function(nodeID){
+  // Set post URL.
+	var url = Alloy.Globals.rootURL+"/rest/vote/set_votes";
+
+	// Get current rating from dialog box stars.
+	var currentNumberRating = $.starwidget.getRating();
+
+	// Check if rating is set, if so post to server.
+	if (currentNumberRating > 0) {
+		// Convert Rating to percentage
+		var percentRating = currentNumberRating*20;
+
+		// Create array structure in prep for sending to server.
+		var voteEntry = {
+		    "votes": [{
+			    "entity_id": String(nodeID),
+			    "value": String(percentRating)
+		  	}]
+		};
+
+		var client = Ti.Network.createHTTPClient();
+		client.open('POST',url);
+		client.setRequestHeader('Content-Type','application/json');
+		client.send(JSON.stringify(voteEntry));
+	}
 };

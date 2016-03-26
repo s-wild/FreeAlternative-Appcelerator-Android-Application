@@ -1,0 +1,13 @@
+<Alloy>
+  <Window class="container" theme="mytheme">
+    <View id="wrapper">
+      <ImageView id="imageLogo"/>
+      <Label id="priceTitle">NA</Label>
+      <View id="pricingResultsWrapper">
+
+      </View>
+      <!-- Define the styling properties in the TSS file -->
+      <ActivityIndicator id="activityIndicator" top="100"/>
+    </View>
+  </Window>
+</Alloy>

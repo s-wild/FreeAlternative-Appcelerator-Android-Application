@@ -46,10 +46,10 @@
 	top: "10dp",
 }
 "#searchResultsContainer":{
-	backgroundColor: "#000",
+	backgroundColor: "#fff",
 	layout: "vertical",
 	width: "100%",
-	top: "120dp"
+	top: "65dp"
 }
 "#resultsTitle":{
 	top: "80dp"
