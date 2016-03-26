@@ -11,8 +11,6 @@
 
 })();
 
-
-
 /*
  * Search Box Functionality.
  */
@@ -21,7 +19,7 @@ backSpaceCheck = -1;
 $.searchInputBox.addEventListener('change', function() {
 	$.searchResultsContainer.removeAllChildren();
 	var searchInput = $.searchInputBox.value; // Get searchInput value.
-  if(searchInput.length >= 2){
+  if(searchInput.length >= 1){
     $.searchResultsContainer.setTop(60);
     counter = 0;
     Alloy.Globals.searchHistoryFlag = false;
@@ -90,6 +88,7 @@ function callNowButton(id, call_button_number) {
  * are made from this function.
  */
 function getUrlContents(url, type, companyID, companyName) {
+  $.searchResultsContainer.removeAllChildren();
 	// Get contents from URL.
 	var xhr = Ti.Network.createHTTPClient({
 		ondatastream: function(e) {
@@ -126,7 +125,7 @@ function getUrlContents(url, type, companyID, companyName) {
 						// Wrapper for buttons
 						var variationButtonWrapper = Ti.UI.createView({
 							height: Ti.UI.SIZE,
-					    top: '45',
+					    top: 50,
 					    left: '3%',
 					    textAlign: 'left',
 							width: '94%'
@@ -168,13 +167,13 @@ function getUrlContents(url, type, companyID, companyName) {
 						$.searchResultsContainer.add(companyWrapper);
 						// Wrapper for buttons
 						var variationButtonWrapper = Ti.UI.createView({
-							height: Ti.UI.SIZE,
-						    top: 50,
-						    left: '3%',
-						    textAlign: 'left',
-							width: '94%'
-					    });
-					    companyWrapper.add(variationButtonWrapper);
+              height: Ti.UI.SIZE,
+              top: 50,
+              left: '3%',
+              textAlign: 'left',
+              width: '94%'
+					  });
+					  companyWrapper.add(variationButtonWrapper);
 					}
 
 					resultNodeVariation = resultNodes[index].variation_name;
@@ -416,10 +415,9 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	    width: "65%",
 	    left: "40%"
 	});
-
 	call_buttons.add(number_label);
 
-    // Add event listener if iteration request is for company lookups.
+  // Add event listener if iteration request is for company lookups.
 	if(typeOfAction == "companyRequest") {
 		// Ti.API.log("Company Requested");
 		call_buttons.addEventListener('click', retriveVariations);
@@ -440,11 +438,12 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 }
 
 function retriveNumbers() {
+  rearrangeScreenForSearch();
+  Ti.API.log("retriveNumbers");
 	var node_id = this.id;
 	var idSplitted = node_id.split(',');
 	var companyIDLocal = idSplitted[0];
 	var variationIDLocal = idSplitted[1];
-	Ti.API.log("JKHJHBJHBJH");
 	// Ti.API.log("variation_id", variationIDLocal);
 	var url = Alloy.Globals.rootURL+"/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
 	type = "companyNumbers";

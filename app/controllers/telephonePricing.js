@@ -114,11 +114,10 @@ function getPrice(numberType) {
 
 		     },
 		     // function called when an error occurs, including a timeout
-		     onerror : function(e) {
-		         Ti.API.debug(e.error);
-		         //alert('error');
-		     },
-		     timeout : 5000  // in milliseconds
+         onerror: function() {
+   	    	Alloy.Globals.errorMessages.serverConnection();
+   	    },
+		     timeout : 3000  // in milliseconds
 		 });
 		 // Prepare the connection.
 		 client.open("GET", url);
@@ -157,7 +156,7 @@ function createCompanyTable(key, indexCompany, groupKey){
 		  //addPricesToTable();
 		  var type = "NA";
 		  if(groupKey[index].phone_plan == "0"){
-		  	  var labelDetails = Ti.UI.createLabel({
+		  	var labelDetails = Ti.UI.createLabel({
 			    color:'#000',
 			    font:{fontFamily:'Arial', fontSize:defaultFontSize+2, fontWeight:'normal'},
 			    text: "£" + groupKey[index].access_charge,
@@ -166,7 +165,7 @@ function createCompanyTable(key, indexCompany, groupKey){
 			  });
 			  row.add(labelDetails);
 		  }
-		  else if (groupKey[index].phone_plan == "1") {
+		  else if (groupKey[index].phone_plan === "1") {
 		  	 var labelDetails = Ti.UI.createLabel({
 			    color:'#000',
 			    font:{fontFamily:'Arial', fontSize:defaultFontSize+2, fontWeight:'normal'},
@@ -188,8 +187,8 @@ function addPricesToTable(){
 	var priceValue = groupKey[index].access_charge;
 	// Check if variable is contract or pay as you go.
 	Ti.API.info("companyNamesPricegrouped ", priceValue.length);
-	if (priceValue != 0) {
-		if (groupKey[index].phone_plan == 0 ) {
+	if (priceValue !== 0) {
+		if (groupKey[index].phone_plan === 0 ) {
 			filtered_results_companies.push(priceValue);
 		}
 		else {
@@ -208,7 +207,6 @@ function createPriceEntry(planType, priceValue){
 	Ti.API.info("createPriceEntry ");
 }
 
-// Open telephone pricing.
 // Open Price Window.
 $.telephonePricing.open({
     activityEnterAnimation: Ti.Android.R.anim.fade_in,
