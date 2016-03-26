@@ -17,11 +17,12 @@
  * Search Box Functionality.
  */
 counter = -1;
+backSpaceCheck = -1;
 $.searchInputBox.addEventListener('change', function() {
 	$.searchResultsContainer.removeAllChildren();
-
 	var searchInput = $.searchInputBox.value; // Get searchInput value.
   if(searchInput.length >= 2){
+    $.searchResultsContainer.setTop(60);
     counter = 0;
     Alloy.Globals.searchHistoryFlag = false;
 		$.previousSearchBox.hide();;
@@ -36,7 +37,7 @@ $.searchInputBox.addEventListener('change', function() {
         type = "search_by_number";
         url = Alloy.Globals.rootURL + "/json/numbers?title=" + searchInput;
         getUrlContents(url, type);
-      } 
+      }
       else {
         // Adjust URL to match name search.
         var url = Alloy.Globals.rootURL + "/json/company-variations?company_name=" + searchInput;
@@ -44,9 +45,10 @@ $.searchInputBox.addEventListener('change', function() {
         type = "search_by_name";
         getUrlContents(url, type);
       }
-    }, 800 ); // This number is the delay for when the user types.
+    }, 600 ); // This number is the delay for when the user types.
   }
   else {
+    $.searchResultsContainer.setTop(200);
     // Add to counter and run only on the first instance. Prevents multiple display generation.
     counter= counter+1;
     if(counter === 1) {
