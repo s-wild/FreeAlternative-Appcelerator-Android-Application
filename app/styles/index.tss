@@ -26,8 +26,9 @@
 }
 "#searchTitle": {
 	top:"75dp",
+	left:"0",
 	width: "100%",
-	textAlign: "left"
+	textAlign: "center"
 }
 
 /* Search Bar */
@@ -41,13 +42,18 @@
 	color: "#000"
 }
 /* Search results */
+"#searchResultsWrapper":{
+	top: "10dp",
+}
 "#searchResultsContainer":{
-	top: "120dp",
 	backgroundColor: "#000",
 	layout: "vertical",
-	width: "100%"
+	width: "100%",
+	top: "120dp"
 }
-
+"#resultsTitle":{
+	top: "80dp"
+}
 /* Previous History View */
 "#previousSearchBox":{
 	backgroundColor: "#eee",

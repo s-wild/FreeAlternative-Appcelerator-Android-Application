@@ -4,10 +4,11 @@
   		<ImageView id="imageLogo"/>
   		<Label id="searchTitle">Search for an alternative telephone number.</Label>
 
-  		<Label id="noResults" top="80">Sorry, no results.</Label>
-  		<Label id="yesResults" top="80">Results:</Label>
-      <!-- Previous search history will show here. -->
-      <ScrollView id="searchResultsContainer"/>
+      <View id="searchResultsWrapper">
+    		<Label id="resultsTitle"></Label>
+        <!-- Previous search history will show here. -->
+        <ScrollView id="searchResultsContainer"/>
+      </View>
 
       <!-- Search Bar Elements -->
       <SearchBar id="searchInputBox" class="beforeSearch"/>

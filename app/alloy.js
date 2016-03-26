@@ -20,7 +20,8 @@
 var rootURL = "http://up637415.co.uk/";
 // Search details
 searchHistoryFlag = false;
-
+url="na";
+type = "search_by_number";
 
 // Trim string if too long for display. Used for company/variation.
 Alloy.Globals.truncateString = function(string){
@@ -45,10 +46,6 @@ Alloy.Globals.checkArrayForDuplicates = function(array) {
 };
 // Check if numeric number is in String.
 Alloy.Globals.checkNumeric = function(searchInput) {
-	return (searchInput - 0) == searchInput && ('' + searchInput).trim().length > 0;
-};
-// Database functions.
-Alloy.Globals.sqlLite = function(searchInput) {
 	return (searchInput - 0) == searchInput && ('' + searchInput).trim().length > 0;
 };
 /*
@@ -116,5 +113,19 @@ Alloy.Globals.errorMessages = {
         }
       });
       serverConnectionError.show();
+    }
+};
+/*
+ * Number Options.
+ */
+Alloy.Globals.numberOptions = {
+    call: function(call) {
+      var localTelephoneNumber = Ti.App.Properties.getString('currentTelephoneNumber');
+      Ti.API.log("localTelephoneNumber", JSON.stringify(localTelephoneNumber));
+      var intent = Ti.Android.createIntent({
+        action: Ti.Android.ACTION_CALL,
+        data: localTelephoneNumber
+      });
+      Ti.Android.currentActivity.startActivity(intent);
     }
 };
