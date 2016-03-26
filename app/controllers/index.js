@@ -16,11 +16,13 @@
 /*
  * Search Box Functionality.
  */
-$.searchInputBox.addEventListener('change', function(e) {
+counter = -1;
+$.searchInputBox.addEventListener('change', function() {
 	$.searchResultsContainer.removeAllChildren();
 
 	var searchInput = $.searchInputBox.value; // Get searchInput value.
-  if(searchInput.length >= 1){
+  if(searchInput.length >= 2){
+    counter = 0;
     Alloy.Globals.searchHistoryFlag = false;
 		$.previousSearchBox.hide();;
 		rearrangeScreenForSearch();
@@ -34,7 +36,7 @@ $.searchInputBox.addEventListener('change', function(e) {
         type = "search_by_number";
         url = Alloy.Globals.rootURL + "/json/numbers?title=" + searchInput;
         getUrlContents(url, type);
-      }
+      } 
       else {
         // Adjust URL to match name search.
         var url = Alloy.Globals.rootURL + "/json/company-variations?company_name=" + searchInput;
@@ -45,12 +47,17 @@ $.searchInputBox.addEventListener('change', function(e) {
     }, 800 ); // This number is the delay for when the user types.
   }
   else {
-  $.searchResultsContainer.hide();
-		var userHasSearched = true;
-    preventRequest(userHasSearched);
-    $.searchResultsContainer.hide();
-		$.searchResultsContainer.data = [];
-		$.activityIndicator.hide();
+    // Add to counter and run only on the first instance. Prevents multiple display generation.
+    counter= counter+1;
+    if(counter === 1) {
+      $.searchResultsContainer.hide();
+    	var userHasSearched = true;
+      preventRequest(userHasSearched);
+      $.searchResultsContainer.hide();
+    	$.searchResultsContainer.data = [];
+    	$.activityIndicator.hide();
+    }
+    Ti.API.log("counter", counter);
   }
 });
 function preventRequest(userHasSearched) {
