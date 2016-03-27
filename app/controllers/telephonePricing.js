@@ -15,8 +15,9 @@ var number = idSplitted[0];
 var nid = idSplitted[1];
 var numberType = Alloy.Globals.helpers.getNumberType(number);
 var numberPrice = getPrice(numberType);
+var numberFormatted = Ti.Locale.formatTelephoneNumber(number);
 
-$.priceTitle.setText(number + " Pricing");
+$.priceTitle.setText(numberFormatted + " Pricing");
 
 // Get Number Price Functionality.
 function getPrice(numberType) {
@@ -139,14 +140,25 @@ function getPrice(numberType) {
 // Create company table for pricing.
 function createCompanyTable(key, indexCompany, groupKey){
 	var defaultFontSize = Ti.Platform.name === 'android' ? 16 : 14;
+	
+	// Get operatorName and color row to match.
+	var telephonymanager = require("com.goyya.telephonymanager");
+	var networkOperatorName = telephonymanager.networkOperatorName;
+	Ti.API.log('networkOperatorName:   ' + telephonymanager.networkOperatorName);
 
 	for (index = 0; index < groupKey.length; ++index){
+		if(key.toLowerCase() === networkOperatorName){
+			var backgroundColor = "#FBB450";
+		}
+		else {
+			backgroundColor = "#eee";
+		}
 	  row = Ti.UI.createTableViewRow({
 	    className:'numberPricing', // used to improve table performance
 	    rowIndex:index, // custom property, useful for determining the row during events
 	    height:40,
-	    backgroundColor: "#eee"
-	  });
+	    backgroundColor: backgroundColor
+	  }); 
 
 	  var labelCompanyName = Ti.UI.createLabel({
 	    color:'#000',
