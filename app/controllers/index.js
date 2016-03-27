@@ -66,7 +66,7 @@ searchInputBox.addEventListener('change', function(e) {
 				var checkTelephonePremium = numberTelephoneCheckPremium(searchInput); // Check if premium number.
 				if (checkTelephonePremium == true) {
 					Ti.API.log("it's a premium number.");
-					url = "http://10.0.3.2/fa.dev/httpdocs/views/phone-numbers?field_premium_number_value=" + searchInput;
+					url = "http://up637415.co.uk/json/numbers?title=" + searchInput;
 					getUrlContents(url, type);
 				} 
 			} 
@@ -129,9 +129,9 @@ function getUrlContents(url, type) {
 			jsonText = this.responseText;
 			// parse the retrieved data, turning it into a JavaScript object
 			var json = JSON.parse(this.responseText);
-			resultNodes = json.nodes; 
+			resultNodes = json.companies; 
 			Ti.API.info(JSON.stringify(resultNodes));
-			resultsLength = JSON.stringify(json.nodes.length);
+			resultsLength = JSON.stringify(json.companies.length);
 			var index;
 			topprop = 0.1; // this is space between two labels one below the other
 			if (type == "search_by_name_number") { 
@@ -147,8 +147,8 @@ function getUrlContents(url, type) {
 					noResults.show();
 				}
 				for (index = 0; index < resultsLength; ++index) {
-					resultNodeTitle = JSON.stringify(resultNodes[index].node.title);
-					resultNodeID = JSON.stringify(resultNodes[index].node.Nid);
+					resultNodeTitle = JSON.stringify(resultNodes[index].title);
+					resultNodeID = JSON.stringify(resultNodes[index].Nid);
 					var resultNodeTitleNoQuotes = resultNodeTitle.slice(1, -1);
 					var row = createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction);
 					resultsView.add(row);
