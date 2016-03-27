@@ -25,6 +25,15 @@ function getPrice(numberType) {
 
 	if (numberType == "na") {
 		Ti.API.log("getPrice", "Number not found.");
+    var noPricing = Ti.UI.createLabel({
+      color:'#000',
+      font:{fontFamily:'Arial', fontSize:22, fontWeight:'normal'},
+      text: "No Pricing Found.",
+      top: 220,
+      textAlign: "center",
+      width:"100%"
+    });
+    $.telephonePricing.add(noPricing);
 	}
 	else {
 		Ti.API.log("getPrice", numberType);
