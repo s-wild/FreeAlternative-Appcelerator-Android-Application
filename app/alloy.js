@@ -164,12 +164,9 @@ Alloy.Globals.errorMessages = {
  * Post's the users rating to server. .
  * @param {nodeID} string - Drupal API needs node id to leave a rating.
  */
-Alloy.Globals.postRatingToServer = function(nodeID){
+Alloy.Globals.postRatingToServer = function(nodeID, currentNumberRating){
   // Set post URL.
 	var url = Alloy.Globals.rootURL+"/rest/vote/set_votes";
-
-	// Get current rating from dialog box stars.
-	var currentNumberRating = $.starwidget.getRating();
 
 	// Check if rating is set, if so post to server.
 	if (currentNumberRating > 0) {

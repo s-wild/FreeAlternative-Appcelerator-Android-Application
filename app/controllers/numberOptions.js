@@ -252,7 +252,9 @@ function numberFeedback(idSplitted){
 
 		// Add event listener for when submit button is clicked.
 		$.rateNumber.addEventListener('click', function(){
-			Alloy.Globals.postRatingToServer(nodeID);
+      // Get current rating from dialog box stars.
+    	var currentNumberRating = $.starwidget.getRating();
+			Alloy.Globals.postRatingToServer(nodeID, currentNumberRating);
 	 	});
 
 	}, 800 ); // This number is the delay so popup box appears after call.
