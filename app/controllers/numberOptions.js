@@ -8,7 +8,7 @@
   var currentTelephoneNumber = Ti.App.Properties.getString('telephoneNumber');
   var nid = Ti.App.Properties.getString('node_id');
 
-  Titanium.API.log("currentTelephoneNumber**********:" , currentTelephoneNumber);
+  Titanium.API.log("currentTelephoneNumber:" , currentTelephoneNumber);
 
   // Initialize Star Widget for rating a phone call.
   $.starwidget.init();

@@ -19,11 +19,11 @@ backSpaceCheck = -1;
 $.searchInputBox.addEventListener('change', function() {
 	$.searchResultsContainer.removeAllChildren();
 	var searchInput = $.searchInputBox.value; // Get searchInput value.
-  if(searchInput.length >= 1){
+  if(searchInput.length >= 2){
     $.searchResultsContainer.setTop(60);
     counter = 0;
     Alloy.Globals.searchHistoryFlag = false;
-		$.previousSearchBox.hide();;
+		$.previousSearchBox.hide();
 		rearrangeScreenForSearch();
     $.activityIndicator.show();
     // Delay function will prevent bombardment of requests to the server.
@@ -31,14 +31,16 @@ $.searchInputBox.addEventListener('change', function() {
       $.searchResultsContainer.show();
       // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
       var checkStringNumber = Alloy.Globals.helpers.checkNumeric(searchInput);
-      if (checkStringNumber == true) {
+      var url = "";
+      var type = "";
+      if (checkStringNumber === true) {
         type = "search_by_number";
         url = Alloy.Globals.rootURL + "/json/numbers?title=" + searchInput;
         getUrlContents(url, type);
       }
       else {
         // Adjust URL to match name search.
-        var url = Alloy.Globals.rootURL + "/json/company-variations?company_name=" + searchInput;
+        url = Alloy.Globals.rootURL + "/json/company-variations?company_name=" + searchInput;
         // Define type of search
         type = "search_by_name";
         getUrlContents(url, type);
@@ -142,12 +144,12 @@ function getUrlContents(url, type, companyID, companyName) {
 
 				}
 			}
-			if (type == "search_by_number") {
+			if (type === "search_by_number") {
 				Ti.API.log("Search by numbers initiated");
 				resultNodes = json.companies;
 				// Ti.API.log("JSON result", JSON.stringify(resultNodes));
 				resultsLength = JSON.stringify(resultNodes.length);
-				if(resultsLength == 0) {
+				if(resultsLength === 0) {
 					// Ti.API.log("Results for company search: False");
 					//$.resultsTitle.setText("No Results Found");
 				}
@@ -201,12 +203,10 @@ function getUrlContents(url, type, companyID, companyName) {
 				Ti.API.log("****** GET URL", resultNodeCompany);
 				Ti.API.log("****** SAVE SEARCH CALLED");
 				Alloy.Globals.sqlLite.saveSearch(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
-        // On Save, update view for previous histories.
-      	sqlLite.getPreviousSearches();
 				// Create a company variation wrapper and assign numbers to it.
 				CompanyVariationWrapper = createCompanyWrapper(resultNodeCompany, resultNodeCompanyID);
 				$.searchResultsContainer.add(CompanyVariationWrapper);
-				$.previousSearchBox.hide();;
+				$.previousSearchBox.hide();
 				if (Alloy.Globals.searchHistoryFlag == true) {
 					rearrangeScreenForSearch();
 					Ti.API.log("****** searchHistoryFlag is true");
@@ -215,6 +215,7 @@ function getUrlContents(url, type, companyID, companyName) {
 				}
 				else {
 					$.searchResultsContainer.setTop(70);
+          $.searchResultsContainer.show();
 					Ti.API.log("****** searchHistoryFlag is false");
 				}
 
@@ -227,14 +228,14 @@ function getUrlContents(url, type, companyID, companyName) {
 				// Wrapper for call buttons
 				var callButtonWrapper = Ti.UI.createView({
 					height: Ti.UI.SIZE,
-				    top: top_spacing,
+				    top: 50,
 				    left: '3%',
 				    bottom: '3%',
 				    textAlign: 'left',
 					width: '94%'
-			    });
+			  });
 
-			    CompanyVariationWrapper.add(callButtonWrapper);
+			  CompanyVariationWrapper.add(callButtonWrapper);
 
 				// Go through results and generate call buttons.
 				for (index = 0; index < resultsLength; ++index) {
@@ -287,8 +288,7 @@ function getUrlContents(url, type, companyID, companyName) {
  * These functions generate the UI for telephone number results.
  */
 function createCompanyWrapper(resultNodeCompany, resultCompanyID){
-	// Ti.API.log("createCompanyWrapper", resultNodeCompany);
-	topprop = 0.1; // this is space between two wrappers one below the other.
+  var trimmedCompany = Alloy.Globals.helpers.truncateString(resultNodeCompany);
 	var wrapperBox = Ti.UI.createView({
 		id: resultCompanyID,
 		height: Ti.UI.SIZE,
@@ -297,11 +297,11 @@ function createCompanyWrapper(resultNodeCompany, resultCompanyID){
 		width: '100%',
 		top: 0
    });
-    var company_label = Ti.UI.createLabel({
+  var company_label = Ti.UI.createLabel({
 	    color: '#000',
 	    height: Ti.UI.SIZE,
-	    text: resultNodeCompany,
-	    top: '3%',
+	    text: trimmedCompany,
+	    top: 10,
 	    bottom: '9%',
 	    left: '3%',
 	    font: { fontSize:24 }
@@ -310,30 +310,37 @@ function createCompanyWrapper(resultNodeCompany, resultCompanyID){
 	return wrapperBox;
 }
 function createVariationButton(resultCompanyID, resultNodeVariation, variation_id, index, type){
-	if (type =="search_by_name") {
-		top_spacing = index*70;
-	}
-	else {
-		top_spacing = index*0.01;
-	}
-	// Ti.API.log("createVariationButton:", resultNodeVariation, variation_id, top_spacing);
-	var variationButton = Ti.UI.createView({
-		top: top_spacing,
-		id: resultCompanyID + "," + variation_id,
-		height: Ti.UI.SIZE,
-	    left: 0,
-	    bottom: 10,
-	    backgroundColor:'#FAB350',
-	    textAlign: 'left',
-		width: '100%'
+	Ti.API.log("************createVariationButton:", type);
+  if (type == "search_by_name") {
+    var variationButton = Ti.UI.createView({
+      top: index*70,
+      id: resultCompanyID + "," + variation_id,
+      height: Ti.UI.SIZE,
+      left: 0,
+      bottom: 10,
+      backgroundColor:'#FAB350',
+      textAlign: 'left',
+      width: '100%'
     });
-    var variation_label = Ti.UI.createLabel({
-	    color: '#fff',
-	    text: resultNodeVariation,
-	    top: 12,
-	    bottom: 12,
-	    left: 10,
-	    font: { fontSize:24 }
+  }
+  else {
+    var variationButton = Ti.UI.createView({
+      id: resultCompanyID + "," + variation_id,
+      height: Ti.UI.SIZE,
+      left: 0,
+      bottom: 10,
+      backgroundColor:'#FAB350',
+      textAlign: 'left',
+      width: '100%'
+    });
+  }
+  var variation_label = Ti.UI.createLabel({
+    color: '#fff',
+    text: resultNodeVariation,
+    top: 12,
+    bottom: 12,
+    left: 10,
+    font: { fontSize:24 }
 	});
 	variationButton.add(variation_label);
 	variationButton.addEventListener('click', retriveNumbers);
@@ -439,8 +446,8 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 
 function retriveNumbers() {
   rearrangeScreenForSearch();
-  Ti.API.log("retriveNumbers");
 	var node_id = this.id;
+  Ti.API.log("22222222222222retriveNumbers:", node_id);
 	var idSplitted = node_id.split(',');
 	var companyIDLocal = idSplitted[0];
 	var variationIDLocal = idSplitted[1];
@@ -467,6 +474,7 @@ function defaultScreenForSearch() {
 	$.searchTitle.show();
   $.addClass($.searchInputBox, 'beforeSearch');
   $.removeClass($.searchInputBox, 'afterSearch');
+  $.previousSearchBox.show();
 }
 /*
 * SQL Lite Functions relating to index page.
@@ -492,13 +500,13 @@ sqlLite = {
       }
 
       // Show history block after creating new entries.
-      $.previousSearchBox.show();;
+      $.previousSearchBox.show();
     }
-}
+};
 sqlLite.getPreviousSearches();
  // Create an entry if search entries exist.
 function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
-	Ti.API.log("****createViewEntry:", company_name, company_id, variation_id);
+	Ti.API.log("createViewEntry:", company_name, company_id, variation_id);
 	if(company_name !== undefined) {
 		var searchButton = Ti.UI.createView({
 			id: company_id + "," + variation_id,
@@ -525,6 +533,7 @@ function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 // Back button handler for Index.
 $.index.addEventListener('androidback' , function(e){
     $.searchInputBox.value = "";
+    defaultScreenForSearch();
 });
 
 /*

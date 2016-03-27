@@ -18,6 +18,7 @@ Alloy.Globals.rootURL = "http://up637415.co.uk/";
 // Search details
 Alloy.Globals.searchHistoryFlag = false;
 Alloy.Globals.searchType = "na";
+Alloy.Globals.minLengthBeforeSearch = 2;
 
 /*
  * Delay function for when user types.
