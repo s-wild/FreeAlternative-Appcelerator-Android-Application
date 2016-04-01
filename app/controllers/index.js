@@ -84,23 +84,22 @@ searchInputBox.addEventListener('change', function(e) {
 	}, 300 ); // This number is the delay for when the user types.
 });
 
-// Call now button.
-function callButton(id, call_button_number) {
-	Ti.API.info('Call function id: ' + this.id);
-	var call = 'tel: ' + this.id;
-	// Ti.API.info('Call'+ call);
-	Ti.API.info('Call function id: ' + this.id);
-	var call = 'tel: ' + this.id;
-	Ti.API.info('Call'+ call);
-	var telephoneNumberValue = this.id;
-	numberFeedback(telephoneNumberValue);
+
+/**
+ * Calls a telephone number. 
+ */
+function callNow() {
+	// Log parameters.
+	Ti.API.info('Call function id: ' + this.button_id);
+	// Get Telephone number (set as button id).
+	var call = 'tel: ' + this.button_id;
+	// Create intent
 	var intent = Ti.Android.createIntent({
 		action: Ti.Android.ACTION_CALL,
 		data: call
 	});
+	// Begin Call.
 	Ti.Android.currentActivity.startActivity(intent); 
-
-	
 } 
 
 // Function to check if numeric number is in String.
@@ -181,32 +180,32 @@ function getUrlContents(url, type) {
 	xhr.send();
 }
 
-function createRowTitle(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction) {
-	topprop = 0.1; // this is space between two labels one below the other
+/**
+ * Creates buttons in a row view. 
+ */
+function createCallButtons(resultNodeTitle, resultNodeID) {
+	// Create row.
 	var row = Ti.UI.createView({
 	    height: 80,
-	    top: 1, 
 	    left: 0
-    }); 
+	}); 
+	
+	// Call buttons
 	var call_buttons = Titanium.UI.createButton({
 	  	id: resultNodeID,
-	    title: resultNodeTitleNoQuotes,
+	    title: resultNodeTitle,
 	    keyboardType: Ti.UI.KEYBOARD_NUMBERS_PUNCTUATION,
 	    top: 1, 
 	    left: '3%',
-		width: '94%', 
-		height: '94%'
 	 });
 	
-	  row.add(call_buttons);
-	  if(typeOfAction == "company_links") {
-		call_buttons.addEventListener('click', retriveResult); 
-	  }
-	  if(typeOfAction == "call_buttons") {
-		call_buttons.addEventListener('click', callButton); 
-	  }
-	   
-	  return row;
+	// Add button to row.
+	row.add(call_buttons);
+	
+	// Add event listener
+	call_buttons.addEventListener('click', callButton); 
+
+	return row;
 }
 
 function retriveResult() {
