@@ -18,7 +18,12 @@ filtering telephone numbers.
 - app/controllers/telephonePricing.js, generates pricing for a telephone number.
 
 #### Installation
-Module dependancies can be installed using:
+The application requires Titanium Appcelerator in order to run. Open the root
+directory in Appcelerator Platform (https://platform.appcelerator.com/) to
+run the application.
+
+Module dependancies can be installed within the terminal after navigating
+to the root directory using:
 
 ```
 gittio install -g
@@ -27,7 +32,3 @@ Additionally, seperate modules can be installed using:
 ```
 gittio install -g gittio install com.goyya.telephonymanager
 ```
-
-The application requires Titanium Appcelerator in order to run. Open the root
-directory in Appcelerator Platform (https://platform.appcelerator.com/) to
-run the application. 
