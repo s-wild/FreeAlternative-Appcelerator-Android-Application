@@ -63,7 +63,7 @@ searchInputBox.addEventListener('change', function(e) {
 				Ti.API.log("You have entered a number.");
 				Ti.API.log("it's a premium number.");
 				type = "search_by_number";
-				url = "http://10.0.3.2/fa.dev/httpdocs/json/views/phone-number-search?title=" + searchInput;
+				url = "http://up637415.co.uk/json/views/phone-number-search?title=" + searchInput;
 				getUrlContents(url, type);
 			} 
 			else {
@@ -72,7 +72,7 @@ searchInputBox.addEventListener('change', function(e) {
 				resultsView.setTop(150);
 				yesResults.setTop(120);
 				// Adjust URL to match name search. 			
-				var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/companies?name=" + searchInput;
+				var url = "http://up637415.co.uk/json/views/companies?name=" + searchInput;
 				// Define type of search
 				type = "search_by_name";
 				Ti.API.log("URL", url);
@@ -300,7 +300,7 @@ function retriveVariations() {
 	var NodeIDNoQuotes = node_id.slice(1, -1);
 	fullResult.setText(fullResultTitle);
 	fullResult.show();
-	var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/company-variations/" + NodeIDNoQuotes;
+	var url = "http://up637415.co.uk/json/views/company-variations/" + NodeIDNoQuotes;
 	getUrlContents(url, type, companyID, companyName);
 }
 
@@ -314,7 +314,7 @@ function retriveNumbers() {
 	var fullResultTitle = this.title+":"; 
 	fullResult.setText(fullResultTitle);
 	fullResult.show();
-	var url = "http://10.0.3.2/fa.dev/httpdocs/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
+	var url = "http://up637415.co.uk/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
 	type = "companyNumbers";
 	getUrlContents(url, type);
 }
