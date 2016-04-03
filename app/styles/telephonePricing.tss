@@ -1,0 +1,22 @@
+
+".container": {
+	backgroundColor:"white"
+}
+"#wrapper": {
+	width: "96%",
+	left: "2%"
+}
+
+/* Logo + Introduction Text */
+"#imageLogo": {
+	image:"/logo.png",
+	top:"15dp",
+	width:"100%"
+}
+"#priceTitle": {
+  color:'#000',
+  textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+  top: "80dp",
+  width: "100%",
+  font: { fontSize:26 }
+}
