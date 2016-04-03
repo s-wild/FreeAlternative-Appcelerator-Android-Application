@@ -94,10 +94,9 @@
 ".afterSearch":{
 	top: "10dp"
 }
-
 /* To Sort */
 "#noResults": {
-	top: 150
+	top: "150"
 }
 "#starwidget": {
 	left: "10dp",
