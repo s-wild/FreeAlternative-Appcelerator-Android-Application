@@ -1,8 +1,17 @@
-<Alloy>
-	<Window class="container">
-		<Label id="serachTitle" >Search for an alternative telephone number:</Label>
-		<TextField id="searchInputBox" borderStyle="Ti.UI.INPUT_BORDERSTYLE_ROUNDED" color="#336699" top="35" left="10" width="250" height="60" />
-		<Label id="noResults" top="100">Sorry, no results.</Label>
-		<Label id="yesResults" top="100">Results:</Label>
-	</Window>
+ <Alloy>
+	<Window class="container" theme="mytheme">
+		<Label id="serachTitle" >Search for an alternative telephone number, e.g. 'Vodafone' or '0870070191'</Label>
+		<TextField id="searchInputBox" borderStyle="Ti.UI.INPUT_BORDERSTYLE_ROUNDED" color="#336699" top="55" left="10" width="94%" height="60" />
+		<Label id="noResults" top="120">Sorry, no results.</Label>
+		<Label id="yesResults" top="120">Results:</Label>
+		<Label id="fullResult" top="120">Full Result:</Label>
+		<AlertDialog id="rateNumber" title="Rate your call"
+            message="<b>Rate the number</b>" cancel="1">
+			<Widget id="starwidget" src="starrating" max='5' initialRating='0' />
+            <!-- The ButtonNames tag sets the buttonNames property. -->
+            <ButtonNames>
+                <ButtonName>Submit</ButtonName>
+            </ButtonNames>
+        </AlertDialog> 
+	</Window> 
 </Alloy>
