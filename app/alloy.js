@@ -80,13 +80,13 @@ Alloy.Globals.helpers = {
     getNumberType: function(number) {
         number_type = "na";
         switch (true) {
-    		case number.substring(0, 4) == "0870":
+    		case number.substring(0, 4) === "0870":
     			number_type = "0870";
     		  break;
-    		case number.substring(0, 4) == "0800":
+    		case number.substring(0, 4) === "0800":
     		    number_type = "0800";
     		  break;
-    		case number.substring(0, 4) == "0845":
+    		case number.substring(0, 4) === "0845":
     		    number_type = "0845";
     		  break;
     	}
