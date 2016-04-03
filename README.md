@@ -27,3 +27,7 @@ Additionally, seperate modules can be installed using:
 ```
 gittio install -g gittio install com.goyya.telephonymanager
 ```
+
+The application requires Titanium Appcelerator in order to run. Open the root
+directory in Appcelerator Platform (https://platform.appcelerator.com/) to
+run the application. 
