@@ -21,6 +21,9 @@
       tabBarHidden:true,
       navBarHidden:true
   });
+  
+  // Set orientation.
+  modalBox.orientationModes = [Ti.UI.PORTRAIT, Ti.UI.UPSIDE_PORTRAIT];
 
   // Create wrapper, background and container view.
   var wrapperView = Ti.UI.createView(); // Full screen

@@ -227,6 +227,8 @@ function createPriceEntry(planType, priceValue){
 	}
 	Ti.API.info("createPriceEntry ");
 }
+// Set orientation.
+$.index.orientationModes = [Ti.UI.PORTRAIT, Ti.UI.UPSIDE_PORTRAIT]; 
 
 // Open Price Window.
 $.telephonePricing.open({

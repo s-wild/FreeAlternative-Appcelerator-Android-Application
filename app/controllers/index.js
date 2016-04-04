@@ -540,4 +540,5 @@ $.index.addEventListener('androidback' , function(e){
  * Page open
  *
  */
+$.index.orientationModes = [Ti.UI.PORTRAIT, Ti.UI.UPSIDE_PORTRAIT]; 
 $.index.open();
