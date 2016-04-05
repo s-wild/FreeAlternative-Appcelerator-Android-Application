@@ -148,10 +148,10 @@ function getUrlContents(url, type, companyID, companyName) {
 				Ti.API.log("Search by numbers initiated");
 				resultNodes = json.companies;
 				// Ti.API.log("JSON result", JSON.stringify(resultNodes));
-				resultsLength = JSON.stringify(resultNodes.length);
-				if(resultsLength === 0) {
-					// Ti.API.log("Results for company search: False");
-					//$.resultsTitle.setText("No Results Found");
+				resultsLength = resultNodes.length;
+        if(resultsLength === 0) {
+          // Assume no results, display to user.
+          noResultsScreen();
 				}
 				var companyNames = [];
 				var filtered_results = [];
