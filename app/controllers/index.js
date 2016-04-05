@@ -1,6 +1,5 @@
 // Perform tasks on page load.
 (function () {
-
   // Hide elements on page until user searches.
   $.searchResultsContainer.hide();
 
@@ -8,7 +7,6 @@
   $.index.addEventListener("focus",function(e){
   	$.searchInputBox.focus();
   });
-
 })();
 
 /*
@@ -106,10 +104,12 @@ function getUrlContents(url, type, companyID, companyName) {
 			topprop = 0.1; // this is space between two labels one below the other
 			if (type == "search_by_name") {
 				var resultNodes = json.companies;
-				//Ti.API.log("resultNodes", JSON.stringify(resultNodes));
-				var resultsLength = JSON.stringify(resultNodes.length);
+				Ti.API.log("resultNodes", JSON.stringify(resultNodes));
+        Ti.API.log("resultNodesLength", resultNodes.length);
+				var resultsLength = resultNodes.length;
 				if(resultsLength === 0) {
-          //$.resultsTitle.setText("No Results Found");
+          // Assume no results, display to user.
+          noResultsScreen();
 				}
 
 				for (index = 0; index < resultsLength; ++index) {
@@ -228,10 +228,10 @@ function getUrlContents(url, type, companyID, companyName) {
 				// Wrapper for call buttons
 				var callButtonWrapper = Ti.UI.createView({
 					height: Ti.UI.SIZE,
-				    top: 50,
-				    left: '3%',
-				    bottom: '3%',
-				    textAlign: 'left',
+			    top: 50,
+			    left: '3%',
+			    bottom: '3%',
+			    textAlign: 'left',
 					width: '94%'
 			  });
 
@@ -282,6 +282,29 @@ function getUrlContents(url, type, companyID, companyName) {
 
 	// Set activity indicator to hide when results are retrived.
 	$.activityIndicator.hide();
+}
+/*
+ * No results screen.
+ * If an empty response is returned from the server, this function notify the
+ * user.
+ */
+function noResultsScreen() {
+  Ti.API.log("No results.");
+  //alert('this is a message');
+  var noResultsWrapper = Ti.UI.createView({
+    height: 100,
+    top: 50,
+    textAlign: 'left',
+    width: '94%',
+  });
+  var no_results_label = Ti.UI.createLabel({
+	    color: '#000',
+      text: 'No Results',
+	    font: { fontSize:24 },
+	});
+  noResultsWrapper.add(no_results_label);
+  $.searchResultsContainer.add(noResultsWrapper);
+  $.searchResultsContainer.show(no_results_label);
 }
 /*
  * Results Interface.
@@ -540,5 +563,5 @@ $.index.addEventListener('androidback' , function(e){
  * Page open
  *
  */
-$.index.orientationModes = [Ti.UI.PORTRAIT, Ti.UI.UPSIDE_PORTRAIT]; 
+$.index.orientationModes = [Ti.UI.PORTRAIT, Ti.UI.UPSIDE_PORTRAIT];
 $.index.open();

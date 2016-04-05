@@ -1,4 +1,4 @@
- <Alloy>
+<Alloy>
 	<Window class="container" theme="mytheme">
     <View id="wrapper">
   		<ImageView id="imageLogo"/>

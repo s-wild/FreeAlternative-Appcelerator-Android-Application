@@ -140,7 +140,7 @@ function getPrice(numberType) {
 // Create company table for pricing.
 function createCompanyTable(key, indexCompany, groupKey){
 	var defaultFontSize = Ti.Platform.name === 'android' ? 16 : 14;
-	
+
 	// Get operatorName and color row to match.
 	var telephonymanager = require("com.goyya.telephonymanager");
 	var networkOperatorName = telephonymanager.networkOperatorName;
@@ -158,7 +158,7 @@ function createCompanyTable(key, indexCompany, groupKey){
 	    rowIndex:index, // custom property, useful for determining the row during events
 	    height:40,
 	    backgroundColor: backgroundColor
-	  }); 
+	  });
 
 	  var labelCompanyName = Ti.UI.createLabel({
 	    color:'#000',
@@ -228,7 +228,7 @@ function createPriceEntry(planType, priceValue){
 	Ti.API.info("createPriceEntry ");
 }
 // Set orientation.
-$.index.orientationModes = [Ti.UI.PORTRAIT, Ti.UI.UPSIDE_PORTRAIT]; 
+$.telephonePricing.orientationModes = [Ti.UI.PORTRAIT, Ti.UI.UPSIDE_PORTRAIT]; 
 
 // Open Price Window.
 $.telephonePricing.open({
