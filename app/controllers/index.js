@@ -228,10 +228,10 @@ function getUrlContents(url, type, companyID, companyName) {
 				// Wrapper for call buttons
 				var callButtonWrapper = Ti.UI.createView({
 					height: Ti.UI.SIZE,
-			    top: 50,
-			    left: '3%',
-			    bottom: '3%',
-			    textAlign: 'left',
+			    	top: 50,
+			    	left: '3%',
+			    	bottom: '3%',
+			    	textAlign: 'left',
 					width: '94%'
 			  });
 
@@ -386,7 +386,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
 	// Add spacing and create rows for entries.
 	top_spacing = index*70;
 	var row = Ti.UI.createView({
-	    height: 60,
+	    height: "80dp",
 	    top: top_spacing,
 	    left: 0
    });
@@ -397,7 +397,7 @@ function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOf
   	  textAlign: "left",
   	  top: 1,
   		width: '98%',
-  		height: '96%',
+  		height: '60dp',
   		backgroundColor:background
  	});
  	var call_image = Ti.UI.createImageView({
@@ -557,6 +557,11 @@ function createSearchHistoryViewEntry(company_name, company_id, variation_id) {
 $.index.addEventListener('androidback' , function(e){
     $.searchInputBox.value = "";
     defaultScreenForSearch();
+});
+
+// Event Listener for Adding a new telephone number.
+$.addTelephoneNumber.addEventListener('click', function(e){
+    Titanium.Platform.openURL(Alloy.Globals.rootURL + '/submit-new-telephone-number');
 });
 
 /*

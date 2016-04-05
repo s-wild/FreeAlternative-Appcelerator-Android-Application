@@ -26,6 +26,12 @@
       </View>
       <!-- Define the styling properties in the TSS file -->
       <ActivityIndicator id="activityIndicator" top="100"/>
+      
+      <!-- Add telephone number button -->
+      <View id="addTelephoneNumber">
+      	<ImageView id="addPhoneNumberIcon"/>
+        <Label id="addNumberTitle">Add number.</Label>
+      </View>
     </View>
 	</Window>
 </Alloy>
