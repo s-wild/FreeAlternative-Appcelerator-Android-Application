@@ -2,7 +2,7 @@
 <ti:app xmlns:ti="http://ti.appcelerator.org">
     <id>uk.co.freealternative.altphone</id>
     <name>FreeAlternative</name>
-    <version>1.4</version>
+    <version>1.5</version>
     <publisher>simonwild</publisher>
     <url>http://www.freealternative.co.uk</url>
     <description>Helps users avoid premium rate telephone numbers.</description>

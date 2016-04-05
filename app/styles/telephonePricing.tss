@@ -20,3 +20,10 @@
   width: "100%",
   font: { fontSize:26 }
 }
+"#priceDescription": {
+  color:'#000',
+  textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+  top: "120dp",
+  width: "100%",
+  font: { fontSize:18 }
+}

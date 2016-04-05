@@ -114,7 +114,7 @@ function getPrice(numberType) {
 				  backgroundColor:'white',
 				  headerView: createCustomView(),
 				  data: companyData,
-				  top: 130
+				  top: 200
 				});
 
 				Ti.API.info("operatorNames ", JSON.stringify(filtered_results_companies));

@@ -6,6 +6,9 @@
       <View id="pricingResultsWrapper">
 
       </View>
+      <Label id="priceDescription">
+      	Please be aware that this pricing is for access charges only. The telephone number may have an additional service charge.
+      </Label>
       <!-- Define the styling properties in the TSS file -->
       <ActivityIndicator id="activityIndicator" top="100"/>
     </View>
