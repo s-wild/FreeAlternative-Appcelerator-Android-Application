@@ -561,7 +561,7 @@ $.index.addEventListener('androidback' , function(e){
 
 // Event Listener for Adding a new telephone number.
 $.addTelephoneNumber.addEventListener('click', function(e){
-    Titanium.Platform.openURL(Alloy.Globals.rootURL + '/submit-new-telephone-number');
+    Titanium.Platform.openURL(Alloy.Globals.rootURL + 'submit-new-telephone-number');
 });
 
 /*
