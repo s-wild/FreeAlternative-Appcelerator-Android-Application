@@ -88,7 +88,7 @@
 	layout: 'vertical',
 	height: '250dp',
 	width:"100%",
-	showPagingControl:true
+	showVerticalScrollIndicator: "true"
 }
 
 /* Rearrange after a user searches */
