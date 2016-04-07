@@ -231,36 +231,37 @@ function saveAsContact(id) {
         Ti.Android.currentActivity.startActivity(intent);
      }
 }
-/*
+/**
  * Rating functionality.
- * These functions show, get and post information about user ratings to the server.
+ * These functions get the ratings after the telephone call.
+ * @param {object} idSplitted - Contains the telephone number and node id.
  */
-// Generates the feedback box after user dials a number.
 function numberFeedback(idSplitted){
-	// Close modal box after clicking feedback button. This prevents
+	// Close modal box after clicking feedback button.
 	modalBox.close();
 	Alloy.Globals.delay(function(){
-
 		// Set rating to unset to prevent incorrect ratings for multiple calls.
 		$.starwidget.setRating(0);
 
 		var telePhoneNumber = idSplitted[0];
 		var nodeID = idSplitted[1];
 
-		// Set message for feedback dialog popup. Include number to tell user what number they are rating.
-		$.rateNumber.setMessage("Thanks for using this service, please rate " + telePhoneNumber + " to help other users.");
+		// Set message for feedback dialog popup. Include telephone number..
+		$.rateNumber.setMessage(
+			"Thanks for using this service, please rate " 
+			+ telePhoneNumber + " to help other users."
+		);
 
-		// Show feedback from XML after phone call.
+		// Show feedback from numberOptions.XML after phone call.
 		$.rateNumber.show();
 
 		// Add event listener for when submit button is clicked.
 		$.rateNumber.addEventListener('click', function(){
-      // Get current rating from dialog box stars.
-    	var currentNumberRating = $.starwidget.getRating();
+	      	// Get current rating from dialog box stars.
+	    	var currentNumberRating = $.starwidget.getRating();
 			Alloy.Globals.postRatingToServer(nodeID, currentNumberRating);
 	 	});
-
-	}, 800 ); // This number is the delay so popup box appears after call.
+	}, 800 ); // This number is the delay so popup box appears after call is initiated.
 }
 /**
  * Get Call History, enable feedback button if exists..
