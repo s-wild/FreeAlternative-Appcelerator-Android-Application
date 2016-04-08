@@ -24,8 +24,9 @@
         <!-- Previous search history will show here. -->
         <ScrollView id="searchHistoryResults"/>
       </View>
-      <!-- Define the styling properties in the TSS file -->
-      <ActivityIndicator id="activityIndicator" top="100"/>
+      
+      <!-- Activity indicator, used to show an action -->
+      <ActivityIndicator id="activityIndicator"/>
       
       <!-- Add telephone number button -->
       <View id="addTelephoneNumber">

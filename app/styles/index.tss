@@ -41,6 +41,27 @@
 	hintTextColor: "#777",
 	color: "#000"
 }
+/* Rearrange before/after a user searches */
+".beforeSearch":{
+	top: "100dp"
+}
+".afterSearch":{
+	top: "10dp"
+}
+/* To Sort */
+"#noResults": {
+	top: "150"
+}
+"#starwidget": {
+	left: "10dp",
+	top: "10dp"
+}
+"#activityIndicator":{
+	font: { fontSize:18 },
+	color: "#000",
+	style: Titanium.UI.ActivityIndicatorStyle.BIG,
+	top: "50%"
+}
 /* Search results */
 "#searchResultsWrapper":{
 	top: "10dp",
@@ -91,27 +112,6 @@
 	showVerticalScrollIndicator: "true"
 }
 
-/* Rearrange after a user searches */
-".beforeSearch":{
-	top: "100dp"
-}
-".afterSearch":{
-	top: "10dp"
-}
-/* To Sort */
-"#noResults": {
-	top: "150"
-}
-"#starwidget": {
-	left: "10dp",
-	top: "10dp"
-}
-"#activityIndicator":{
-	font: { fontSize:18 },
-	color: "#000",
-	style: Titanium.UI.ActivityIndicatorStyle.BIG,
-	top: "50%"
-}
 /* Add telephone number button */
 "#addTelephoneNumber":{
 	top: "490dp",
