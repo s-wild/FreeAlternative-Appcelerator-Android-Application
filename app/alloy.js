@@ -160,6 +160,7 @@ Alloy.Globals.errorMessages = {
       serverConnectionError.show();
     }
 };
+
 /**
  * Post's the users rating to server. .
  * @param {nodeID} string - Drupal API needs node id to leave a rating.
@@ -173,7 +174,7 @@ Alloy.Globals.postRatingToServer = function(nodeID, currentNumberRating){
 		// Convert Rating to percentage
 		var percentRating = currentNumberRating*20;
 
-		// Create array structure in prep for sending to server.
+		// Create structure in preperation for sending to server.
 		var voteEntry = {
 		    "votes": [{
 			    "entity_id": String(nodeID),
