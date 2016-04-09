@@ -1,8 +1,8 @@
 <Alloy>
-	<Window class="container" theme="mytheme">
+  <Window class="container" theme="mytheme">
     <View id="wrapper">
-  		<ImageView id="imageLogo"/>
-  		<Label id="searchTitle">Search for an alternative telephone number.</Label>
+      <ImageView id="imageLogo"/>
+      <Label id="searchTitle">Search for an alternative telephone number.</Label>
 
       <View id="searchResultsWrapper">
         <!-- Previous search history will show here. -->
@@ -16,23 +16,23 @@
         <!-- Previous search history -->
         <View id="previousSearchHeader">
           <!-- Icon -->
-          <ImageView id="previousSearchIcon" />
+          <ImageView id="previousSearchIcon"/>
           <!-- Label -->
-          <Label id="previousSearchLabelText" class="regularFontSize" />
+          <Label id="previousSearchLabelText" class="regularFontSize"/>
         </View>
 
         <!-- Previous search history will show here. -->
         <ScrollView id="searchHistoryResults"/>
       </View>
-      
+
       <!-- Activity indicator, used to show an action -->
       <ActivityIndicator id="activityIndicator"/>
-      
+
       <!-- Add telephone number button -->
       <View id="addTelephoneNumber">
-      	<ImageView id="addPhoneNumberIcon"/>
+        <ImageView id="addPhoneNumberIcon"/>
         <Label id="addNumberTitle">Add number.</Label>
       </View>
     </View>
-	</Window>
+  </Window>
 </Alloy>

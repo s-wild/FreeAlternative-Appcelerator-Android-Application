@@ -23,83 +23,82 @@ Alloy.Globals.minLengthBeforeSearch = 2;
 /*
  * Delay function for when user types.
  */
-Alloy.Globals.delay = (function(){
-	var timer = 0;
-	return function(callback, ms){
-		clearTimeout (timer);
-		timer = setTimeout(callback, ms);
-	};
+Alloy.Globals.delay = (function() {
+  var timer = 0;
+  return function(callback, ms) {
+    clearTimeout(timer);
+    timer = setTimeout(callback, ms);
+  };
 })();
 
 /*
  * Global helper functions.
  */
 Alloy.Globals.helpers = {
-    /**
-    * Returns a trimmed a string to prevent layout issues.
-    * from http://stackoverflow.com/questions/4700226/i-want-to-truncate-a-text-or-line-with-ellipsis-using-javascript
-    * @param {string} string - The full length of a string.
-    */
-    truncateString: function(string) {
-      if (string.length > 25) {
-        return string.substring(0,25)+'...';
-      }
-      else {
-        return string;
-      }
-    },
-    /**
-    * Filters companies for display.
-    * from http://stackoverflow.com/questions/7376598/in-javascript-how-do-i-check-if-an-array-has-duplicate-values
-    * @param {array} Array - Array of companies.
-    */
-    checkArrayForDuplicates: function(array) {
-      var valuesSoFar = Object.create(null);
-      for (var i = 0; i < array.length; ++i) {
-          var value = array[i];
-          if (value in valuesSoFar) {
-              return true;
-          }
-          valuesSoFar[value] = true;
-      }
-      return false;
-    },
-    /**
-    * Numeric check, the returned value is used to set the URL for HTTP request.
-    * from http://stackoverflow.com/questions/9716468/is-there-any-function-like-isnumeric-in-javascript-to-validate-numbers
-    * @param {searchInput} string - Value from search box on startup screen.
-    */
-    checkNumeric: function(searchInput) {
-      return !isNaN(parseFloat(searchInput)) && isFinite(searchInput);
-    },
-    /**
-    * Checks the telephone number type, this is passed to the server.
-    * The return value is passed to the server which sets the pricing.
-    * @param {number} string - Telephone number value.
-    */
-    getNumberType: function(number) {
-        number_type = "na";
-        switch (number.substring(0, 4)) {
-    		case  "0870":
-    			number_type = "0870";
-    		  break;
-    		case "0845":
-    		    number_type = "0845";
-    		  break;
-    	}
-    	return number_type;
+  /**
+   * Returns a trimmed a string to prevent layout issues.
+   * from http://stackoverflow.com/questions/4700226/i-want-to-truncate-a-text-or-line-with-ellipsis-using-javascript
+   * @param {string} string - The full length of a string.
+   */
+  truncateString: function(string) {
+    if (string.length > 25) {
+      return string.substring(0, 25) + '...';
+    } else {
+      return string;
     }
+  },
+  /**
+   * Filters companies for display.
+   * from http://stackoverflow.com/questions/7376598/in-javascript-how-do-i-check-if-an-array-has-duplicate-values
+   * @param {array} Array - Array of companies.
+   */
+  checkArrayForDuplicates: function(array) {
+    var valuesSoFar = Object.create(null);
+    for (var i = 0; i < array.length; ++i) {
+      var value = array[i];
+      if (value in valuesSoFar) {
+        return true;
+      }
+      valuesSoFar[value] = true;
+    }
+    return false;
+  },
+  /**
+   * Numeric check, the returned value is used to set the URL for HTTP request.
+   * from http://stackoverflow.com/questions/9716468/is-there-any-function-like-isnumeric-in-javascript-to-validate-numbers
+   * @param {searchInput} string - Value from search box on startup screen.
+   */
+  checkNumeric: function(searchInput) {
+    return !isNaN(parseFloat(searchInput)) && isFinite(searchInput);
+  },
+  /**
+   * Checks the telephone number type, this is passed to the server.
+   * The return value is passed to the server which sets the pricing.
+   * @param {number} string - Telephone number value.
+   */
+  getNumberType: function(number) {
+    number_type = "na";
+    switch (number.substring(0, 4)) {
+      case "0870":
+        number_type = "0870";
+        break;
+      case "0845":
+        number_type = "0845";
+        break;
+    }
+    return number_type;
+  }
 };
 /*
  * SQL Lite Functions.
  */
 Alloy.Globals.sqlLite = {
   /**
-  * Create a user search entry.
-  * @param {string} resultNodeCompany - The company name.
-  * @param {string} resultNodeCompanyID - The company ID from database.
-  * @param {string} resultNodeVariationID - The company variation ID from database.
-  */
+   * Create a user search entry.
+   * @param {string} resultNodeCompany - The company name.
+   * @param {string} resultNodeCompanyID - The company ID from database.
+   * @param {string} resultNodeVariationID - The company variation ID from database.
+   */
   saveSearch: function(resultNodeCompany, resultNodeCompanyID, resultNodeVariationID) {
     // Save search to SQL Lite Database.
     try {
@@ -110,10 +109,9 @@ Alloy.Globals.sqlLite = {
       db.execute('INSERT OR REPLACE INTO search_entries (company_name,company_id,variation_id,search_time) VALUES (?,?,?, CURRENT_TIMESTAMP)', resultNodeCompany, resultNodeCompanyID, resultNodeVariationID);
       db.execute('COMMIT');
       db.close();
-    }
-    catch(err) {
-       Titanium.API.log("saveSearch() - Can't insert values. ");
-       db.close();
+    } catch (err) {
+      Titanium.API.log("saveSearch() - Can't insert values. ");
+      db.close();
     }
   },
   /**
@@ -132,10 +130,9 @@ Alloy.Globals.sqlLite = {
       callDB.execute('COMMIT');
       callDB.close();
       Titanium.API.log("Entered Call into DB.");
-    }
-    catch(err) {
-       Titanium.API.log("saveSearch() - Can't insert values. ");
-       callDB.close();
+    } catch (err) {
+      Titanium.API.log("saveSearch() - Can't insert values. ");
+      callDB.close();
     }
   }
 };
@@ -143,48 +140,47 @@ Alloy.Globals.sqlLite = {
  * Error Messages.
  */
 Alloy.Globals.errorMessages = {
-    serverConnection: function() {
-      // Create alert dialog containing message. 
-      var serverConnectionError = Ti.UI.createAlertDialog({
-        cancel: 1,
-        message: 'The application is having some problems connecting to the server.' +
+  serverConnection: function() {
+    // Create alert dialog containing message.
+    var serverConnectionError = Ti.UI.createAlertDialog({
+      cancel: 1,
+      message: 'The application is having some problems connecting to the server.' +
         ' Could be the server but make sure your device has access to the internet.',
-        title: 'Server Connection Error'
-      });
-      // Exit button.
-      serverConnectionError.addEventListener('click', function(e){
-        if (e.index === e.source.cancel){
-        }
-      });
-      // Show alert dialog. 
-      serverConnectionError.show();
-    }
+      title: 'Server Connection Error'
+    });
+    // Exit button.
+    serverConnectionError.addEventListener('click', function(e) {
+      if (e.index === e.source.cancel) {}
+    });
+    // Show alert dialog.
+    serverConnectionError.show();
+  }
 };
 
 /**
  * Post's the users rating to server. .
  * @param {nodeID} string - Drupal API needs node id to leave a rating.
  */
-Alloy.Globals.postRatingToServer = function(nodeID, currentNumberRating){
+Alloy.Globals.postRatingToServer = function(nodeID, currentNumberRating) {
   // Set post URL.
-	var url = Alloy.Globals.rootURL+"/rest/vote/set_votes";
+  var url = Alloy.Globals.rootURL + "/rest/vote/set_votes";
 
-	// Check if rating is set, if so post to server.
-	if (currentNumberRating > 0) {
-		// Convert Rating to percentage
-		var percentRating = currentNumberRating*20;
+  // Check if rating is set, if so post to server.
+  if (currentNumberRating > 0) {
+    // Convert Rating to percentage
+    var percentRating = currentNumberRating * 20;
 
-		// Create structure in preperation for sending to server.
-		var voteEntry = {
-		    "votes": [{
-			    "entity_id": String(nodeID),
-			    "value": String(percentRating)
-		  	}]
-		};
+    // Create structure in preperation for sending to server.
+    var voteEntry = {
+      "votes": [{
+        "entity_id": String(nodeID),
+        "value": String(percentRating)
+      }]
+    };
 
-		var client = Ti.Network.createHTTPClient();
-		client.open('POST',url);
-		client.setRequestHeader('Content-Type','application/json');
-		client.send(JSON.stringify(voteEntry));
-	}
+    var client = Ti.Network.createHTTPClient();
+    client.open('POST', url);
+    client.setRequestHeader('Content-Type', 'application/json');
+    client.send(JSON.stringify(voteEntry));
+  }
 };

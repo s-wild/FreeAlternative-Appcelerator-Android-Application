@@ -1,133 +1,136 @@
 /* Global Styling */
-".container": {
-	backgroundColor:"white"
+".container" : {
+  backgroundColor: "white"
 }
-"#wrapper": {
-	width: "96%",
-	left: "2%"
+"#wrapper" : {
+  width: "96%",
+  left: "2%"
 }
-".regularFontSize": {
-	font: {fontSize: '20dp'}
+".regularFontSize" : {
+  font: {
+    fontSize: '20dp'
+  }
 }
-"Label": {
-	width: Ti.UI.SIZE,
-	height: Ti.UI.SIZE,
-	color: "#000",
-	top: 10,
-	left: 15,
-	font: { fontSize:18 },
+"Label" : {
+  width: Ti.UI.SIZE,
+  height: Ti.UI.SIZE,
+  color: "#000",
+  top: 10,
+  left: 15,
+  font: {
+    fontSize: 18
+  }
 }
-
 /* Logo + Introduction Text */
-"#imageLogo": {
-	image:"/logo.png",
-	top:"15dp",
-	width:"100%"
+"#imageLogo" : {
+  image: "/logo.png",
+  top: "15dp",
+  width: "100%"
 }
-"#searchTitle": {
-	top:"75dp",
-	left:"0",
-	width: "100%",
-	textAlign: "center"
+"#searchTitle" : {
+  top: "75dp",
+  left: "0",
+  width: "100%",
+  textAlign: "center"
 }
-
 /* Search Bar */
-"#searchInputBox": {
-	backgroundColor: "#fff",
-	showCancel: "true",
-	height: "60",
-	width: "100%",
-	hintText: "E.g. 'Vodafone' or '0870070191'",
-	hintTextColor: "#777",
-	color: "#000"
+"#searchInputBox" : {
+  backgroundColor: "#fff",
+  showCancel: "true",
+  height: "60",
+  width: "100%",
+  hintText: "E.g. 'Vodafone' or '0870070191'",
+  hintTextColor: "#777",
+  color: "#000"
 }
 /* Rearrange before/after a user searches */
-".beforeSearch":{
-	top: "100dp"
+".beforeSearch" : {
+  top: "100dp"
 }
-".afterSearch":{
-	top: "10dp"
+".afterSearch" : {
+  top: "10dp"
 }
 /* To Sort */
-"#noResults": {
-	top: "150"
+"#noResults" : {
+  top: "150"
 }
-"#starwidget": {
-	left: "10dp",
-	top: "10dp"
+"#starwidget" : {
+  left: "10dp",
+  top: "10dp"
 }
-"#activityIndicator":{
-	font: { fontSize:18 },
-	color: "#000",
-	style: Titanium.UI.ActivityIndicatorStyle.BIG,
-	top: "50%"
+"#activityIndicator" : {
+  font: {
+    fontSize: 18
+  },
+  color: "#000",
+  style: Titanium.UI.ActivityIndicatorStyle.BIG,
+  top: "50%"
 }
 /* Search results */
-"#searchResultsWrapper":{
-	top: "10dp",
+"#searchResultsWrapper" : {
+  top: "10dp"
 }
-"#searchResultsContainer":{
-	backgroundColor: "#fff",
-	layout: "vertical",
-	width: "100%",
-	top: "65dp",
-	height: "400dp",
-	showVerticalScrollIndicator: "true"
+"#searchResultsContainer" : {
+  backgroundColor: "#fff",
+  layout: "vertical",
+  width: "100%",
+  top: "65dp",
+  height: "400dp",
+  showVerticalScrollIndicator: "true"
 }
-"#resultsTitle":{
-	top: "80dp"
+"#resultsTitle" : {
+  top: "80dp"
 }
 /* Previous History View */
-"#previousSearchBox":{
-	backgroundColor: "#eee",
-	top: "160dp",
-	width: "100%",
-	height: "320dp"
+"#previousSearchBox" : {
+  backgroundColor: "#eee",
+  top: "160dp",
+  width: "100%",
+  height: "320dp"
 }
-"#previousSearchHeader":{
-	top: "0dp",
-	width: "100%",
-	height: "60dp"
+"#previousSearchHeader" : {
+  top: "0dp",
+  width: "100%",
+  height: "60dp"
 }
-"#previousSearchIcon":{
-	image: "/search_icon.png",
-	left: "15dp",
-	height: "30dp",
-	width: "30dp"
+"#previousSearchIcon" : {
+  image: "/search_icon.png",
+  left: "15dp",
+  height: "30dp",
+  width: "30dp"
 }
-"#previousSearchLabelText":{
-	color: "#000",
-	text: "Search History",
-	textAlign: "Ti.UI.TEXT_ALIGNMENT_LEFT",
-	top: "17dp",
-	left: "60dp",
-	width:"230dp",
-	height: "30dp"
+"#previousSearchLabelText" : {
+  color: "#000",
+  text: "Search History",
+  textAlign: "Ti.UI.TEXT_ALIGNMENT_LEFT",
+  top: "17dp",
+  left: "60dp",
+  width: "230dp",
+  height: "30dp"
 }
-"#searchHistoryResults":{
-	top: "60dp",
-	layout: 'vertical',
-	height: '250dp',
-	width:"100%",
-	showVerticalScrollIndicator: "true"
+"#searchHistoryResults" : {
+  top: "60dp",
+  layout: 'vertical',
+  height: '250dp',
+  width: "100%",
+  showVerticalScrollIndicator: "true"
 }
-
 /* Add telephone number button */
-"#addTelephoneNumber":{
-	top: "490dp",
-	height: "60dp",
-	width: "100%",
-	backgroundColor: "#FBB450",
-	borderRadius: 10
+"#addTelephoneNumber" : {
+  top: "490dp",
+  height: "60dp",
+  width: "100%",
+  backgroundColor: "#FBB450",
+  borderRadius: 10
 }
-"#addNumberTitle": {
-	top: "18dp",
-	width: "100%",
-	textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER
+"#addNumberTitle" : {
+  top: "18dp",
+  width: "100%",
+  textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER
 }
-"#addPhoneNumberIcon":{
-	image:"/add_number.png",
-	top:"15dp",
-	left: "30%",
-	width:"30dp"
+"#addPhoneNumberIcon" : {
+  image: "/add_number.png",
+  top: "15dp",
+  left: "30%",
+  width: "30dp"
 }
