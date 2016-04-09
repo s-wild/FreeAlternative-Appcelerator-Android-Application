@@ -79,14 +79,11 @@ Alloy.Globals.helpers = {
     */
     getNumberType: function(number) {
         number_type = "na";
-        switch (true) {
-    		case number.substring(0, 4) === "0870":
+        switch (number.substring(0, 4)) {
+    		case  "0870":
     			number_type = "0870";
     		  break;
-    		case number.substring(0, 4) === "0800":
-    		    number_type = "0800";
-    		  break;
-    		case number.substring(0, 4) === "0845":
+    		case "0845":
     		    number_type = "0845";
     		  break;
     	}
@@ -147,16 +144,19 @@ Alloy.Globals.sqlLite = {
  */
 Alloy.Globals.errorMessages = {
     serverConnection: function() {
+      // Create alert dialog containing message. 
       var serverConnectionError = Ti.UI.createAlertDialog({
         cancel: 1,
         message: 'The application is having some problems connecting to the server.' +
         ' Could be the server but make sure your device has access to the internet.',
         title: 'Server Connection Error'
       });
+      // Exit button.
       serverConnectionError.addEventListener('click', function(e){
         if (e.index === e.source.cancel){
         }
       });
+      // Show alert dialog. 
       serverConnectionError.show();
     }
 };

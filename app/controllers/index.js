@@ -510,9 +510,18 @@ sqlLite = {
       // Try to see if any entries exist in database.
       try {
         db = Ti.Database.open('userSearches');
-        var searchResults = db.execute('SELECT company_name,company_id,variation_id,search_time FROM search_entries ORDER BY search_time DESC');
+        var searchResults = db.execute(
+        	'SELECT company_name,company_id,variation_id,search_time ' + 
+        	'FROM search_entries ' + 
+        	'ORDER BY search_time DESC'
+        	);
         while (searchResults.isValidRow()) {
-          createSearchHistoryViewEntry(searchResults.fieldByName('company_name'), searchResults.fieldByName('company_id'), searchResults.fieldByName('variation_id'));
+          // If rows exist, create buttons on the index page.
+          createSearchHistoryViewEntry(
+          	searchResults.fieldByName('company_name'), 
+          	searchResults.fieldByName('company_id'), 
+          	searchResults.fieldByName('variation_id')
+          	);
           searchResults.next();
         }
         db.close();
