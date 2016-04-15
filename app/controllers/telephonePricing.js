@@ -40,7 +40,7 @@ function getPrice(numberType) {
     $.telephonePricing.add(noPricing);
   } else {
     Ti.API.log("getPrice", numberType);
-    var url = Alloy.Globals.rootURL + "/telephone-numbers/pricing/" + numberType;
+    var url = Alloy.Globals.rootURL + "json/telephone-numbers/pricing/" + numberType;
     var client = Ti.Network.createHTTPClient({
       // function called when the response data is available
       onload: function(e) {
@@ -155,7 +155,9 @@ function createCompanyTable(key, indexCompany, groupKey) {
   // Get operatorName and color row to match.
   var telephonymanager = require("com.goyya.telephonymanager");
   var networkOperatorName = telephonymanager.networkOperatorName;
-  Ti.API.log('networkOperatorName:   ' + telephonymanager.networkOperatorName);
+  
+  // Log operator name.
+  Ti.API.log('networkOperatorName:   ' + networkOperatorName);
 
   for (index = 0; index < groupKey.length; ++index) {
     if (key.toLowerCase() === networkOperatorName) {
