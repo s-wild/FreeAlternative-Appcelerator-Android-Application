@@ -489,7 +489,7 @@ function retriveNumbers() {
   var companyIDLocal = idSplitted[0];
   var variationIDLocal = idSplitted[1];
   // Ti.API.log("variation_id", variationIDLocal);
-  var url = Alloy.Globals.rootURL + "/json/views/numbers/" + companyIDLocal + "/" + variationIDLocal;
+  var url = Alloy.Globals.rootURL + "/json/numbers-ratings/" + companyIDLocal + "/" + variationIDLocal;
   type = "companyNumbers";
   companyID = "1";
   companyName = "test";
