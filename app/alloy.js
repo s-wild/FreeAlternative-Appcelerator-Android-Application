@@ -14,7 +14,7 @@
  * Global Variables
  */
 // Root url to connect to server.
-Alloy.Globals.rootURL = "http://up637415.co.uk/";
+Alloy.Globals.rootURL = "http://www.freealternative.co.uk/";
 // Search details
 Alloy.Globals.searchHistoryFlag = false;
 Alloy.Globals.searchType = "na";
