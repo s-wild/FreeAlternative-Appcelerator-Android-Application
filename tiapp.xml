@@ -54,7 +54,6 @@
     <theme>default</theme>
   </mobileweb>
   <modules>
-    <module platform="commonjs">ti.cloud</module>
     <module platform="android">com.goyya.telephonymanager</module>
   </modules>
   <deployment-targets>
