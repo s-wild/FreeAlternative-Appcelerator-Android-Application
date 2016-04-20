@@ -28,20 +28,21 @@ $.searchInputBox.addEventListener('change', function() {
     Alloy.Globals.delay(function() {
       $.searchResultsContainer.show();
       // Check if only numbers, if so, assume it is a telephone number, else assume user is searching company name.
-      var checkStringNumber = Alloy.Globals.helpers.checkNumeric(searchInput);
+      
       var url = "";
       var type = "";
-      if (checkStringNumber === true) {
+      
+      var checkStringNumber = Alloy.Globals.helpers.checkNumeric(searchInput);
+      if (checkStringNumber) {
         type = "search_by_number";
         url = Alloy.Globals.rootURL + "/json/numbers?title=" + searchInput;
         getUrlContents(url, type);
       } else {
-        // Adjust URL to match name search.
         url = Alloy.Globals.rootURL + "/json/company-variations?company_name=" + searchInput;
-        // Define type of search
         type = "search_by_name";
         getUrlContents(url, type);
       }
+      
     }, 600); // This number is the delay for when the user types.
   } else {
     $.searchResultsContainer.setTop(200);
@@ -163,7 +164,7 @@ function getUrlContents(url, type, companyID, companyName) {
           companyNames.push(resultNodeCompany);
           resultCompanyID = resultNodes[index].company_id;
           // Check if duplicates, prevent multiple company names being written.
-          if (Alloy.Globals.helpers.checkArrayForDuplicates(companyNames) == false) {
+          if (Alloy.Globals.helpers.checkArrayForDuplicates(companyNames) === false) {
             // Push company name.
             filtered_results.push({
               company: resultNodeCompany,
@@ -382,18 +383,20 @@ function createVariationButton(resultCompanyID, resultNodeVariation, variation_i
 
 function createNumberButton(index, resultNodeTitleNoQuotes, resultNodeID, typeOfAction, ratings, numberType, resultNumberID, combinedTitle) {
   // Check number type and assign background.
-  background = "";
   var companyVariation = combinedTitle;
   Ti.API.log("resultNodeTitleNoQuotes", combinedTitle);
+  
+  // Check number type and assign background.
+  var background = "#000"; // Default color is black
   if (numberType == "Free Phone") {
     background = "#388e3c";
-  }
-  if (numberType == "Standard Rate") {
+  } else if (numberType == "Standard Rate") {
     background = "#ffb300";
-  }
-  if (numberType == "Premium") {
+  } else if (numberType == "Premium") {
     background = "#e65100";
   }
+  
+  
   // Add spacing and create rows for entries.
   top_spacing = index * 70;
   var row = Ti.UI.createView({
