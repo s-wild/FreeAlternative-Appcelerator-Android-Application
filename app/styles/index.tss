@@ -64,7 +64,7 @@
   },
   color: "#000",
   style: Titanium.UI.ActivityIndicatorStyle.BIG,
-  top: "50%"
+  top: "100dp"
 }
 /* Search results */
 "#searchResultsWrapper" : {
