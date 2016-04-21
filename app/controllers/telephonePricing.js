@@ -6,7 +6,7 @@ $.telephonePricing.addEventListener('androidback', function(e) {
   // When user goes back, empty window contents.
   $.telephonePricing.removeAllChildren();
   $.telephonePricing.close();
-});
+}); 
 
 var pricingID = Ti.App.Properties.getString('pricingID');
 var idSplitted = pricingID.split('|');
@@ -125,24 +125,31 @@ function getPrice(numberType) {
           backgroundColor: 'white',
           headerView: createCustomView(),
           data: companyData,
-          top: 200
+          top: 200,
+          zIndex: 1
         });
 
         Ti.API.info("operatorNames ", JSON.stringify(filtered_results_companies));
 
         // Add table of companies.
         $.telephonePricing.add(tableOfCompanies);
-
+			
+      	// Hide activity indicator.  
+		$.activityIndicator.hide();
       },
       // function called when an error occurs, including a timeout
       onerror: function() {
         Alloy.Globals.errorMessages.serverConnection();
+        // Hide activity indicator.  
+		$.activityIndicator.hide();
       },
       timeout: 3000 // in milliseconds
     });
     // Prepare the connection.
     client.open("GET", url);
-    // Send the request.
+    // Show activity indicator on load as pricing should be requested. 
+	$.activityIndicator.show();
+    // Send the request.	
     client.send();
   }
 
